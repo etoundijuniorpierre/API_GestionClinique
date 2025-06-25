@@ -3,12 +3,16 @@ package com.example.GestionClinique.controller;
 
 import com.example.GestionClinique.controller.controllerApi.RendezVousApi;
 import com.example.GestionClinique.dto.RendezVousDto;
+import com.example.GestionClinique.model.entity.Salle;
+import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.service.RendezVousService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -67,8 +71,13 @@ public class RendezVousController implements RendezVousApi {
     }
 
     @Override
-    public boolean isRendezVousAvailable(LocalDateTime dateHeure, Integer idMedecin, Integer idSalle) {
-        return rendezVousService.isRendezVousAvailable(dateHeure, idMedecin, idSalle);
+    public List<RendezVousDto> findRendezVousByJour(LocalDate jour) {
+        return rendezVousService.findRendezVousByJour(jour);
+    }
+
+    @Override
+    public boolean isRendezVousAvailable(LocalDate jour, LocalTime heure, Utilisateur medecin, Salle salle) {
+        return rendezVousService.isRendezVousAvailable(jour, heure, medecin, salle);
     }
 
     @Override

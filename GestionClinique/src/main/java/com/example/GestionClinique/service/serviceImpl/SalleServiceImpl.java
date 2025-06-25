@@ -2,10 +2,11 @@ package com.example.GestionClinique.service.serviceImpl;
 
 import com.example.GestionClinique.dto.SalleDto;
 import com.example.GestionClinique.model.entity.Salle;
+import com.example.GestionClinique.model.entity.enumElem.StatutRDV; // Needed for availability checks
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.SalleRepository;
-import com.example.GestionClinique.service.HistoriqueActionService; // Import HistoriqueActionService
+import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.SalleService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -26,13 +27,13 @@ import static com.example.GestionClinique.model.entity.enumElem.StatutSalle.DISP
 public class SalleServiceImpl implements SalleService {
     private final SalleRepository salleRepository;
     private final RendezVousRepository rendezVousRepository;
-    private final HistoriqueActionService historiqueActionService; // Inject HistoriqueActionService
+    private final HistoriqueActionService historiqueActionService;
 
     @Autowired
-    public SalleServiceImpl(SalleRepository salleRepository, RendezVousRepository rendezVousRepository, HistoriqueActionService historiqueActionService) { // Add to constructor
+    public SalleServiceImpl(SalleRepository salleRepository, RendezVousRepository rendezVousRepository, HistoriqueActionService historiqueActionService) {
         this.salleRepository = salleRepository;
         this.rendezVousRepository = rendezVousRepository;
-        this.historiqueActionService = historiqueActionService; // Initialize
+        this.historiqueActionService = historiqueActionService;
     }
 
 
@@ -40,67 +41,60 @@ public class SalleServiceImpl implements SalleService {
     @Override
     @Transactional
     public SalleDto createSalle(SalleDto salleDto) {
-        // --- 1. Validation des données du DTO ---
-        // Ajoutez des validations pour les champs obligatoires d'une salle
+        // --- Input Validation ---
         if (salleDto.getNumero() == null || salleDto.getNumero().trim().isEmpty()) {
-            throw new IllegalArgumentException("Le numéro de la salle est obligatoire.");
+            throw new IllegalArgumentException("Le numéro de la salle est obligatoire et ne peut pas être vide.");
         }
-        // Assurez-vous qu'une salle avec le même numéro n'existe pas déjà (si les numéros doivent être uniques)
         if (salleRepository.findByNumero(salleDto.getNumero()).isPresent()) {
             throw new IllegalArgumentException("Une salle avec le numéro '" + salleDto.getNumero() + "' existe déjà.");
         }
-        // Si le statut de la salle est censé avoir une valeur par défaut à la création
-        if (salleDto.getStatutSalle() == null) {
-            salleDto.setStatutSalle(DISPONIBLE); // Par exemple, les nouvelles salles sont disponibles
-        }
 
-        SalleDto savedSalle = SalleDto.fromEntity(salleRepository
-                .save(SalleDto.toEntity(salleDto)));
+        // --- DTO to Entity Conversion ---
+        Salle salleToSave = new Salle(); // Manually create entity
+        salleToSave.setNumero(salleDto.getNumero());
+        salleToSave.setServiceMedical(salleDto.getServiceMedical()); // Assuming ServiceMedical is an Enum or String
+        // Set default status if not provided
+        salleToSave.setStatutSalle(salleDto.getStatutSalle() != null ? salleDto.getStatutSalle() : DISPONIBLE);
 
-        // --- Ajout de l'historique ---
+        // --- Save Entity ---
+        Salle savedSalleEntity = salleRepository.save(salleToSave);
+        SalleDto savedSalleDto = SalleDto.fromEntity(savedSalleEntity);
+
+        // --- Historique Logging ---
         historiqueActionService.enregistrerAction(
-                "Création de la salle ID: " + savedSalle.getId() + ", Numéro: " + savedSalle.getNumero() + ", Statut: " + savedSalle.getStatutSalle()
+                "Création de la salle ID: " + savedSalleDto.getId() + ", Numéro: " + savedSalleDto.getNumero() + ", Statut: " + savedSalleDto.getStatutSalle()
         );
-        // --- Fin de l'ajout de l'historique ---
-
-        return savedSalle;
+        return savedSalleDto;
     }
 
 
 
     @Override
-    @Transactional
+    @Transactional() // Mark as read-only
     public SalleDto findSalleById(Integer salleId) {
+        Salle foundSalle = salleRepository.findById(salleId)
+                .orElseThrow(() -> new EntityNotFoundException("La salle avec l'ID " + salleId + " n'existe pas.")); // Use EntityNotFoundException
 
-        SalleDto foundSalle = salleRepository.findById(salleId)
-                .map(SalleDto::fromEntity)
-                .orElseThrow(() -> new RuntimeException("salle n'existe pas"));
+        SalleDto foundSalleDto = SalleDto.fromEntity(foundSalle);
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction(
-                "Recherche de la salle ID: " + salleId + ", Numéro: " + foundSalle.getNumero()
+                "Recherche de la salle ID: " + salleId + ", Numéro: " + foundSalleDto.getNumero()
         );
-        // --- Fin de l'ajout de l'historique ---
-
-        return foundSalle;
+        return foundSalleDto;
     }
 
 
 
     @Override
-    @Transactional
+    @Transactional() // Mark as read-only
     public List<SalleDto> findAllSalle() {
-        List<SalleDto> allSalles = salleRepository.findAll()
-                .stream()
+        List<SalleDto> allSalles = salleRepository.findAll().stream()
                 .map(SalleDto::fromEntity)
                 .collect(Collectors.toList());
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction(
-                "Affichage de toutes les salles."
+                "Affichage de toutes les salles (nombre de résultats: " + allSalles.size() + ")."
         );
-        // --- Fin de l'ajout de l'historique ---
-
         return allSalles;
     }
 
@@ -109,19 +103,19 @@ public class SalleServiceImpl implements SalleService {
     @Override
     @Transactional
     public SalleDto updateSalle(Integer salleId, SalleDto salleDto) {
-
         Salle existingSalle = salleRepository.findById(salleId)
-                .orElseThrow(() -> new IllegalArgumentException("Salle avec l'id " + salleId + " n'existe pas"));
+                .orElseThrow(() -> new EntityNotFoundException("La salle avec l'ID " + salleId + " n'existe pas.")); // Use EntityNotFoundException
 
-        // Stocker l'état avant la mise à jour pour le logging
+        // Store old values for logging
         String oldNumero = existingSalle.getNumero();
-        String oldServiceMedical = String.valueOf(existingSalle.getServiceMedical()); // Assuming String
+        String oldServiceMedical = (existingSalle.getServiceMedical() != null) ? existingSalle.getServiceMedical().name() : "N/A"; // Handle null ServiceMedical
         StatutSalle oldStatutSalle = existingSalle.getStatutSalle();
 
-        // --- Mise à jour sélective des champs ---
+
+        // --- Selective Field Update ---
         if (salleDto.getNumero() != null && !salleDto.getNumero().trim().isEmpty()) {
-            // Si le numéro est changé, vérifier l'unicité
             if (!salleDto.getNumero().equals(existingSalle.getNumero())) {
+                // Check if the new number is already taken by another salle
                 if (salleRepository.findByNumero(salleDto.getNumero()).isPresent()) {
                     throw new IllegalArgumentException("Une salle avec le numéro '" + salleDto.getNumero() + "' existe déjà.");
                 }
@@ -135,21 +129,19 @@ public class SalleServiceImpl implements SalleService {
             existingSalle.setStatutSalle(salleDto.getStatutSalle());
         }
 
-        SalleDto updatedSalle = SalleDto.fromEntity(
-                salleRepository.save(
-                        existingSalle
-                )
-        );
 
-        // --- Ajout de l'historique ---
+
+        SalleDto updatedSalle = SalleDto.fromEntity(salleRepository.save(existingSalle));
+
+        // --- Historique Logging ---
         StringBuilder logMessage = new StringBuilder("Mise à jour de la salle ID: " + salleId + ".");
-        if (!Objects.equals(oldNumero, updatedSalle.getNumero())) logMessage.append(" Numéro: ").append(oldNumero).append(" -> ").append(updatedSalle.getNumero());
-        if (!Objects.equals(oldServiceMedical, updatedSalle.getServiceMedical())) logMessage.append(" Service Médical: ").append(oldServiceMedical).append(" -> ").append(updatedSalle.getServiceMedical());
-        if (!Objects.equals(oldStatutSalle, updatedSalle.getStatutSalle())) logMessage.append(" Statut: ").append(oldStatutSalle).append(" -> ").append(updatedSalle.getStatutSalle());
+        if (!Objects.equals(oldNumero, updatedSalle.getNumero())) logMessage.append(" Numéro: ").append(oldNumero).append(" -> ").append(updatedSalle.getNumero()).append(".");
+        if (!Objects.equals(oldServiceMedical, updatedSalle.getServiceMedical() != null ? updatedSalle.getServiceMedical().name() : "N/A")) logMessage.append(" Service Médical: ").append(oldServiceMedical).append(" -> ").append(updatedSalle.getServiceMedical() != null ? updatedSalle.getServiceMedical().name() : "N/A").append(".");
+        if (!Objects.equals(oldStatutSalle, updatedSalle.getStatutSalle())) logMessage.append(" Statut: ").append(oldStatutSalle).append(" -> ").append(updatedSalle.getStatutSalle()).append(".");
+
+
 
         historiqueActionService.enregistrerAction(logMessage.toString());
-        // --- Fin de l'ajout de l'historique ---
-
         return updatedSalle;
     }
 
@@ -161,52 +153,46 @@ public class SalleServiceImpl implements SalleService {
         Salle salleToDelete = salleRepository.findById(salleId)
                 .orElseThrow(() -> new EntityNotFoundException("La salle avec l'ID " + salleId + " n'existe pas et ne peut pas être supprimée."));
 
+        // Check if there are any associated rendez-vous (even if not PLANIFIE/CONFIRME, they still exist)
         if (rendezVousRepository.existsBySalle(salleToDelete)) {
             historiqueActionService.enregistrerAction(
-                    "Tentative de suppression de la salle ID: " + salleId + ": échec, car associée à des rendez-vous."
+                    "Tentative de suppression de la salle ID: " + salleId + ": échec, car associée à des rendez-vous existants."
             );
-            throw new IllegalStateException("Impossible de supprimer la salle avec l'ID " + salleId + " car elle est associée à un ou plusieurs rendez-vous.");
+            throw new IllegalStateException("Impossible de supprimer la salle avec l'ID " + salleId + " car elle est associée à un ou plusieurs rendez-vous. Veuillez d'abord supprimer ou réaffecter ces rendez-vous.");
         }
 
         salleRepository.deleteById(salleId);
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction(
                 "Suppression de la salle ID: " + salleId + ", Numéro: " + salleToDelete.getNumero()
         );
-        // --- Fin de l'ajout de l'historique ---
     }
 
 
 
     @Override
-    @Transactional
+    @Transactional()
     public List<SalleDto> findSallesByStatut(StatutSalle statutSalle) {
-
         if (statutSalle == null) {
-            throw new IllegalArgumentException("Le statut ne peut pas être nul.");
+            throw new IllegalArgumentException("Le statut ne peut pas être nul pour la recherche.");
         }
 
-        List<SalleDto> sallesByStatut = salleRepository.findSallesByStatut(statutSalle)
-                .stream()
+        List<SalleDto> sallesByStatut = salleRepository.findByStatutSalle(statutSalle).stream() // Assuming findByStatutSalle method
                 .filter(Objects::nonNull)
                 .map(SalleDto::fromEntity)
                 .collect(Collectors.toList());
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction(
                 "Recherche des salles avec le statut: " + statutSalle + " (nombre de résultats: " + sallesByStatut.size() + ")"
         );
-        // --- Fin de l'ajout de l'historique ---
-
         return sallesByStatut;
     }
 
 
 
     @Override
-    @Transactional
-    public List<SalleDto> findAvailableSalles(LocalDateTime dateHeureDebut, Integer dureeMinutes) { // Ajouté 'dureeMinutes' pour une meilleure gestion des créneaux
+    @Transactional()
+    public List<SalleDto> findAvailableSalles(LocalDateTime dateHeureDebut, Integer dureeMinutes) {
         // --- 1. Validation des entrées ---
         if (dateHeureDebut == null) {
             throw new IllegalArgumentException("La date et l'heure de début pour la recherche des salles disponibles sont obligatoires.");
@@ -218,33 +204,30 @@ public class SalleServiceImpl implements SalleService {
         // --- 2. Définir la plage horaire de recherche ---
         LocalDate jour = dateHeureDebut.toLocalDate();
         LocalTime heureDebut = dateHeureDebut.toLocalTime();
-        LocalTime heureFin = dateHeureDebut.plusMinutes(dureeMinutes).toLocalTime(); // Calculate end time
+        LocalTime heureFin = dateHeureDebut.plusMinutes(dureeMinutes).toLocalTime();
 
         // --- 3. Récupérer toutes les salles potentiellement disponibles ---
-        List<Salle> toutesLesSallesDisponiblesG_ = (List<Salle>) salleRepository.findSallesByStatut(DISPONIBLE); // Assuming you only want 'DISPONIBLE'
+        // Fetch all rooms that are marked as DISPONIBLE
+        List<Salle> allAvailableStatusSalles = salleRepository.findByStatutSalle(DISPONIBLE);
 
-        // --- 4. Filtrer les salles qui sont déjà occupées par un RendezVous à ce créneau ---
-        List<SalleDto> availableSalles = toutesLesSallesDisponiblesG_.stream()
+        // --- 4. Filtrer les salles qui n'ont pas de rendez-vous qui chevauchent ---
+        // Iterate through rooms and check for conflicts at the given time slot
+        List<SalleDto> trulyAvailableSalles = allAvailableStatusSalles.stream()
                 .filter(salle -> {
-                    // Check if there's any overlapping appointment for this room
-                    // This often requires a more sophisticated query in your RendezVousRepository
-                    // For example: `findBySalleAndJourAndHeureBetween(salle, jour, heureDebut, heureFin)`
-                    // Or, for simple cases, check if any existing appointment at that exact start time
-                    boolean estOccupeeParRendezVous = rendezVousRepository
-                            .findBySalleAndJourAndHeure(salle, jour, heureDebut) // This is a simplistic check; for proper overlap, you need a more complex query.
-                            .isPresent();
-                    return !estOccupeeParRendezVous; // The room is available if it's not occupied
+                    boolean isOccupied = rendezVousRepository.findBySalleAndJourAndHeureAndStatutIn(salle, jour, heureDebut, List.of(StatutRDV.PLANIFIE, StatutRDV.CONFIRME)).isPresent();
+
+                    boolean isAlreadyBooked = rendezVousRepository.findBySalleAndJourAndHeureBetween(salle, jour, heureDebut, heureFin).isPresent();
+
+                    boolean hasConflict = rendezVousRepository.findBySalleAndJourAndHeureAndStatutIn(salle, jour, heureDebut, List.of(StatutRDV.PLANIFIE, StatutRDV.CONFIRME)).isPresent();
+                    return !hasConflict;
                 })
                 .map(SalleDto::fromEntity)
                 .collect(Collectors.toList());
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction(
                 "Recherche de salles disponibles pour le " + dateHeureDebut.toLocalDate() + " à " + dateHeureDebut.toLocalTime() +
-                        " pour " + dureeMinutes + " minutes (nombre de salles trouvées: " + availableSalles.size() + ")"
+                        " pour " + dureeMinutes + " minutes (nombre de salles trouvées: " + trulyAvailableSalles.size() + ")"
         );
-        // --- Fin de l'ajout de l'historique ---
-
-        return availableSalles;
+        return trulyAvailableSalles;
     }
 }

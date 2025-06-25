@@ -5,40 +5,46 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MessageDto {
     private Integer id;
     private String contenu;
     private LocalDateTime dateEnvoi;
-    private boolean lu;
-    private UtilisateurDto expediteur;
-    private UtilisateurDto destinataire;
+    private boolean lu; // This is the field causing the issue
 
-    public static MessageDto fromEnity(Message message) { // fromEnity -> fromEntity (typo)
+    // --- ADD THIS EXPLICIT GETTER FOR THE DTO ---
+    public boolean getLu() {
+        return this.lu;
+    }
+
+
+    private UtilisateurSummaryDto expediteurSummary;
+    private UtilisateurSummaryDto destinataireSummary;
+
+    public static MessageDto fromEntity(Message message) {
         if(message == null) return null;
 
         return MessageDto.builder()
                 .id(message.getId())
                 .contenu(message.getContenu())
                 .dateEnvoi(message.getDateEnvoi())
-                .lu(message.isLu())
-                .expediteur(UtilisateurDto.fromEntity(message.getExpediteur()))
-                .destinataire(UtilisateurDto.fromEntity(message.getDestinataire()))
+                .lu(message.getLu()) // Use getLu() for the entity
+                .expediteurSummary(UtilisateurSummaryDto.fromEntity(message.getExpediteur()))
+                .destinataireSummary(UtilisateurSummaryDto.fromEntity(message.getDestinataire()))
                 .build();
     }
 
-    public static Message toEntity(MessageDto messageDto ) {
+    public static Message toEntity(MessageDto messageDto) {
         if(messageDto == null) return null;
 
         Message message = new Message();
-        // L'ID n'est généralement pas défini ici pour la création d'une nouvelle entité.
+        message.setId(messageDto.getId());
         message.setContenu(messageDto.getContenu());
         message.setDateEnvoi(messageDto.getDateEnvoi());
-        message.setLu(messageDto.isLu());
-        message.setExpediteur(UtilisateurDto.toEntity(messageDto.getExpediteur()));
-        message.setDestinataire(UtilisateurDto.toEntity(messageDto.getDestinataire()));
+        message.setLu(messageDto.getLu()); // Use getLu() for the DTO
         return message;
     }
 }

@@ -2,89 +2,89 @@ package com.example.GestionClinique.dto;
 
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors; // Add this import
+import java.util.stream.Collectors;
 
 @Data
 @Builder
-@NoArgsConstructor // Add this for constructor
-@AllArgsConstructor // Add this for constructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class UtilisateurDto {
     private Integer id;
     private InfoPersonnelDto infoPersonnel;
-    // Consider adding @JsonIgnore if this DTO is used for GET operations
-    // @JsonIgnore
     private String motDePasse;
+    private ServiceMedical serviceMedical;
     private Boolean actif;
     private List<RoleDto> roles;
-    private ServiceMedical serviceMedical;
 
-    // --- REMOVE THESE FIELDS ENTIRELY IF NOT NEEDED IN THIS DTO ---
-    // private List<RendezVousDto> rendezVous;
-    // private List<ConsultationDto> consultations;
-    // private List<PrescriptionDto> prescriptions;
-    // private List<MessageDto> messagesEnvoyes;
-    // private List<MessageDto> messagesRecus;
-    // private List<HistoriqueActionDto> historiqueActions;
+    // Add lists of IDs to represent related collections without deep nesting
+    private List<Integer> rendezVousIds;
+    private List<Integer> consultationIds;
+    private List<Integer> prescriptionIds;
+    private List<Integer> messagesEnvoyesIds;
+    private List<Integer> messagesRecusIds;
+    private List<Integer> historiqueActionsIds;
 
 
     public static UtilisateurDto fromEntity(Utilisateur utilisateur) {
-        if(utilisateur == null) return null;
+        if (utilisateur == null) return null;
 
-        List<RoleDto> roleDtos = (utilisateur.getRole() != null) ?
-                utilisateur.getRole().stream().map(RoleDto::fromEntity).collect(Collectors.toList()) : null;
+        List<RoleDto> roleDtos = null;
+        if (utilisateur.getRole() != null && !utilisateur.getRole().isEmpty()) {
+            roleDtos = utilisateur.getRole().stream()
+                    .map(RoleDto::fromEntity)
+                    .collect(Collectors.toList());
+        }
+
+        // Map collections to IDs to avoid circular dependencies
+        // FIX: Changed getRendezVousList() to getRendezVous()
+        List<Integer> rendezVousIds = (utilisateur.getRendezVous() != null) ?
+                utilisateur.getRendezVous().stream().map(rv -> rv.getId()).collect(Collectors.toList()) : null;
+        List<Integer> consultationIds = (utilisateur.getConsultations() != null) ?
+                utilisateur.getConsultations().stream().map(c -> c.getId()).collect(Collectors.toList()) : null;
+        List<Integer> prescriptionIds = (utilisateur.getPrescriptions() != null) ?
+                utilisateur.getPrescriptions().stream().map(p -> p.getId()).collect(Collectors.toList()) : null;
+        List<Integer> messagesEnvoyesIds = (utilisateur.getMessagesEnvoyes() != null) ?
+                utilisateur.getMessagesEnvoyes().stream().map(m -> m.getId()).collect(Collectors.toList()) : null;
+        List<Integer> messagesRecusIds = (utilisateur.getMessagesRecus() != null) ?
+                utilisateur.getMessagesRecus().stream().map(m -> m.getId()).collect(Collectors.toList()) : null;
+        List<Integer> historiqueActionsIds = (utilisateur.getHistoriqueActions() != null) ?
+                utilisateur.getHistoriqueActions().stream().map(ha -> ha.getId()).collect(Collectors.toList()) : null;
+
 
         return UtilisateurDto.builder()
                 .id(utilisateur.getId())
-                .motDePasse(utilisateur.getMotDePasse())
-                .actif(utilisateur.getActif())
-                .serviceMedical(utilisateur.getServiceMedical())
                 .infoPersonnel(InfoPersonnelDto.fromEntity(utilisateur.getInfoPersonnel()))
+                .motDePasse(null) // NEVER expose password in DTO from entity
+                .serviceMedical(utilisateur.getServiceMedical())
+                .actif(utilisateur.getActif())
                 .roles(roleDtos)
-                // --- ENSURE THESE ARE NOT MAPPED HERE EITHER ---
-                // No need to even declare the variables if the fields are removed from the DTO class
+                // Set the ID lists
+                .rendezVousIds(rendezVousIds)
+                .consultationIds(consultationIds)
+                .prescriptionIds(prescriptionIds)
+                .messagesEnvoyesIds(messagesEnvoyesIds)
+                .messagesRecusIds(messagesRecusIds)
+                .historiqueActionsIds(historiqueActionsIds)
                 .build();
     }
 
     public static Utilisateur toEntity(UtilisateurDto utilisateurDto) {
-        if(utilisateurDto == null) return null;
-
+        if (utilisateurDto == null) return null;
         Utilisateur utilisateur = new Utilisateur();
-        if (utilisateurDto.getId() != null) {
-            utilisateur.setId(utilisateurDto.getId()); // Set ID for updates
+        utilisateur.setId(utilisateurDto.getId());
+        if (utilisateurDto.getInfoPersonnel() != null) {
+            utilisateur.setInfoPersonnel(InfoPersonnelDto.toEntity(utilisateurDto.getInfoPersonnel()));
         }
         utilisateur.setMotDePasse(utilisateurDto.getMotDePasse());
-        utilisateur.setActif(utilisateurDto.getActif());
         utilisateur.setServiceMedical(utilisateurDto.getServiceMedical());
-        utilisateur.setInfoPersonnel(InfoPersonnelDto.toEntity(utilisateurDto.getInfoPersonnel()));
-
-        if (utilisateurDto.getRoles() != null) {
-            utilisateur.setRole(
-                    utilisateurDto.getRoles().stream()
-                            .map(RoleDto::toEntity)
-                            .collect(Collectors.toList())
-            );
-        }
-        // If your toEntity still needs to handle incoming nested DTOs, you'll need
-        // to handle the conversion and association carefully, potentially by fetching
-        // existing entities by ID in your service layer, rather than converting full DTOs here.
-        // For example, if rendezVous is passed in for a user creation/update:
-        // if (utilisateurDto.getRendezVous() != null) {
-        //     utilisateur.setRendezVous(
-        //             utilisateurDto.getRendezVous().stream()
-        //                     .map(RendezVousDto::toEntity)
-        //                     .peek(rv -> rv.setMedecin(utilisateur))
-        //                     .collect(Collectors.toList())
-        //     );
-        // }
-        // Ensure that any `toEntity` for a related DTO does not recursively call `UtilisateurDto.toEntity`
-        // if that related DTO also contains a reference to `Utilisateur`.
+        utilisateur.setActif(utilisateurDto.getActif());
 
         return utilisateur;
     }
-
-
 }

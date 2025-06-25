@@ -1,22 +1,25 @@
 package com.example.GestionClinique.service.serviceImpl;
 
+import com.example.GestionClinique.dto.ConsultationSummaryDto; // Make sure to import this
 import com.example.GestionClinique.dto.FactureDto;
-import com.example.GestionClinique.dto.PatientDto;
+import com.example.GestionClinique.dto.PatientDto; // Still needed for findPatientByFactureId
 import com.example.GestionClinique.model.entity.Consultation;
 import com.example.GestionClinique.model.entity.Facture;
+import com.example.GestionClinique.model.entity.Patient; // Need to import Patient entity
 import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.ConsultationRepository;
 import com.example.GestionClinique.repository.FactureRepository;
-import com.example.GestionClinique.repository.PatientRepository;
+import com.example.GestionClinique.repository.PatientRepository; // Need PatientRepository for fetching Patient entity
 import com.example.GestionClinique.service.FactureService;
-import com.example.GestionClinique.service.HistoriqueActionService; // Import HistoriqueActionService
+import com.example.GestionClinique.service.HistoriqueActionService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal; // Import BigDecimal
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -26,46 +29,59 @@ import java.util.stream.Collectors;
 public class FactureServiceImpl implements FactureService {
     private final FactureRepository factureRepository;
     private final ConsultationRepository consultationRepository;
-    private final HistoriqueActionService historiqueActionService; // Inject HistoriqueActionService
+    private final PatientRepository patientRepository; // Inject PatientRepository
+    private final HistoriqueActionService historiqueActionService;
 
     @Autowired
-    public FactureServiceImpl(FactureRepository factureRepository, PatientRepository patientRepository, ConsultationRepository consultationRepository, HistoriqueActionService historiqueActionService) { // Add to constructor
+    public FactureServiceImpl(FactureRepository factureRepository,
+                              PatientRepository patientRepository, // Keep this in constructor
+                              ConsultationRepository consultationRepository,
+                              HistoriqueActionService historiqueActionService) {
         this.factureRepository = factureRepository;
+        this.patientRepository = patientRepository; // Initialize it
         this.consultationRepository = consultationRepository;
-        this.historiqueActionService = historiqueActionService; // Initialize
+        this.historiqueActionService = historiqueActionService;
     }
-
-    //pas besoin de cette méthode vu que nous avons déjà createFactureForConsultation
-    //    @Override
-    //    public FactureDto createFacture(FactureDto factureDto) {
-    //        return FactureDto.fromEntity(
-    //                factureRepository
-    //                        .save(FactureDto
-    //                                .toEntity(factureDto))
-    //        );
-    //
-    //    }
 
     @Override
     @Transactional
     public FactureDto updateFacture(Integer factureId, FactureDto factureDto) {
         Facture existingFacture = factureRepository.findById(factureId)
-                .orElseThrow(() -> new RuntimeException("Le facture n'existe pas"));
+                .orElseThrow(() -> new EntityNotFoundException("La facture avec l'ID " + factureId + " n'existe pas."));
 
-        existingFacture.setMontant(factureDto.getMontant());
+        // Update direct attributes. Use floatValue() to convert BigDecimal back if entity uses Float.
+        existingFacture.setMontant(factureDto.getMontant() != null ? factureDto.getMontant().floatValue() : null);
         existingFacture.setDateEmission(factureDto.getDateEmission());
         existingFacture.setStatutPaiement(factureDto.getStatutPaiement());
         existingFacture.setModePaiement(factureDto.getModePaiement());
+
+        // Handle related entities from summary DTOs
+        // Update Patient if provided
+        if (factureDto.getPatientSummary() != null && factureDto.getPatientSummary().getId() != null) {
+            Patient patient = patientRepository.findById(factureDto.getPatientSummary().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Patient associé introuvable avec l'ID: " + factureDto.getPatientSummary().getId()));
+            existingFacture.setPatient(patient);
+        } else if (factureDto.getPatientSummary() != null) {
+            existingFacture.setPatient(null); // Explicitly disassociate patient
+        }
+
+        // Update Consultation if provided
+        if (factureDto.getConsultationSummary() != null && factureDto.getConsultationSummary().getId() != null) {
+            Consultation consultation = consultationRepository.findById(factureDto.getConsultationSummary().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Consultation associée introuvable avec l'ID: " + factureDto.getConsultationSummary().getId()));
+            existingFacture.setConsultation(consultation);
+        } else if (factureDto.getConsultationSummary() != null) {
+            existingFacture.setConsultation(null); // Explicitly disassociate consultation
+        }
+
 
         FactureDto updatedFactureDto = FactureDto.fromEntity(
                 factureRepository.save(existingFacture)
         );
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction(
                 "Facture ID " + factureId + " mise à jour."
         );
-        // --- Fin de l'ajout de l'historique ---
 
         return updatedFactureDto;
     }
@@ -77,83 +93,68 @@ public class FactureServiceImpl implements FactureService {
                 .map(FactureDto::fromEntity)
                 .collect(Collectors.toList());
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction("Liste de toutes les factures récupérée.");
-        // --- Fin de l'ajout de l'historique ---
 
         return factures;
     }
 
     @Override
     public List<FactureDto> findFacturesByStatut(StatutPaiement statutPaiement) {
-
         List<FactureDto> factures = factureRepository.findFacturesByStatutPaiement(statutPaiement)
                 .stream()
                 .map(FactureDto::fromEntity)
                 .collect(Collectors.toList());
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction("Factures récupérées avec le statut : " + statutPaiement);
-        // --- Fin de l'ajout de l'historique ---
 
         return factures;
     }
 
     @Override
     public List<FactureDto> findFacturesByModePaiement(ModePaiement modePaiement) {
-
         List<FactureDto> factures = factureRepository.findFacturesByModePaiement(modePaiement)
                 .stream()
                 .map(FactureDto::fromEntity)
                 .collect(Collectors.toList());
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction("Factures récupérées avec le mode de paiement : " + modePaiement);
-        // --- Fin de l'ajout de l'historique ---
 
         return factures;
     }
 
     @Override
     public FactureDto findById(Integer FactureId) {
-
         FactureDto factureDto = factureRepository.findById(FactureId)
                 .map(FactureDto::fromEntity)
-                .orElseThrow(() -> new EntityNotFoundException("id : " + FactureId + " pas trouvé"));
+                .orElseThrow(() -> new EntityNotFoundException("Facture avec l'ID : " + FactureId + " non trouvée."));
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction("Facture ID " + FactureId + " récupérée.");
-        // --- Fin de l'ajout de l'historique ---
 
         return factureDto;
     }
 
     @Override
     public void deleteFacture(Integer FactureId) {
-        if (!factureRepository.existsById(FactureId)) {
-            throw new RuntimeException("Le facture n'existe pas");
-        }
+        Facture factureToDelete = factureRepository.findById(FactureId)
+                .orElseThrow(() -> new EntityNotFoundException("La facture avec l'ID : " + FactureId + " n'existe pas et ne peut pas être supprimée."));
+
+
 
         factureRepository.deleteById(FactureId);
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction("Facture ID " + FactureId + " supprimée.");
-        // --- Fin de l'ajout de l'historique ---
     }
-
 
     @Override
     public PatientDto findPatientByFactureId(Integer factureId) {
         Facture facture = factureRepository.findById(factureId)
-                .orElseThrow(() -> new EntityNotFoundException("Facture avec l'id : " + factureId + " pas trouvé"));
+                .orElseThrow(() -> new EntityNotFoundException("Facture avec l'ID : " + factureId + " non trouvée."));
 
         PatientDto patientDto = Optional.ofNullable(facture.getPatient())
                 .map(PatientDto::fromEntity)
-                .orElseThrow(() -> new RuntimeException("Aucun patient associé à la facture avec l'ID : " + factureId));
+                .orElseThrow(() -> new EntityNotFoundException("Aucun patient associé à la facture avec l'ID : " + factureId));
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction("Patient récupéré pour la facture ID : " + factureId);
-        // --- Fin de l'ajout de l'historique ---
 
         return patientDto;
     }
@@ -161,49 +162,50 @@ public class FactureServiceImpl implements FactureService {
     @Override
     @Transactional
     public FactureDto createFactureForConsultation(Integer consultationId, FactureDto factureDto) {
-        // Logique pour créer une facture pour une consultation terminée:
-        // 1. Trouver la Consultation par consultationId
         Consultation consultation = consultationRepository.findById(consultationId)
-                .orElseThrow(() -> new RuntimeException("Consultation avec l'id : " + consultationId + " pas trouvé"));
-        // 2. Vérifier si la consultation est terminée et non encore facturée
-        if (consultation.getRendezVous() == null || consultation.getRendezVous().getStatut() != StatutRDV.CONFIRME) {
-            throw new IllegalStateException("Impossible de créer la facture : le rendez-vous de la consultation n'est pas terminé.");
+                .orElseThrow(() -> new EntityNotFoundException("Consultation avec l'ID : " + consultationId + " non trouvée."));
+
+        // Ensure the rendezvous exists and is TERMINÉ for facturation
+        // Assuming StatutRDV.TERMINE means the consultation is complete.
+        // Your current code checks for StatutRDV.CONFIRME, which might not be correct for a finished consultation.
+        // Let's assume you meant StatutRDV.TERMINE.
+        if (consultation.getRendezVous() == null || consultation.getRendezVous().getStatut() != StatutRDV.TERMINE) {
+            throw new IllegalStateException("Impossible de créer la facture : le rendez-vous de la consultation n'est pas terminé (Statut: " + (consultation.getRendezVous() != null ? consultation.getRendezVous().getStatut() : "N/A") + ").");
         }
+
         if (consultation.getFacture() != null) {
             throw new IllegalStateException("Impossible de créer la facture : la consultation avec l'ID " + consultationId + " a déjà une facture associée.");
         }
 
-        // 3. Créer et Lier la Facture à la Consultation et au Patient
         Facture newFacture = new Facture();
-        newFacture.setConsultation(consultation); //liaison de la facture à la consultation
-        newFacture.setPatient(consultation.getDossierMedical().getPatient()); //liaison de la facture au patient en passant par le dossier médical
+        // Set direct attributes from the DTO, converting BigDecimal to Float if necessary
+        newFacture.setMontant(factureDto.getMontant() != null ? factureDto.getMontant().floatValue() : null);
+        newFacture.setDateEmission(factureDto.getDateEmission() != null ? factureDto.getDateEmission() : LocalDate.now());
+        newFacture.setStatutPaiement(factureDto.getStatutPaiement() != null ? factureDto.getStatutPaiement() : StatutPaiement.NONPAYE);
+        newFacture.setModePaiement(factureDto.getModePaiement() != null ? factureDto.getModePaiement() : ModePaiement.ESPECE);
 
-        // 4. Définir les valeurs par défaut ou calculées pour la nouvelle facture
-        newFacture.setDateEmission(LocalDate.now()); // Date du jour
-        newFacture.setStatutPaiement(StatutPaiement.NONPAYE); // Statut initial
-        newFacture.setModePaiement(ModePaiement.ESPECE); // Mode de paiement par défaut
 
-        newFacture.setMontant((float) consultation.getRendezVous().getServiceMedical().getMontant()); // Exemple de montant par défaut
+        // Establish relationships by fetching entities
+        newFacture.setConsultation(consultation);
+        newFacture.setPatient(consultation.getDossierMedical().getPatient()); // Patient from consultation's dossier
 
-        //optionnel pour assurer que la la nexFacture est bien lier à Consultation pour bien gèrer la relation entre les deux
-        //        consultation.setFacture(newFacture);
-        //        consultationRepository.save(consultation);
+        // Optional: If you want to automatically set the consultation's `facture` field:
+        consultation.setFacture(newFacture); // Link the facture back to the consultation
+        consultationRepository.save(consultation); // Save consultation to persist the bidirectional link
 
-        FactureDto createdFactureDto = FactureDto.fromEntity(factureRepository.save(newFacture));
+        Facture createdFacture = factureRepository.save(newFacture);
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction(
-                "Facture créée pour la consultation ID : " + consultationId + ", Facture ID: " + createdFactureDto.getId()
+                "Facture créée pour la consultation ID : " + consultationId + ", Facture ID: " + createdFacture.getId()
         );
-        // --- Fin de l'ajout de l'historique ---
 
-        return createdFactureDto;
+        return FactureDto.fromEntity(createdFacture);
     }
 
     @Override
     public FactureDto updateStatutPaiement(Integer factureId, StatutPaiement nouveauStatut) {
         Facture existingFacture = factureRepository.findById(factureId)
-                .orElseThrow(() -> new RuntimeException("Le facture n'existe pas"));
+                .orElseThrow(() -> new EntityNotFoundException("La facture avec l'ID " + factureId + " n'existe pas."));
 
         existingFacture.setStatutPaiement(nouveauStatut);
 
@@ -211,11 +213,9 @@ public class FactureServiceImpl implements FactureService {
                 factureRepository.save(existingFacture)
         );
 
-        // --- Ajout de l'historique ---
         historiqueActionService.enregistrerAction(
                 "Statut de paiement de la facture ID " + factureId + " mis à jour à : " + nouveauStatut
         );
-        // --- Fin de l'ajout de l'historique ---
 
         return updatedFactureDto;
     }

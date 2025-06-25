@@ -22,5 +22,7 @@ public interface SalleRepository extends JpaRepository<Salle, Integer> {
     Collection<Salle> findSallesByStatut(@Param("statutSalle") StatutSalle statutSalle);
 
     Collection<Object> findByServiceMedical(ServiceMedical serviceMedicalEnum);
+
+    List<Salle> findByStatutSalle(StatutSalle statutSalle);
 }
 

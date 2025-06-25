@@ -1,3 +1,4 @@
+// PrescriptionDto.java (updated)
 package com.example.GestionClinique.dto;
 
 import com.example.GestionClinique.model.entity.Prescription;
@@ -8,6 +9,8 @@ import java.time.LocalDate;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PrescriptionDto {
     private Integer id;
     private LocalDate datePrescription;
@@ -17,10 +20,12 @@ public class PrescriptionDto {
     private String dureePrescription;
     private Integer quantite;
 
-    private ConsultationDto consultation;
-    private UtilisateurDto medecin;
-    private PatientDto patient;
-    private DossierMedicalDto dossierMedical;
+    private Integer consultationId;
+
+    // Use Summary DTOs to avoid recursion
+    private UtilisateurSummaryDto medecinSummary;
+    private PatientSummaryDto patientSummary;
+    private DossierMedicalSummaryDto dossierMedicalSummary; // Correctly referencing the new DTO
 
     public static PrescriptionDto fromEntity(Prescription prescription) {
         if(prescription == null) {
@@ -35,10 +40,11 @@ public class PrescriptionDto {
                 .instructions(prescription.getInstructions())
                 .dureePrescription(prescription.getDureePrescription())
                 .quantite(prescription.getQuantite())
-                .consultation(ConsultationDto.fromEntity(prescription.getConsultation()))
-                .medecin(UtilisateurDto.fromEntity(prescription.getMedecin()))
-                .patient(PatientDto.fromEntity(prescription.getPatient()))
-                .dossierMedical(DossierMedicalDto.fromEntity(prescription.getDossierMedical()))
+                .consultationId(prescription.getConsultation() != null ? prescription.getConsultation().getId() : null)
+                // Use Summary DTOs for related objects
+                .medecinSummary(UtilisateurSummaryDto.fromEntity(prescription.getMedecin()))
+                .patientSummary(PatientSummaryDto.fromEntity(prescription.getPatient()))
+                .dossierMedicalSummary(DossierMedicalSummaryDto.fromEntity(prescription.getDossierMedical())) // This is the fix!
                 .build();
     }
 
@@ -48,7 +54,7 @@ public class PrescriptionDto {
         }
 
         Prescription prescription = new Prescription();
-        // L'ID n'est généralement pas défini ici pour la création d'une nouvelle entité.
+        prescription.setId(prescriptionDto.getId());
         prescription.setDatePrescription(prescriptionDto.getDatePrescription());
         prescription.setTypePrescription(prescriptionDto.getTypePrescription());
         prescription.setMedicaments(prescriptionDto.getMedicaments());
@@ -56,13 +62,8 @@ public class PrescriptionDto {
         prescription.setDureePrescription(prescriptionDto.getDureePrescription());
         prescription.setQuantite(prescriptionDto.getQuantite());
 
-        // Conversion des DTOs imbriqués en entités
-        prescription.setConsultation(ConsultationDto.toEntity(prescriptionDto.getConsultation()));
-        prescription.setMedecin(UtilisateurDto.toEntity(prescriptionDto.getMedecin()));
-        prescription.setPatient(PatientDto.toEntity(prescriptionDto.getPatient()));
-        prescription.setDossierMedical(DossierMedicalDto.toEntity(prescriptionDto.getDossierMedical()));
-
+        // Relationships for `toEntity` should be handled in the service layer using IDs.
+        // Avoid mapping full nested DTOs here to prevent potential issues.
         return prescription;
     }
 }
-

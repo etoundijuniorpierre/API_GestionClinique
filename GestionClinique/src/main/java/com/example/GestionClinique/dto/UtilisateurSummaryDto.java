@@ -1,7 +1,6 @@
-package com.example.GestionClinique.service.serviceImpl;
+package com.example.GestionClinique.dto;
 
 
-import com.example.GestionClinique.dto.InfoPersonnelDto;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UtilisateurLightDto {
+public class UtilisateurSummaryDto {
     private Integer id;
     private InfoPersonnelDto infoPersonnel; // Assuming InfoPersonnelDto is not recursive
 
@@ -21,9 +20,9 @@ public class UtilisateurLightDto {
     // private String email;
     // private String nomComplet; // You'd derive this from InfoPersonnelDto in the mapping
 
-    public static UtilisateurLightDto fromEntity(Utilisateur utilisateur) {
+    public static UtilisateurSummaryDto fromEntity(Utilisateur utilisateur) {
         if (utilisateur == null) return null;
-        return UtilisateurLightDto.builder()
+        return UtilisateurSummaryDto.builder()
                 .id(utilisateur.getId())
                 .infoPersonnel(InfoPersonnelDto.fromEntity(utilisateur.getInfoPersonnel()))
                 .build();

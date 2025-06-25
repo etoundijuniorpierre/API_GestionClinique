@@ -5,6 +5,7 @@ import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
+import org.springframework.beans.PropertyValues;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -27,5 +28,19 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Integer>
 
     Optional<RendezVous> findByPatientAndJourAndHeure(Patient existingPatient, LocalDate jour, LocalTime heure);
 
-    List<RendezVous> findRendezVousByStatut(StatutRDV statut);
+    List<RendezVous> findByStatut(StatutRDV statut);
+
+    List<RendezVous> findByJour(LocalDate jour);
+
+    List<RendezVous> findBySalleId(Integer salleId);
+
+    List<RendezVous> findByMedecinId(Integer medecinId);
+
+    List<RendezVous> findByPatientId(Integer patientId);
+
+    Optional<RendezVous> findByMedecinAndJourAndHeureAndStatutIn(Utilisateur medecin, LocalDate jour, LocalTime heure, List<StatutRDV> planifie);
+
+    Optional<RendezVous> findBySalleAndJourAndHeureAndStatutIn(Salle salle, LocalDate jour, LocalTime heure, List<StatutRDV> planifie);
+
+    Optional<RendezVous> findBySalleAndJourAndHeureBetween(Salle salle, LocalDate jour, LocalTime heureDebut, LocalTime heureFin);
 }

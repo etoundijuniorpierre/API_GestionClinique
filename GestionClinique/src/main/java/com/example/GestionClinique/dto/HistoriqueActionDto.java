@@ -2,14 +2,12 @@ package com.example.GestionClinique.dto;
 
 import com.example.GestionClinique.model.entity.HistoriqueAction;
 import com.example.GestionClinique.model.entity.Utilisateur; // Import Utilisateur for toEntity conversion
-import com.example.GestionClinique.service.serviceImpl.UtilisateurLightDto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor; // Add this
 import lombok.AllArgsConstructor; // Add this
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -19,7 +17,7 @@ public class HistoriqueActionDto {
     private Integer id;
     private LocalDate date;
     private String action;
-    private UtilisateurLightDto utilisateur; // *** USE UtilisateurLightDto HERE ***
+    private UtilisateurSummaryDto utilisateur; // *** USE UtilisateurLightDto HERE ***
 
     public static HistoriqueActionDto fromEntity(HistoriqueAction historiqueAction){
         if(historiqueAction == null) return null;
@@ -28,7 +26,7 @@ public class HistoriqueActionDto {
                 .id(historiqueAction.getId())
                 .date(historiqueAction.getDate())
                 .action(historiqueAction.getAction())
-                .utilisateur(UtilisateurLightDto.fromEntity(historiqueAction.getUtilisateur())) // *** Call UtilisateurLightDto.fromEntity ***
+                .utilisateur(UtilisateurSummaryDto.fromEntity(historiqueAction.getUtilisateur())) // *** Call UtilisateurLightDto.fromEntity ***
                 .build();
     }
 

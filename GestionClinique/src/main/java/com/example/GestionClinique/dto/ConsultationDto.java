@@ -1,20 +1,16 @@
 package com.example.GestionClinique.dto;
 
 import com.example.GestionClinique.model.entity.Consultation;
-import com.example.GestionClinique.model.entity.DossierMedical;
 import com.example.GestionClinique.model.entity.Facture;
-import com.example.GestionClinique.model.entity.RendezVous;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors; // Ensure this import is present
 
 @Data
 @Builder
+@AllArgsConstructor // Added AllArgsConstructor because you are using @Builder
+@NoArgsConstructor // Added NoArgsConstructor because you are using @Builder
 public class ConsultationDto {
     private Integer id;
     private String motifs;
@@ -27,15 +23,17 @@ public class ConsultationDto {
     private DossierMedicalDto dossierMedical;
     private UtilisateurDto medecin;
     private RendezVousDto rendezVous;
-    private List<PrescriptionDto> prescriptions; // Ajouté
-    private FactureDto facture; // Ajouté
+    private List<PrescriptionDto> prescriptions;
+    private FactureDto facture;
 
     public static ConsultationDto fromEntity(Consultation consultation) {
         if(consultation == null) return null;
 
         // Précaution pour éviter les chargements intempestifs si Lazy et non initialisé
         List<PrescriptionDto> prescriptionDtos = (consultation.getPrescriptions() != null) ?
-                consultation.getPrescriptions().stream().map(PrescriptionDto::fromEntity).toList() : null;
+                consultation.getPrescriptions().stream()
+                        .map(PrescriptionDto::fromEntity) // This call is now safe
+                        .collect(Collectors.toList()) : null; // Changed to .collect(Collectors.toList())
         FactureDto factureDto = (consultation.getFacture() != null) ? FactureDto.fromEntity(consultation.getFacture()) : null;
 
         return ConsultationDto.builder()
@@ -50,8 +48,8 @@ public class ConsultationDto {
                 .dossierMedical(DossierMedicalDto.fromEntity(consultation.getDossierMedical()))
                 .medecin(UtilisateurDto.fromEntity(consultation.getMedecin()))
                 .rendezVous(RendezVousDto.fromEntity(consultation.getRendezVous()))
-                .prescriptions(prescriptionDtos) // Mappé
-                .facture(factureDto) // Mappé
+                .prescriptions(prescriptionDtos)
+                .facture(factureDto)
                 .build();
     }
 
@@ -60,8 +58,6 @@ public class ConsultationDto {
         if(consultationDto == null) return null;
 
         Consultation consultation = new Consultation();
-        // L'ID n'est généralement pas défini ici pour la création d'une nouvelle entité.
-        // Pour les mises à jour, on chargerait l'entité existante par son ID.
         consultation.setMotifs(consultationDto.getMotifs());
         consultation.setTensionArterielle(consultationDto.getTensionArterielle());
         consultation.setTemperature(consultationDto.getTemperature());
@@ -81,7 +77,7 @@ public class ConsultationDto {
                     consultationDto.getPrescriptions().stream()
                             .map(PrescriptionDto::toEntity)
                             .peek(p -> p.setConsultation(consultation)) // Assurez-vous que la relation inverse est définie
-                            .toList()
+                            .collect(Collectors.toList()) // Changed to .collect(Collectors.toList())
             );
         }
         if (consultationDto.getFacture() != null) {
@@ -93,4 +89,3 @@ public class ConsultationDto {
         return consultation;
     }
 }
-

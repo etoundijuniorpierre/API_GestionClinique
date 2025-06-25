@@ -9,9 +9,11 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.ArrayList;
+import java.util.ArrayList; // Keep if other lists are used
 import java.util.Collection;
+import java.util.HashSet; // Import HashSet
 import java.util.List;
+import java.util.Set; // Import Set
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
@@ -26,33 +28,29 @@ public class Utilisateur extends EntityAbstracte {
     private InfoPersonnel infoPersonnel;
 
     @Column(nullable = false, name = "mot_de_passe")
-    @JsonIgnore // Ignoré pour la sérialisation JSON pour des raisons de sécurité
+    @JsonIgnore
     @Size(min = 8, max = 20)
     private String motDePasse;
 
-    @Column(name = "actif", nullable = false) // Ajouté nullable = false
+    @Column(name = "actif", nullable = false)
     private Boolean actif;
 
-
-
-    @ManyToMany(fetch = FetchType.EAGER) // Changé de OneToMany à ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER) // Keep EAGER or consider LAZY + specific fetching later
     @JoinTable(
             name = "utilisateur_roles",
             joinColumns = @JoinColumn(name = "utilisateur_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private List<Role> role = new ArrayList<>(); //
+    private Set<Role> role = new HashSet<>(); // Changed from List to Set, and ArrayList to HashSet
+
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Convertit chaque objet Role en SimpleGrantedAuthority
-        // Le rôle doit être préfixé par "ROLE_" si vous utilisez hasRole("ADMIN") dans Spring Security
-        // Sinon, si vous utilisez hasAuthority("ADMIN"), le préfixe n'est pas obligatoire
         return role.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleType())) // Assurez-vous que Role a un getRoleType() qui retourne une String (ex: "ADMIN", "USER")
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleType().name())) // Ensure .name() for enum
                 .collect(Collectors.toSet());
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "ServiceMedical") // Ajouté nullable = false
+    @Column(name = "ServiceMedical")
     private ServiceMedical serviceMedical;
 
     @OneToMany(mappedBy = "medecin", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -70,6 +68,6 @@ public class Utilisateur extends EntityAbstracte {
     @OneToMany(mappedBy = "destinataire", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Message> messagesRecus = new ArrayList<>();
 
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Ajouté cascade et initialisation
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<HistoriqueAction> historiqueActions = new ArrayList<>();
 }

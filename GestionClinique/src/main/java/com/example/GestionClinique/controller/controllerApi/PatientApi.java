@@ -77,7 +77,7 @@ public interface PatientApi {
 
 
     @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
-    @GetMapping(path = "/recherche/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/recherche/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir un patient par son ID",
             description = "Récupère les détails complets d'un patient spécifique")
     @ApiResponses(value = {
@@ -112,7 +112,7 @@ public interface PatientApi {
 
 
     @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
-    @GetMapping(path = "/recherche/{term}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/recherche/term/{term}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher des patients",
             description = "Recherche des patients par terme (nom, prénom, email, téléphone, etc.)")
     @ApiResponses(value = {
@@ -131,7 +131,7 @@ public interface PatientApi {
 
 
     @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
-    @GetMapping(path = "/recherche/{nom}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/recherche/nom/{nom}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher par nom exact",
             description = "Trouve tous les patients portant exactement le nom spécifié")
     @ApiResponses(value = {
@@ -148,7 +148,7 @@ public interface PatientApi {
 
 
     @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
-    @GetMapping(path = "/recherche/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/recherche/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher par email exact",
             description = "Trouve un patient unique par son adresse email exacte")
     @ApiResponses(value = {

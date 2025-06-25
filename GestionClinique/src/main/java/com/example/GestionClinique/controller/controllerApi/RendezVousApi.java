@@ -1,6 +1,8 @@
 package com.example.GestionClinique.controller.controllerApi;
 
 import com.example.GestionClinique.dto.*;
+import com.example.GestionClinique.model.entity.Salle;
+import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,7 +15,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.example.GestionClinique.utils.constants.API_NAME;
@@ -42,7 +46,7 @@ public interface RendezVousApi {
 
 
     @PreAuthorize("hasAnyRole('SECRETAIRE')")
-    @GetMapping(path = "/recherche/{idRendezVous}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/recherche/id/{idRendezVous}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir un rendez-vous par son ID",
             description = "Récupère les informations détaillées d'un rendez-vous spécifique")
     @ApiResponses(value = {
@@ -201,31 +205,46 @@ public interface RendezVousApi {
 
 
 
+    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+    @GetMapping(path = "/disponibilite/{jour}/{heure}/{medecinId}/{salleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Vérifier la disponibilité d'un créneau (TENTATIVE DE MATCHING DIRECT)",
+            description = "Tente de vérifier la disponibilité d'un créneau horaire, mais cette signature est problématique pour REST.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Disponibilité vérifiée avec succès (si ça marche)",
+                    content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse(responseCode = "400", description = "**ATTENTION: Paramètres non supportés ou format invalide.**"),
+            @ApiResponse(responseCode = "404", description = "Ressource non trouvée"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    boolean isRendezVousAvailable(
+            @Parameter(description = "Date du rendez-vous (yyyy-MM-dd)", required = true, example = "2023-12-31")
+            @PathVariable("jour") LocalDate jour,
+            @Parameter(description = "Heure du rendez-vous (HH:mm:ss)", required = true, example = "14:30:00")
+            @PathVariable("heure") LocalTime heure,
+            @Parameter(description = "ID du médecin", required = true, example = "3")
+            @PathVariable("medecinId") Utilisateur medecin,
+            @Parameter(description = "ID de la salle", required = true, example = "2")
+            @PathVariable("salleId") Salle salle
+    );
+
+
 
 
     @PreAuthorize("hasAnyRole('SECRETAIRE')")
-    @GetMapping(path = "/disponibilite/{dateHeure}/{idMedecin}/{idSalle}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Vérifier la disponibilité d'un créneau",
-            description = "Vérifie si un créneau horaire est disponible pour un médecin et une salle donnés")
+    @GetMapping(path = "/jour/{jour}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Rechercher des rendez-vous par jour",
+            description = "Récupère une liste de tous les rendez-vous programmés pour une date spécifique.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Disponibilité vérifiée avec succès",
-                    content = @Content(schema = @Schema(implementation = Boolean.class))),
-            @ApiResponse(responseCode = "400", description = "Paramètres de date, médecin ou salle invalides"),
-            @ApiResponse(responseCode = "404", description = "Médecin ou salle non trouvé"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la vérification")
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous pour le jour retournée avec succès",
+                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+            @ApiResponse(responseCode = "400", description = "Format de date invalide"),
+            @ApiResponse(responseCode = "404", description = "Aucun rendez-vous trouvé pour ce jour"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    boolean isRendezVousAvailable(
-            @Parameter(description = "Date et heure à vérifier", required = true,
-                    example = "2023-12-31T14:30:00")
-            @PathVariable("dateHeure") LocalDateTime dateHeure,
-            @Parameter(description = "ID du médecin", required = true,
-                    example = "3")
-            @PathVariable("idMedecin") Integer idMedecin,
-            @Parameter(description = "ID de la salle", required = true,
-                    example = "2")
-            @PathVariable("idSalle") Integer idSalle);
-
-
+    List<RendezVousDto> findRendezVousByJour(
+            @Parameter(description = "Date du jour à rechercher (format yyyy-MM-dd)", required = true,
+                    example = "2025-06-22") // Example is current date
+            @PathVariable("jour") LocalDate jour);
 
 
 

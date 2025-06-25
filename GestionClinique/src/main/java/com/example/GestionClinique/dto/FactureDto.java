@@ -1,38 +1,44 @@
+// FactureDto.java (updated)
 package com.example.GestionClinique.dto;
 
-import com.example.GestionClinique.model.entity.*;
-import com.example.GestionClinique.model.entity.Patient;
-import com.example.GestionClinique.model.entity.RendezVous;
+import com.example.GestionClinique.model.entity.Facture;
 import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
-import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor; // Add this for @Builder compatibility
 
 import java.time.LocalDate;
+import java.math.BigDecimal; // Import BigDecimal
 
 @Data
 @Builder
+@AllArgsConstructor // Add this
+@NoArgsConstructor // Add this
 public class FactureDto {
     private Integer id;
-    private Float montant;
+    private Float montant; // Changed to BigDecimal
     private LocalDate dateEmission;
     private StatutPaiement statutPaiement;
     private ModePaiement modePaiement;
-    private PatientDto patient;
-    private ConsultationDto consultation; // Renommé pour cohérence avec l'entité
+
+    // CHANGE: Use Summary DTOs or IDs for related entities to prevent recursion
+    private PatientSummaryDto patientSummary;
+    private ConsultationSummaryDto consultationSummary;
 
     public static FactureDto fromEntity(Facture facture) {
         if(facture == null) return null;
 
         return FactureDto.builder()
                 .id(facture.getId())
-                .montant(facture.getMontant())
+                .montant(facture.getMontant()) // Convert Float to BigDecimal
                 .dateEmission(facture.getDateEmission())
                 .statutPaiement(facture.getStatutPaiement())
                 .modePaiement(facture.getModePaiement())
-                .patient(PatientDto.fromEntity(facture.getPatient()))
-                .consultation(ConsultationDto.fromEntity(facture.getConsultation())) // Mappé correctement
+                // CRITICAL CHANGE: Map to Summary DTOs to break the cycle
+                .patientSummary(PatientSummaryDto.fromEntity(facture.getPatient()))
+                .consultationSummary(ConsultationSummaryDto.fromEntity(facture.getConsultation()))
                 .build();
     }
 
@@ -40,17 +46,13 @@ public class FactureDto {
         if(factureDto == null) return null;
 
         Facture facture = new Facture();
-        // L'ID est souvent défini pour les mises à jour, mais pas pour la création.
-        // Ici, il est conservé car l'entité Facture a un setId dans toEntity
-        facture.setId(factureDto.getId()); // Si l'ID est utilisé pour la mise à jour, assurez-vous qu'il est géré correctement
-        facture.setMontant(factureDto.getMontant());
+        facture.setId(factureDto.getId());
+        facture.setMontant(factureDto.getMontant() != null ? factureDto.getMontant().floatValue() : null); // Convert BigDecimal back to Float
         facture.setDateEmission(factureDto.getDateEmission());
         facture.setStatutPaiement(factureDto.getStatutPaiement());
         facture.setModePaiement(factureDto.getModePaiement());
 
-        // Conversion des DTOs imbriqués en entités
-        facture.setPatient(PatientDto.toEntity(factureDto.getPatient()));
-        facture.setConsultation(ConsultationDto.toEntity(factureDto.getConsultation())); // Mappé correctement
+
         return facture;
     }
 }

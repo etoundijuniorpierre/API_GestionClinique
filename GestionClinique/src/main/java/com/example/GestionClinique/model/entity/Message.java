@@ -3,32 +3,39 @@ package com.example.GestionClinique.model.entity;
 import com.example.GestionClinique.model.EntityAbstracte;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Data // Keep @Data, but the explicit getter will be preferred
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "message")
 public class Message extends EntityAbstracte {
 
-    @Column(name="contenu", nullable = false, columnDefinition = "TEXT") // Ajouté nullable = false et columnDefinition
+    @Column(name="contenu", nullable = false, columnDefinition = "TEXT")
     private String contenu;
 
-    @Column(name="dateEnvoi", nullable = false) // Ajouté nullable = false
+    @Column(name="date_envoi", nullable = false)
     private LocalDateTime dateEnvoi;
 
-    @Column(name="lu", nullable = false) // Ajouté nullable = false
+    @Column(name="lu", nullable = false)
     private boolean lu;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Ajouté Lazy
-    @JoinColumn(name = "expediteur_id", nullable = false) // Ajouté nullable = false
+
+    public boolean getLu() {
+        return this.lu;
+    }
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "expediteur_id", nullable = false)
     private Utilisateur expediteur;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Ajouté Lazy
-    @JoinColumn(name = "destinataire_id", nullable = false) // Ajouté nullable = false
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destinataire_id", nullable = false)
     private Utilisateur destinataire;
 }

@@ -1,9 +1,13 @@
 package com.example.GestionClinique.service;
 
 import com.example.GestionClinique.dto.RendezVousDto;
+import com.example.GestionClinique.model.entity.Salle;
+import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 
@@ -20,7 +24,10 @@ public interface RendezVousService {
     List<RendezVousDto> findRendezVousByMedecinId(Integer utilisateurId); // Renommé pour clarté
 
     // Nouvelle méthode: Vérifier la disponibilité d'un créneau (pour médecin et salle)
-    boolean isRendezVousAvailable(LocalDateTime dateHeure, Integer medecinId, Integer salleId);
+    boolean isRendezVousAvailable(LocalDate jour, LocalTime heure, Utilisateur medecin, Salle salle);
+
     // Nouvelle méthode: Annuler un rendez-vous avec logique de prévenance
     RendezVousDto cancelRendezVous(Integer rendezVousId);
+
+    List<RendezVousDto> findRendezVousByJour(LocalDate jour);
 }
