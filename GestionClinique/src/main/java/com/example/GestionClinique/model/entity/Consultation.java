@@ -52,7 +52,6 @@ public class Consultation extends EntityAbstracte {
     @JoinColumn(name = "medecin_id", nullable = false) // Clé étrangère vers l'ID du médecin
     private Utilisateur medecin;
 
-
     @OneToMany(mappedBy = "consultation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Ajouté Lazy pour optimisation
     private List<Prescription> prescriptions = new ArrayList<>(); // Initialisation pour éviter les NullPointerExceptions
 
