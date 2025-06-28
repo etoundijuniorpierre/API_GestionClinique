@@ -9,12 +9,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -23,7 +18,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "utilisateurs")
-public class Utilisateur extends InfoPersonnel{
+public class Utilisateur extends InfoPersonnel {
 
     @Column(nullable = false, name = "mot_de_passe")
     @JsonIgnore
@@ -35,18 +30,16 @@ public class Utilisateur extends InfoPersonnel{
 
     private Boolean actif;
 
-    @ManyToMany(fetch = FetchType.EAGER) // Keep EAGER or consider LAZY + specific fetching later
-    @JoinTable(
-            name = "utilisateur_roles",
-            joinColumns = @JoinColumn(name = "utilisateur_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> role = new HashSet<>(); // Changed from List to Set, and ArrayList to HashSet
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleType().name())) // Ensure .name() for enum
-                .collect(Collectors.toSet());
+        if (this.role == null) {
+            return Collections.emptyList();
+        }
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.getRoleType().name()));
     }
 
     @Enumerated(EnumType.STRING)

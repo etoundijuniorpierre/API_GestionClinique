@@ -53,7 +53,7 @@ public class HistoriqueActionServiceImpl implements HistoriqueActionService {
                 authenticationFacade.getAuthentication().getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) authenticationFacade.getAuthentication().getPrincipal();
             username = userDetails.getUsername();
-            currentUser = utilisateurRepository.findUtilisateurByInfoPersonnel_Email(username).orElse(null);
+            currentUser = utilisateurRepository.findByEmail(username).orElse(null);
         }
 
         HistoriqueAction action = new HistoriqueAction();

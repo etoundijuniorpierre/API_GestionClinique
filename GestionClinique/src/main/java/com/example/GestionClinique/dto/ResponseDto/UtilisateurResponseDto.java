@@ -7,13 +7,9 @@ import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class UtilisateurResponseDto extends InfoPersonnelResponseDto {
-    private String Email;
+    private String email;
     private ServiceMedical serviceMedicalName;
     private Boolean actif;
-    private RoleResponseDto roles1;
-    private RoleResponseDto roles2;
+    private RoleResponseDto role;
 }

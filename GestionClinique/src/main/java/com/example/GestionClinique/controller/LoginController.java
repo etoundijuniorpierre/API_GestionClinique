@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.example.GestionClinique.utils.constants.API_NAME;
+import static com.example.GestionClinique.utils.Constants.API_NAME;
 
 
 @Tag(name = "AUTHENTIFICATION", description = "API pour se login dans notre système")

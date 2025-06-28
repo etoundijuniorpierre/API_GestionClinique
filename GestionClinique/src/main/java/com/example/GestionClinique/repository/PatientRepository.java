@@ -7,21 +7,22 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.lang.ScopedValue;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 
-public interface PatientRepository extends JpaRepository<Patient, Integer> {
+public interface PatientRepository extends JpaRepository<Patient, Long> {
 
-
-    Optional<Patient> findPatientByInfoPersonnel_Email(String email);
-
-    Collection<Patient> findPatientByInfoPersonnel_Nom(String nom);
 
     @Query("SELECT p FROM Patient p WHERE " +
-            "LOWER(p.infoPersonnel.nom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(p.infoPersonnel.prenom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(p.infoPersonnel.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    Collection<Patient> findPatientBySearchTerm(@Param("searchTerm") String searchTerm);
+            "LOWER(p.nom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "LOWER(p.prenom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "LOWER(p.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    List<Patient> searchByTerm(String searchTerm);
+
+    List<Patient> findByNom(String nom);
+
+    Optional<Patient> findByEmail(String email);
 }

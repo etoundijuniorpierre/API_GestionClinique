@@ -19,7 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static com.example.GestionClinique.utils.constants.API_NAME;
+import static com.example.GestionClinique.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Rendez-vous", description = "API pour la gestion des rendez-vous médicaux")
 @RequestMapping(API_NAME + "/rendezVous")

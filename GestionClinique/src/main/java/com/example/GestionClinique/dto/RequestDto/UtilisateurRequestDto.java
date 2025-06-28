@@ -1,19 +1,23 @@
 package com.example.GestionClinique.dto.RequestDto;
 
-import com.example.GestionClinique.dto.ResponseDto.RoleResponseDto;
+
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class UtilisateurRequestRequestDto extends InfoPersonnelRequestDto {
+public class UtilisateurRequestDto extends InfoPersonnelRequestDto {
 
     @NotNull
-    private String Email;
+    @Email
+    private String email;
 
     @NotNull
+    @Size(min = 8, max = 20)
     private String motDePasse;
 
     private ServiceMedical serviceMedicalName;
@@ -21,7 +25,5 @@ public class UtilisateurRequestRequestDto extends InfoPersonnelRequestDto {
     private Boolean actif;
 
     @NotNull
-    private RoleResponseDto roles1;
-
-    private RoleResponseDto roles2;
+    private Long roleId;
 }

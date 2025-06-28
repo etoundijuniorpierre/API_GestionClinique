@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.example.GestionClinique.utils.constants.API_NAME;
+import static com.example.GestionClinique.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Historiques d'Actions", description = "API pour la gestion et le suivi des actions dans le système")
 @RequestMapping(API_NAME + "/historiqueActions")

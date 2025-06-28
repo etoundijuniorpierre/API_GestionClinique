@@ -1,7 +1,6 @@
 package com.example.GestionClinique.configuration.dataInitConfig;
 
 
-import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestRequestDto;
 import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;

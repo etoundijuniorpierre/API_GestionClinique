@@ -8,5 +8,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class RoleResponseDto extends BaseResponseDto {
+    private Long id;
     private RoleType roleType;
 }

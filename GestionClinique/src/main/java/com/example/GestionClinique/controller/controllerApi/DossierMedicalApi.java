@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.example.GestionClinique.utils.constants.API_NAME;
+import static com.example.GestionClinique.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Dossiers Médicaux", description = "API pour la gestion des dossiers médicaux des patients")
 @RequestMapping(API_NAME + "/dossierMedical")
