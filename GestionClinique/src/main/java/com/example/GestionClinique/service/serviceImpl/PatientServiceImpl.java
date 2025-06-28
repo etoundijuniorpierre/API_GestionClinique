@@ -1,8 +1,8 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.InfoPersonnelDto; // Ensure this is imported if InfoPersonnel is a separate DTO
-import com.example.GestionClinique.dto.PatientDto;
-import com.example.GestionClinique.model.entity.InfoPersonnel; // Ensure this is imported
+import com.example.GestionClinique.dto.RequestDto.InfoPersonnelRequestDto; // Ensure this is imported if InfoPersonnel is a separate DTO
+import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
+import com.example.GestionClinique.model.InfoPersonnel; // Ensure this is imported
 import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.repository.PatientRepository;
 import com.example.GestionClinique.service.HistoriqueActionService;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,22 +32,22 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     @Transactional
-    public PatientDto createPatient(PatientDto patientDto) {
+    public PatientRequestDto createPatient(PatientRequestDto patientRequestDto) {
         // Validate required personal information
-        if (patientDto.getInfoPersonnel() == null ||
-                patientDto.getInfoPersonnel().getEmail() == null || patientDto.getInfoPersonnel().getEmail().trim().isEmpty() ||
-                patientDto.getInfoPersonnel().getNom() == null || patientDto.getInfoPersonnel().getNom().trim().isEmpty() ||
-                patientDto.getInfoPersonnel().getPrenom() == null || patientDto.getInfoPersonnel().getPrenom().trim().isEmpty()) {
+        if (patientRequestDto.getInfoPersonnel() == null ||
+                patientRequestDto.getInfoPersonnel().getEmail() == null || patientRequestDto.getInfoPersonnel().getEmail().trim().isEmpty() ||
+                patientRequestDto.getInfoPersonnel().getNom() == null || patientRequestDto.getInfoPersonnel().getNom().trim().isEmpty() ||
+                patientRequestDto.getInfoPersonnel().getPrenom() == null || patientRequestDto.getInfoPersonnel().getPrenom().trim().isEmpty()) {
             throw new IllegalArgumentException("Les informations personnelles (nom, prenom, email) du patient sont obligatoires et ne peuvent pas être vides.");
         }
 
         // Check for unique email
-        if (patientRepository.findPatientByInfoPersonnel_Email(patientDto.getInfoPersonnel().getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Un patient avec l'email '" + patientDto.getInfoPersonnel().getEmail() + "' existe déjà.");
+        if (patientRepository.findPatientByInfoPersonnel_Email(patientRequestDto.getInfoPersonnel().getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Un patient avec l'email '" + patientRequestDto.getInfoPersonnel().getEmail() + "' existe déjà.");
         }
 
         // Convert DTO to entity. Assuming PatientDto.toEntity handles InfoPersonnel conversion.
-        Patient patientToSave = PatientDto.toEntity(patientDto);
+        Patient patientToSave = PatientRequestDto.toEntity(patientRequestDto);
 
         // Ensure InfoPersonnel is not null on the entity, even if DTO conversion somehow missed it (though it shouldn't if toEntity is robust)
         if (patientToSave.getInfoPersonnel() == null) {
@@ -57,22 +56,22 @@ public class PatientServiceImpl implements PatientService {
         }
 
         Patient savedPatientEntity = patientRepository.save(patientToSave);
-        PatientDto savedPatientDto = PatientDto.fromEntity(savedPatientEntity);
+        PatientRequestDto savedPatientRequestDto = PatientRequestDto.fromEntity(savedPatientEntity);
 
         historiqueActionService.enregistrerAction(
-                "Création du patient ID: " + savedPatientDto.getId() +
-                        ", Nom: " + (savedPatientDto.getInfoPersonnel() != null ? savedPatientDto.getInfoPersonnel().getNom() : "N/A") + " " +
-                        (savedPatientDto.getInfoPersonnel() != null ? savedPatientDto.getInfoPersonnel().getPrenom() : "N/A")
+                "Création du patient ID: " + savedPatientRequestDto.getId() +
+                        ", Nom: " + (savedPatientRequestDto.getInfoPersonnel() != null ? savedPatientRequestDto.getInfoPersonnel().getNom() : "N/A") + " " +
+                        (savedPatientRequestDto.getInfoPersonnel() != null ? savedPatientRequestDto.getInfoPersonnel().getPrenom() : "N/A")
         );
 
-        return savedPatientDto;
+        return savedPatientRequestDto;
     }
 
 
 
     @Override
     @Transactional
-    public PatientDto updatePatient(Integer id, PatientDto patientDto) {
+    public PatientRequestDto updatePatient(Integer id, PatientRequestDto patientRequestDto) {
         Patient existingPatient = patientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Le patient avec l'ID " + id + " n'existe pas.")); // More specific exception
 
@@ -82,8 +81,8 @@ public class PatientServiceImpl implements PatientService {
         }
 
         // Update personal information if provided in the DTO
-        if (patientDto.getInfoPersonnel() != null) {
-            InfoPersonnelDto dtoInfo = patientDto.getInfoPersonnel();
+        if (patientRequestDto.getInfoPersonnel() != null) {
+            InfoPersonnelRequestDto dtoInfo = patientRequestDto.getInfoPersonnel();
             InfoPersonnel existingInfo = existingPatient.getInfoPersonnel();
 
             if (dtoInfo.getNom() != null && !dtoInfo.getNom().trim().isEmpty()) {
@@ -116,25 +115,25 @@ public class PatientServiceImpl implements PatientService {
         }
 
         Patient updatedPatientEntity = patientRepository.save(existingPatient);
-        PatientDto updatedPatientDto = PatientDto.fromEntity(updatedPatientEntity);
+        PatientRequestDto updatedPatientRequestDto = PatientRequestDto.fromEntity(updatedPatientEntity);
 
         historiqueActionService.enregistrerAction(
                 "Mise à jour du patient ID: " + id +
-                        ", Nom: " + (updatedPatientDto.getInfoPersonnel() != null ? updatedPatientDto.getInfoPersonnel().getNom() : "N/A") + " " +
-                        (updatedPatientDto.getInfoPersonnel() != null ? updatedPatientDto.getInfoPersonnel().getPrenom() : "N/A")
+                        ", Nom: " + (updatedPatientRequestDto.getInfoPersonnel() != null ? updatedPatientRequestDto.getInfoPersonnel().getNom() : "N/A") + " " +
+                        (updatedPatientRequestDto.getInfoPersonnel() != null ? updatedPatientRequestDto.getInfoPersonnel().getPrenom() : "N/A")
         );
 
-        return updatedPatientDto;
+        return updatedPatientRequestDto;
     }
 
 
 
     @Override
     @Transactional
-    public List<PatientDto> findAllPatients() {
-        List<PatientDto> allPatients = patientRepository.findAll()
+    public List<PatientRequestDto> findAllPatients() {
+        List<PatientRequestDto> allPatients = patientRepository.findAll()
                 .stream()
-                .map(PatientDto::fromEntity)
+                .map(PatientRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction("Affichage de tous les patients.");
@@ -145,19 +144,19 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     @Transactional
-    public PatientDto findById(Integer id) {
+    public PatientRequestDto findById(Integer id) {
         Patient foundPatientEntity = patientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Le patient avec l'ID " + id + " n'existe pas.")); // More specific exception
 
-        PatientDto foundPatientDto = PatientDto.fromEntity(foundPatientEntity);
+        PatientRequestDto foundPatientRequestDto = PatientRequestDto.fromEntity(foundPatientEntity);
 
         historiqueActionService.enregistrerAction(
                 "Recherche du patient ID: " + id +
-                        ", Nom: " + (foundPatientDto.getInfoPersonnel() != null ? foundPatientDto.getInfoPersonnel().getNom() : "N/A") + " " +
-                        (foundPatientDto.getInfoPersonnel() != null ? foundPatientDto.getInfoPersonnel().getPrenom() : "N/A")
+                        ", Nom: " + (foundPatientRequestDto.getInfoPersonnel() != null ? foundPatientRequestDto.getInfoPersonnel().getNom() : "N/A") + " " +
+                        (foundPatientRequestDto.getInfoPersonnel() != null ? foundPatientRequestDto.getInfoPersonnel().getPrenom() : "N/A")
         );
 
-        return foundPatientDto;
+        return foundPatientRequestDto;
     }
 
 
@@ -179,16 +178,16 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     @Transactional
-    public List<PatientDto> searchPatients(String searchTerm) {
+    public List<PatientRequestDto> searchPatients(String searchTerm) {
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            List<PatientDto> allPatients = findAllPatients(); // Call the existing method
+            List<PatientRequestDto> allPatients = findAllPatients(); // Call the existing method
             historiqueActionService.enregistrerAction("Recherche de tous les patients (terme de recherche vide).");
             return allPatients;
         }
-        List<PatientDto> searchedPatients = patientRepository.findPatientBySearchTerm(searchTerm)
+        List<PatientRequestDto> searchedPatients = patientRepository.findPatientBySearchTerm(searchTerm)
                 .stream()
                 .filter(Objects::nonNull)
-                .map(PatientDto::fromEntity)
+                .map(PatientRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -201,14 +200,14 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     @Transactional
-    public List<PatientDto> findPatientByInfoPersonnel_Nom(String nom) {
+    public List<PatientRequestDto> findPatientByInfoPersonnel_Nom(String nom) {
         if (nom == null || nom.trim().isEmpty()) {
             throw new IllegalArgumentException("Le nom ne peut pas être vide pour la recherche.");
         }
-        List<PatientDto> patientsByNom = patientRepository.findPatientByInfoPersonnel_Nom(nom)
+        List<PatientRequestDto> patientsByNom = patientRepository.findPatientByInfoPersonnel_Nom(nom)
                 .stream()
                 .filter(Objects::nonNull)
-                .map(PatientDto::fromEntity)
+                .map(PatientRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -221,12 +220,12 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     @Transactional
-    public PatientDto findPatientByInfoPersonnel_Email(String email) {
+    public PatientRequestDto findPatientByInfoPersonnel_Email(String email) {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("L'email ne peut pas être vide pour la recherche.");
         }
-        PatientDto patientByEmail = patientRepository.findPatientByInfoPersonnel_Email(email)
-                .map(PatientDto::fromEntity)
+        PatientRequestDto patientByEmail = patientRepository.findPatientByInfoPersonnel_Email(email)
+                .map(PatientRequestDto::fromEntity)
                 .orElseThrow(() -> new EntityNotFoundException("Le patient avec l'email " + email + " n'existe pas.")); // More specific exception
 
         historiqueActionService.enregistrerAction(

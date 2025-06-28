@@ -1,7 +1,7 @@
 package com.example.GestionClinique.controller;
 
 import com.example.GestionClinique.controller.controllerApi.SalleApi;
-import com.example.GestionClinique.dto.SalleDto;
+import com.example.GestionClinique.dto.RequestDto.SalleResquestDto;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import com.example.GestionClinique.service.SalleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,28 +20,28 @@ public class SalleController implements SalleApi {
     }
 
     @Override
-    public SalleDto createSalle(SalleDto SalleDto) {
-        return salleService.createSalle(SalleDto);
+    public SalleResquestDto createSalle(SalleResquestDto SalleResquestDto) {
+        return salleService.createSalle(SalleResquestDto);
     }
 
     @Override
-    public SalleDto findSalleById(Integer id) {
+    public SalleResquestDto findSalleById(Integer id) {
         return salleService.findSalleById(id);
     }
 
     @Override
-    public List<SalleDto> findSalleByStatut(StatutSalle statutSalle) {
+    public List<SalleResquestDto> findSalleByStatut(StatutSalle statutSalle) {
         return salleService.findSallesByStatut(statutSalle);
     }
 
     @Override
-    public List<SalleDto> findAllSalle() {
+    public List<SalleResquestDto> findAllSalle() {
         return salleService.findAllSalle();
     }
 
     @Override
-    public SalleDto updateSalle(Integer id, SalleDto SalleDto) {
-        return salleService.updateSalle(id, SalleDto);
+    public SalleResquestDto updateSalle(Integer id, SalleResquestDto SalleResquestDto) {
+        return salleService.updateSalle(id, SalleResquestDto);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SalleController implements SalleApi {
     }
 
     @Override
-    public List<SalleDto> findAvailableSalles(LocalDateTime dateHeureDebut, Integer dureeMinutes) {
+    public List<SalleResquestDto> findAvailableSalles(LocalDateTime dateHeureDebut, Integer dureeMinutes) {
         return salleService.findAvailableSalles(dateHeureDebut, dureeMinutes);
     }
 

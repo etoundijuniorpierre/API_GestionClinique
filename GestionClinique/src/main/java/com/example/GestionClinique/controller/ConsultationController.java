@@ -1,10 +1,10 @@
 package com.example.GestionClinique.controller;
 
 import com.example.GestionClinique.controller.controllerApi.ConsultationApi;
-import com.example.GestionClinique.dto.ConsultationDto;
-import com.example.GestionClinique.dto.DossierMedicalDto;
-import com.example.GestionClinique.dto.PrescriptionDto;
-import com.example.GestionClinique.dto.RendezVousDto;
+import com.example.GestionClinique.dto.RequestDto.ConsultationRequestDto;
+import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
+import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
+import com.example.GestionClinique.dto.RequestDto.RendezVousRequestDto;
 import com.example.GestionClinique.service.ConsultationService;
 import com.example.GestionClinique.service.PrescriptionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,37 +24,37 @@ public class ConsultationController implements ConsultationApi {
     }
 
     @Override
-    public ConsultationDto createConsultation(ConsultationDto consultationDto) {
-        return consultationService.createConsultation(consultationDto);
+    public ConsultationRequestDto createConsultation(ConsultationRequestDto consultationRequestDto) {
+        return consultationService.createConsultation(consultationRequestDto);
     }
 
     @Override
-    public ConsultationDto startConsultation(Integer id, ConsultationDto consultationDto) {
-        return consultationService.startConsultation(id, consultationDto);
+    public ConsultationRequestDto startConsultation(Integer id, ConsultationRequestDto consultationRequestDto) {
+        return consultationService.startConsultation(id, consultationRequestDto);
     }
 
     @Override
-    public ConsultationDto updateConsultation(Integer id, ConsultationDto consultationDto) {
-        return consultationService.updateConsultation(id, consultationDto);
+    public ConsultationRequestDto updateConsultation(Integer id, ConsultationRequestDto consultationRequestDto) {
+        return consultationService.updateConsultation(id, consultationRequestDto);
     }
 
     @Override
-    public ConsultationDto findById(Integer id) {
+    public ConsultationRequestDto findById(Integer id) {
         return consultationService.findById(id);
     }
 
     @Override
-    public List<ConsultationDto> findAll() {
+    public List<ConsultationRequestDto> findAll() {
         return consultationService.findAll();
     }
 
     @Override
-    public DossierMedicalDto findDossierMedicalByConsultationId(Integer id) {
+    public DossierMedicalRequestDto findDossierMedicalByConsultationId(Integer id) {
         return consultationService.findDossierMedicalByConsultationId(id);
     }
 
     @Override
-    public RendezVousDto findRendezVousByConsultationId(Integer id) {
+    public RendezVousRequestDto findRendezVousByConsultationId(Integer id) {
         return consultationService.findRendezVousByConsultationId(id);
     }
 
@@ -64,12 +64,12 @@ public class ConsultationController implements ConsultationApi {
     }
 
     @Override
-    public ConsultationDto addPrescriptionToConsultation(Integer id, PrescriptionDto prescriptionDto) {
-        return consultationService.addPrescriptionToConsultation(id, prescriptionDto);
+    public ConsultationRequestDto addPrescriptionToConsultation(Integer id, PrescriptionRequestDto prescriptionRequestDto) {
+        return consultationService.addPrescriptionToConsultation(id, prescriptionRequestDto);
     }
 
     @Override
-    public List<PrescriptionDto> findPrescriptionsByConsultationId(Integer id) {
+    public List<PrescriptionRequestDto> findPrescriptionsByConsultationId(Integer id) {
         return consultationService.findPrescriptionsByConsultationId(id);
     }
 }

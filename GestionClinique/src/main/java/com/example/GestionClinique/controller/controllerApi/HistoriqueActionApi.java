@@ -1,6 +1,6 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.HistoriqueActionDto;
+import com.example.GestionClinique.dto.RequestDto.HistoriqueActionRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.GestionClinique.utils.constants.API_NAME;
@@ -47,11 +46,11 @@ public interface HistoriqueActionApi {
             description = "Récupère la liste complète et chronologique de toutes les actions enregistrées dans le système")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Historique récupéré avec succès",
-                    content = @Content(schema = @Schema(implementation = HistoriqueActionDto.class))),
+                    content = @Content(schema = @Schema(implementation = HistoriqueActionRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune action trouvée - historique vide"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<HistoriqueActionDto> findAll();
+    List<HistoriqueActionRequestDto> findAll();
 
 
 
@@ -63,12 +62,12 @@ public interface HistoriqueActionApi {
             description = "Trouve et retourne les détails complets d'une action particulière dans l'historique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Action trouvée et retournée",
-                    content = @Content(schema = @Schema(implementation = HistoriqueActionDto.class))),
+                    content = @Content(schema = @Schema(implementation = HistoriqueActionRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID historique invalide ou mal formé"),
             @ApiResponse(responseCode = "404", description = "Action non trouvée avec l'ID spécifié"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    HistoriqueActionDto findById(
+    HistoriqueActionRequestDto findById(
             @Parameter(description = "ID unique de l'action historique à récupérer", required = true, example = "1")
             @PathVariable("idHistorique") Integer id);
 
@@ -81,13 +80,13 @@ public interface HistoriqueActionApi {
             description = "Récupère la liste chronologique de toutes les actions effectuées par un utilisateur spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Historique utilisateur récupéré avec succès",
-                    content = @Content(schema = @Schema(implementation = HistoriqueActionDto.class))),
+                    content = @Content(schema = @Schema(implementation = HistoriqueActionRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune action trouvée pour cet utilisateur"),
             @ApiResponse(responseCode = "400", description = "ID utilisateur invalide ou mal formé"),
             @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé avec l'ID spécifié"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<HistoriqueActionDto> findByUtilisateurId(
+    List<HistoriqueActionRequestDto> findByUtilisateurId(
             @Parameter(description = "ID de l'utilisateur dont on veut l'historique", required = true, example = "5")
             @PathVariable("utilisateurId") Integer id);
 
@@ -100,12 +99,12 @@ public interface HistoriqueActionApi {
             description = "Récupère toutes les actions enregistrées entre deux dates/heures spécifiques (inclusives)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Historique filtré récupéré avec succès",
-                    content = @Content(schema = @Schema(implementation = HistoriqueActionDto.class))),
+                    content = @Content(schema = @Schema(implementation = HistoriqueActionRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune action trouvée dans la période spécifiée"),
             @ApiResponse(responseCode = "400", description = "Dates invalides ou période mal formée"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors du filtrage")
     })
-    List<HistoriqueActionDto> findByDateAfterAndDateBefore(
+    List<HistoriqueActionRequestDto> findByDateAfterAndDateBefore(
             @Parameter(description = "Date/heure de début de la période (format: YYYY-MM-DD)", required = true, example = "2023-01-01")
             @PathVariable("debut") LocalDate startDate,
             @Parameter(description = "Date/heure de fin de la période (format: YYYY-MM-DD)", required = true, example = "2023-12-31")

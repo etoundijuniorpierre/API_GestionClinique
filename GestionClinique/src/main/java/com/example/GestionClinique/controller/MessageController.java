@@ -2,11 +2,9 @@ package com.example.GestionClinique.controller;
 
 
 import com.example.GestionClinique.controller.controllerApi.MessageApi;
-import com.example.GestionClinique.dto.MessageDto;
+import com.example.GestionClinique.dto.ResponseDto.MessageResponseDto;
 import com.example.GestionClinique.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,22 +19,22 @@ public class MessageController implements MessageApi {
     }
 
     @Override
-    public MessageDto saveMessage(MessageDto messageDto) {
-        return messageService.save(messageDto);
+    public MessageResponseDto saveMessage(MessageResponseDto messageResponseDto) {
+        return messageService.save(messageResponseDto);
     }
 
     @Override
-    public MessageDto updateMessage(Integer id, MessageDto messageDto) {
-        return messageService.updateMessage(id, messageDto);
+    public MessageResponseDto updateMessage(Integer id, MessageResponseDto messageResponseDto) {
+        return messageService.updateMessage(id, messageResponseDto);
     }
 
     @Override
-    public MessageDto findMessageById(Integer id) {
+    public MessageResponseDto findMessageById(Integer id) {
         return messageService.findMessageById(id);
     }
 
     @Override
-    public List<MessageDto> findAllMessages() {
+    public List<MessageResponseDto> findAllMessages() {
         return messageService.findAllMessages();
     }
 
@@ -46,17 +44,17 @@ public class MessageController implements MessageApi {
     }
 
     @Override
-    public List<MessageDto> findMessagesBySenderId(Integer id) {
+    public List<MessageResponseDto> findMessagesBySenderId(Integer id) {
         return messageService.findMessagesBySenderId(id);
     }
 
     @Override
-    public List<MessageDto> findMessagesByReceiverId(Integer id) {
+    public List<MessageResponseDto> findMessagesByReceiverId(Integer id) {
         return messageService.findMessagesByReceiverId(id);
     }
 
     @Override
-    public MessageDto markMessageAsRead(Integer id) {
+    public MessageResponseDto markMessageAsRead(Integer id) {
         return messageService.markMessageAsRead(id);
     }
 }

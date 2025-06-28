@@ -1,6 +1,6 @@
 package com.example.GestionClinique.model.entity;
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,10 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "prescription")
-public class Prescription extends EntityAbstracte {
-
-    @Column(name = "datePrescription", nullable = false)
-    private LocalDate datePrescription;
+public class Prescription extends BaseEntity {
 
     @Column(name = "typePrescription", nullable = false)
     private String typePrescription;

@@ -2,14 +2,12 @@ package com.example.GestionClinique.controller;
 
 
 import com.example.GestionClinique.controller.controllerApi.FactureApi;
-import com.example.GestionClinique.dto.FactureDto;
-import com.example.GestionClinique.dto.PatientDto;
-import com.example.GestionClinique.dto.RendezVousDto;
+import com.example.GestionClinique.dto.RequestDto.FactureRequestDto;
+import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import com.example.GestionClinique.service.FactureService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,32 +23,32 @@ public class FactureController implements FactureApi {
     }
 
     @Override
-    public FactureDto createFactureForConsultation(Integer consultationId, FactureDto factureDto) {
-        return factureService.createFactureForConsultation(consultationId, factureDto);
+    public FactureRequestDto createFactureForConsultation(Integer consultationId, FactureRequestDto factureRequestDto) {
+        return factureService.createFactureForConsultation(consultationId, factureRequestDto);
     }
 
     @Override
-    public FactureDto updateFacture(Integer id, FactureDto factureDto) {
-        return factureService.updateFacture(id, factureDto);
+    public FactureRequestDto updateFacture(Integer id, FactureRequestDto factureRequestDto) {
+        return factureService.updateFacture(id, factureRequestDto);
     }
 
     @Override
-    public List<FactureDto> findAllFactures() {
+    public List<FactureRequestDto> findAllFactures() {
         return factureService.findAllFactures();
     }
 
     @Override
-    public List<FactureDto> findFacturesByStatut(StatutPaiement statutPaiement) {
+    public List<FactureRequestDto> findFacturesByStatut(StatutPaiement statutPaiement) {
         return factureService.findFacturesByStatut(statutPaiement);
     }
 
     @Override
-    public List<FactureDto> findFacturesByModePaiement(ModePaiement modePaiement) {
+    public List<FactureRequestDto> findFacturesByModePaiement(ModePaiement modePaiement) {
         return factureService.findFacturesByModePaiement(modePaiement);
     }
 
     @Override
-    public FactureDto findById(Integer id) {
+    public FactureRequestDto findById(Integer id) {
         return factureService.findById(id);
     }
 
@@ -60,12 +58,12 @@ public class FactureController implements FactureApi {
     }
 
     @Override
-    public PatientDto findPatientByFactureId(Integer id) {
+    public PatientRequestDto findPatientByFactureId(Integer id) {
         return factureService.findPatientByFactureId(id);
     }
 
     @Override
-    public FactureDto updateStatutPaiement(Integer id, StatutPaiement nouveauStatut) {
+    public FactureRequestDto updateStatutPaiement(Integer id, StatutPaiement nouveauStatut) {
         return factureService.updateStatutPaiement(id, nouveauStatut);
     }
 }

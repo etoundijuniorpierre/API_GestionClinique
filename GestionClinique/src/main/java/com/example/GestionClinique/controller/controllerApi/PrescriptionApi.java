@@ -1,6 +1,6 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.PrescriptionDto;
+import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,15 +26,15 @@ public interface PrescriptionApi {
             description = "Enregistre une nouvelle prescription médicale dans le système")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Prescription créée avec succès",
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class))),
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de prescription invalides"),
             @ApiResponse(responseCode = "404", description = "Patient ou médecin non trouvé"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
-    PrescriptionDto createPrescription(
+    PrescriptionRequestDto createPrescription(
             @Parameter(description = "Détails de la prescription à créer", required = true,
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class)))
-            @RequestBody PrescriptionDto prescriptionDto);
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class)))
+            @RequestBody PrescriptionRequestDto prescriptionRequestDto);
 
 
 
@@ -46,17 +46,17 @@ public interface PrescriptionApi {
             description = "Modifie les informations d'une prescription existante")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prescription mise à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class))),
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de mise à jour invalides"),
             @ApiResponse(responseCode = "404", description = "Prescription introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
     })
-    PrescriptionDto updatePrescription(
+    PrescriptionRequestDto updatePrescription(
             @Parameter(description = "ID de la prescription à mettre à jour", required = true, example = "1")
             @PathVariable("id") Integer id,
             @Parameter(description = "Nouveaux détails de la prescription", required = true,
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class)))
-            @RequestBody PrescriptionDto prescriptionDto);
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class)))
+            @RequestBody PrescriptionRequestDto prescriptionRequestDto);
 
 
 
@@ -68,12 +68,12 @@ public interface PrescriptionApi {
             description = "Récupère les détails complets d'une prescription spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prescription trouvée et retournée",
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class))),
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de prescription invalide"),
             @ApiResponse(responseCode = "404", description = "Prescription introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    PrescriptionDto findById(
+    PrescriptionRequestDto findById(
             @Parameter(description = "ID de la prescription à récupérer", required = true, example = "1")
             @PathVariable("id") Integer id);
 
@@ -87,11 +87,11 @@ public interface PrescriptionApi {
             description = "Récupère la liste complète des prescriptions enregistrées")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des prescriptions retournée avec succès",
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class))),
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune prescription trouvée"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<PrescriptionDto> findAllPrescription();
+    List<PrescriptionRequestDto> findAllPrescription();
 
 
 
@@ -121,12 +121,12 @@ public interface PrescriptionApi {
             description = "Récupère toutes les prescriptions rédigées par un médecin spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prescriptions trouvées et retournées",
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class))),
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune prescription trouvée pour ce médecin"),
             @ApiResponse(responseCode = "400", description = "ID de médecin invalide"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<PrescriptionDto> findPrescriptionByMedecinId(
+    List<PrescriptionRequestDto> findPrescriptionByMedecinId(
             @Parameter(description = "ID du médecin", required = true, example = "1")
             @PathVariable("medecinId") Integer id);
 
@@ -141,12 +141,12 @@ public interface PrescriptionApi {
             description = "Récupère toutes les prescriptions associées à un patient spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prescriptions trouvées et retournées",
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class))),
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune prescription trouvée pour ce patient"),
             @ApiResponse(responseCode = "400", description = "ID de patient invalide"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<PrescriptionDto> findPrescriptionByPatientId(
+    List<PrescriptionRequestDto> findPrescriptionByPatientId(
             @Parameter(description = "ID du patient", required = true, example = "1")
             @PathVariable("patientId") Integer id);
 
@@ -161,12 +161,12 @@ public interface PrescriptionApi {
             description = "Récupère toutes les prescriptions associées à une consultation spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prescriptions trouvées et retournées",
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class))),
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune prescription trouvée pour cette consultation"),
             @ApiResponse(responseCode = "400", description = "ID de consultation invalide"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<PrescriptionDto> findPrescriptionByConsultationId(
+    List<PrescriptionRequestDto> findPrescriptionByConsultationId(
             @Parameter(description = "ID de la consultation", required = true, example = "1")
             @PathVariable("consultationId") Integer id);
 }

@@ -1,8 +1,7 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.dtoConnexion.LoginRequest;
-import com.example.GestionClinique.dto.dtoConnexion.LoginResponse;
-import com.example.GestionClinique.dto.UtilisateurDto;
+
+import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestRequestDto;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,36 +23,21 @@ import static com.example.GestionClinique.utils.constants.API_NAME;
 public interface UtilisateurApi {
 
 
-    @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Login un utilisateur",
-            description = "Permet à un utilisateur de se connecter au système en fournissant email et mot de passe, et obtient un JWT.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Connexion réussie, JWT retourné",
-                    content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Authentification échouée (informations d'identification invalides)"),
-            @ApiResponse(responseCode = "400", description = "Requête invalide (email ou mot de passe manquant)"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
-    })
-    ResponseEntity<?> login(@RequestBody LoginRequest loginRequest);
-
-
-
-
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping(path = "/createUtilisateur", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer un nouvel utilisateur",
             description = "Enregistre un nouvel utilisateur dans le système avec les détails fournis")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Utilisateur créé avec succès",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class))),
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données utilisateur invalides ou incomplètes"),
             @ApiResponse(responseCode = "404", description = "Ressource requise non trouvée"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
-    UtilisateurDto createUtilisateur(
+    UtilisateurRequestRequestDto createUtilisateur(
             @Parameter(description = "Détails de l'utilisateur à créer", required = true,
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class)))
-            @RequestBody UtilisateurDto utilisateurDto);
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class)))
+            @RequestBody UtilisateurRequestRequestDto utilisateurRequestDto);
 
 
 
@@ -67,12 +50,12 @@ public interface UtilisateurApi {
             description = "Récupère les informations détaillées d'un utilisateur spécifique par son identifiant unique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Utilisateur trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class))),
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'ID utilisateur invalide"),
             @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé avec l'ID fourni"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    UtilisateurDto findUtilisateurById(
+    UtilisateurRequestRequestDto findUtilisateurById(
             @Parameter(description = "ID de l'utilisateur à récupérer", required = true,
                     example = "123")
             @PathVariable("idUtilisateur") Integer id);
@@ -87,12 +70,12 @@ public interface UtilisateurApi {
             description = "Récupère tous les utilisateurs correspondant au nom spécifié (recherche partielle)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des utilisateurs correspondants retournée",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class))),
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Paramètre de nom invalide"),
             @ApiResponse(responseCode = "404", description = "Aucun utilisateur trouvé avec ce nom"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<UtilisateurDto> findUtilisateurByInfoPersonnel_Nom(
+    List<UtilisateurRequestRequestDto> findUtilisateurByInfoPersonnel_Nom(
             @Parameter(description = "Nom à rechercher", required = true,
                     example = "Dupont")
             @PathVariable("nomUtilisateur") String nom);
@@ -108,12 +91,12 @@ public interface UtilisateurApi {
             description = "Récupère un seul utilisateur par son adresse email unique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Utilisateur trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class))),
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'email invalide"),
             @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé avec cet email"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    UtilisateurDto findUtilisateurByInfoPersonnel_Email(
+    UtilisateurRequestRequestDto findUtilisateurByInfoPersonnel_Email(
             @Parameter(description = "Adresse email à rechercher", required = true,
                     example = "utilisateur@exemple.com")
             @PathVariable("emailUtilisateur") String email);
@@ -128,12 +111,12 @@ public interface UtilisateurApi {
             description = "Récupère tous les utilisateurs ayant le rôle spécifié dans le système")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des utilisateurs avec le rôle spécifié retournée",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class))),
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Paramètre de rôle invalide"),
             @ApiResponse(responseCode = "404", description = "Aucun utilisateur trouvé avec ce rôle"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors du filtrage")
     })
-    List<UtilisateurDto> findUtilisateurByRole_RoleType(
+    List<UtilisateurRequestRequestDto> findUtilisateurByRole_RoleType(
             @Parameter(description = "Type de rôle pour filtrer", required = true,
                     schema = @Schema(implementation = RoleType.class))
             @PathVariable("roleUtilisateur") RoleType roleType);
@@ -150,10 +133,10 @@ public interface UtilisateurApi {
             description = "Récupère la liste complète de tous les utilisateurs enregistrés dans le système")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste complète des utilisateurs retournée",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class))),
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class))),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<UtilisateurDto> findAllUtilisateur();
+    List<UtilisateurRequestRequestDto> findAllUtilisateur();
 
 
 
@@ -166,18 +149,18 @@ public interface UtilisateurApi {
             description = "Modifie les détails d'un utilisateur existant avec les informations fournies")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Utilisateur mis à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class))),
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de mise à jour invalides ou ID incorrect"),
             @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé avec l'ID fourni"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
     })
-    UtilisateurDto updateUtilisateur(
+    UtilisateurRequestRequestDto updateUtilisateur(
             @Parameter(description = "ID de l'utilisateur à mettre à jour", required = true,
                     example = "123")
             @PathVariable("idUtilisateur") Integer id,
             @Parameter(description = "Nouveaux détails de l'utilisateur", required = true,
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class)))
-            @RequestBody UtilisateurDto utilisateurDto);
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class)))
+            @RequestBody UtilisateurRequestRequestDto utilisateurRequestDto);
 
 
 
@@ -191,12 +174,12 @@ public interface UtilisateurApi {
             description = "Active ou désactive un compte utilisateur dans le système")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Statut utilisateur mis à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDto.class))),
+                    content = @Content(schema = @Schema(implementation = UtilisateurRequestRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID utilisateur invalide ou paramètre de statut incorrect"),
             @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé avec l'ID fourni"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour du statut")
     })
-    UtilisateurDto updateUtilisateurStatus(
+    UtilisateurRequestRequestDto updateUtilisateurStatus(
             @Parameter(description = "ID de l'utilisateur à mettre à jour", required = true,
                     example = "123")
             @PathVariable("idUtilisateur") Integer id,

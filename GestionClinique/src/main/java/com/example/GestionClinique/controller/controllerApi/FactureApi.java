@@ -1,7 +1,7 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.FactureDto;
-import com.example.GestionClinique.dto.PatientDto;
+import com.example.GestionClinique.dto.RequestDto.FactureRequestDto;
+import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,17 +29,17 @@ public interface FactureApi {
             description = "Crée une nouvelle facture associée à une consultation existante avec les détails de paiement")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Facture créée avec succès",
-                    content = @Content(schema = @Schema(implementation = FactureDto.class))),
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de la facture invalides ou incomplètes"),
             @ApiResponse(responseCode = "404", description = "Consultation non trouvée avec l'ID spécifié"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
-    FactureDto createFactureForConsultation(
+    FactureRequestDto createFactureForConsultation(
             @Parameter(description = "ID de la consultation à facturer", required = true, example = "1")
             @PathVariable("consultationId") Integer consultationId,
             @Parameter(description = "Détails de la facture à créer", required = true,
-                    content = @Content(schema = @Schema(implementation = FactureDto.class)))
-            @RequestBody FactureDto factureDto);
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class)))
+            @RequestBody FactureRequestDto factureRequestDto);
 
 
 
@@ -50,17 +50,17 @@ public interface FactureApi {
             description = "Met à jour tous les détails d'une facture existante (montant, description, etc.)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Facture mise à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = FactureDto.class))),
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de la facture invalides ou incomplètes"),
             @ApiResponse(responseCode = "404", description = "Facture non trouvée avec l'ID spécifié"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
     })
-    FactureDto updateFacture(
+    FactureRequestDto updateFacture(
             @Parameter(description = "ID de la facture à mettre à jour", required = true, example = "1")
             @PathVariable("idFacture") Integer id,
             @Parameter(description = "Nouveaux détails de la facture", required = true,
-                    content = @Content(schema = @Schema(implementation = FactureDto.class)))
-            @RequestBody FactureDto factureDto);
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class)))
+            @RequestBody FactureRequestDto factureRequestDto);
 
 
 
@@ -71,11 +71,11 @@ public interface FactureApi {
             description = "Récupère la liste complète des factures avec leurs détails")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des factures récupérée avec succès",
-                    content = @Content(schema = @Schema(implementation = FactureDto.class))),
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune facture trouvée - liste vide"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<FactureDto> findAllFactures();
+    List<FactureRequestDto> findAllFactures();
 
 
 
@@ -86,12 +86,12 @@ public interface FactureApi {
             description = "Récupère les factures selon leur statut de paiement (PAYE, IMPAYE, EN_RETARD, etc.)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Factures filtrées récupérées avec succès",
-                    content = @Content(schema = @Schema(implementation = FactureDto.class))),
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune facture trouvée pour ce statut"),
             @ApiResponse(responseCode = "400", description = "Statut de paiement invalide ou inconnu"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors du filtrage")
     })
-    List<FactureDto> findFacturesByStatut(
+    List<FactureRequestDto> findFacturesByStatut(
             @Parameter(description = "Statut de paiement pour le filtrage", required = true,
                     schema = @Schema(implementation = StatutPaiement.class), example = "PAYE")
             @PathVariable("statutPaiement") StatutPaiement statutPaiement);
@@ -105,12 +105,12 @@ public interface FactureApi {
             description = "Récupère les factures selon leur mode de paiement (CARTE, ESPECES, VIREMENT, etc.)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Factures filtrées récupérées avec succès",
-                    content = @Content(schema = @Schema(implementation = FactureDto.class))),
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucune facture trouvée pour ce mode"),
             @ApiResponse(responseCode = "400", description = "Mode de paiement invalide ou inconnu"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors du filtrage")
     })
-    List<FactureDto> findFacturesByModePaiement(
+    List<FactureRequestDto> findFacturesByModePaiement(
             @Parameter(description = "Mode de paiement pour le filtrage", required = true,
                     schema = @Schema(implementation = ModePaiement.class), example = "CARTE")
             @PathVariable("modePaiement") ModePaiement modePaiement);
@@ -124,12 +124,12 @@ public interface FactureApi {
             description = "Récupère tous les détails d'une facture spécifique, y compris les éléments facturés")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Facture trouvée et retournée",
-                    content = @Content(schema = @Schema(implementation = FactureDto.class))),
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de facture invalide ou mal formé"),
             @ApiResponse(responseCode = "404", description = "Facture non trouvée avec l'ID spécifié"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    FactureDto findById(
+    FactureRequestDto findById(
             @Parameter(description = "ID unique de la facture à récupérer", required = true, example = "1")
             @PathVariable("idFacture") Integer id);
 
@@ -159,12 +159,12 @@ public interface FactureApi {
             description = "Récupère les informations du patient lié à une facture spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patient trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = PatientDto.class))),
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de facture invalide ou mal formé"),
             @ApiResponse(responseCode = "404", description = "Facture ou patient associé non trouvé"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    PatientDto findPatientByFactureId(
+    PatientRequestDto findPatientByFactureId(
             @Parameter(description = "ID de la facture pour trouver le patient associé", required = true, example = "1")
             @PathVariable("idFacture") Integer id);
 
@@ -177,12 +177,12 @@ public interface FactureApi {
             description = "Modifie uniquement le statut de paiement d'une facture existante (PAYE, IMPAYE, etc.)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Statut mis à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = FactureDto.class))),
+                    content = @Content(schema = @Schema(implementation = FactureRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de facture ou statut invalide"),
             @ApiResponse(responseCode = "404", description = "Facture non trouvée avec l'ID spécifié"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
     })
-    FactureDto updateStatutPaiement(
+    FactureRequestDto updateStatutPaiement(
             @Parameter(description = "ID de la facture à mettre à jour", required = true, example = "1")
             @PathVariable("idFacture") Integer id,
             @Parameter(description = "Nouveau statut de paiement", required = true,

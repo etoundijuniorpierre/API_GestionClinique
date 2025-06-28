@@ -1,14 +1,13 @@
 package com.example.GestionClinique.model.entity;
 
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "consultation")
-public class Consultation extends EntityAbstracte {
+public class Consultation extends BaseEntity {
 
     @Column(name = "motifs", nullable = false) // Ajouté nullable = false
     private String motifs;

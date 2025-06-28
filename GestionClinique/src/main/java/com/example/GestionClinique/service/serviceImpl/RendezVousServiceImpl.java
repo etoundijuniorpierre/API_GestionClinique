@@ -1,15 +1,11 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.PatientSummaryDto; // Import if not already
-import com.example.GestionClinique.dto.RendezVousDto;
-import com.example.GestionClinique.dto.SalleSummaryDto;     // Import if not already
-import com.example.GestionClinique.dto.UtilisateurSummaryDto; // Import if not already
+import com.example.GestionClinique.dto.RequestDto.RendezVousRequestDto;
 import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
-import com.example.GestionClinique.model.entity.enumElem.StatutSalle; // Keep if Salle has a status enum
 import com.example.GestionClinique.repository.PatientRepository;
 import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.SalleRepository;
@@ -22,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime; // Potentially useful if you track exact timestamp of creation/update
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
@@ -54,43 +49,43 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVousDto createRendezVous(RendezVousDto rendezVousDto) {
+    public RendezVousRequestDto createRendezVous(RendezVousRequestDto rendezVousRequestDto) {
         // --- Input Validation ---
-        if (rendezVousDto.getJour() == null || rendezVousDto.getHeure() == null) {
+        if (rendezVousRequestDto.getJour() == null || rendezVousRequestDto.getHeure() == null) {
             throw new IllegalArgumentException("La date et l'heure du rendez-vous sont obligatoires.");
         }
         // Validate IDs from Summary DTOs
-        if (rendezVousDto.getPatientSummary() == null || rendezVousDto.getPatientSummary().getId() == null ||
-                rendezVousDto.getMedecinSummary() == null || rendezVousDto.getMedecinSummary().getId() == null ||
-                rendezVousDto.getSalleSummary() == null || rendezVousDto.getSalleSummary().getId() == null) {
+        if (rendezVousRequestDto.getPatientId() == null || rendezVousRequestDto.getPatientId().getId() == null ||
+                rendezVousRequestDto.getMedecinId() == null || rendezVousRequestDto.getMedecinId().getId() == null ||
+                rendezVousRequestDto.getSalleId() == null || rendezVousRequestDto.getSalleId().getId() == null) {
             throw new IllegalArgumentException("Le patient, le médecin et la salle sont obligatoires pour un rendez-vous (IDs manquants).");
         }
 
         // Ensure default status if not provided
-        if (rendezVousDto.getStatut() == null) {
-            rendezVousDto.setStatut(StatutRDV.PLANIFIE);
+        if (rendezVousRequestDto.getStatut() == null) {
+            rendezVousRequestDto.setStatut(StatutRDV.PLANIFIE);
         }
 
         // --- Fetch Related Entities ---
-        Patient patient = patientRepository.findById(rendezVousDto.getPatientSummary().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Patient non trouvé avec l'ID: " + rendezVousDto.getPatientSummary().getId()));
-        Utilisateur medecin = utilisateurRepository.findById(rendezVousDto.getMedecinSummary().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Médecin non trouvé avec l'ID: " + rendezVousDto.getMedecinSummary().getId()));
-        Salle salle = salleRepository.findById(rendezVousDto.getSalleSummary().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Salle non trouvée avec l'ID: " + rendezVousDto.getSalleSummary().getId()));
+        Patient patient = patientRepository.findById(rendezVousRequestDto.getPatientId().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Patient non trouvé avec l'ID: " + rendezVousRequestDto.getPatientId().getId()));
+        Utilisateur medecin = utilisateurRepository.findById(rendezVousRequestDto.getMedecinId().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Médecin non trouvé avec l'ID: " + rendezVousRequestDto.getMedecinId().getId()));
+        Salle salle = salleRepository.findById(rendezVousRequestDto.getSalleId().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Salle non trouvée avec l'ID: " + rendezVousRequestDto.getSalleId().getId()));
 
         // --- Check for Availability (using the dedicated helper method) ---
-        if (!isRendezVousAvailable(rendezVousDto.getJour(), rendezVousDto.getHeure(), medecin, salle)) {
+        if (!isRendezVousAvailable(rendezVousRequestDto.getJour(), rendezVousRequestDto.getHeure(), medecin, salle)) {
             throw new IllegalStateException("Le médecin ou la salle n'est pas disponible à cette heure.");
         }
 
         // --- DTO to Entity Conversion & Relationship Setting ---
         RendezVous rendezVousToSave = new RendezVous(); // Manually create entity
-        rendezVousToSave.setJour(rendezVousDto.getJour());
-        rendezVousToSave.setHeure(rendezVousDto.getHeure());
-        rendezVousToSave.setStatut(rendezVousDto.getStatut());
-        rendezVousToSave.setNotes(rendezVousDto.getNotes());
-        rendezVousToSave.setServiceMedical(rendezVousDto.getServiceMedical()); // Assuming ServiceMedical is a simple object or handled by DTO
+        rendezVousToSave.setJour(rendezVousRequestDto.getJour());
+        rendezVousToSave.setHeure(rendezVousRequestDto.getHeure());
+        rendezVousToSave.setStatut(rendezVousRequestDto.getStatut());
+        rendezVousToSave.setNotes(rendezVousRequestDto.getNotes());
+        rendezVousToSave.setServiceMedical(rendezVousRequestDto.getServiceMedical()); // Assuming ServiceMedical is a simple object or handled by DTO
 
         rendezVousToSave.setPatient(patient);
         rendezVousToSave.setMedecin(medecin);
@@ -98,44 +93,44 @@ public class RendezVousServiceImpl implements RendezVousService {
 
         // --- Save Entity ---
         RendezVous savedEntity = rendezVousRepository.save(rendezVousToSave);
-        RendezVousDto savedRendezVousDto = RendezVousDto.fromEntity(savedEntity);
+        RendezVousRequestDto savedRendezVousRequestDto = RendezVousRequestDto.fromEntity(savedEntity);
 
         // --- Historique Logging ---
         historiqueActionService.enregistrerAction(
-                "Création du rendez-vous ID: " + savedRendezVousDto.getId() +
-                        ", Patient: " + (savedRendezVousDto.getPatientSummary() != null && savedRendezVousDto.getPatientSummary().getInfoPersonnel() != null ? savedRendezVousDto.getPatientSummary().getInfoPersonnel().getNom() + " " + savedRendezVousDto.getPatientSummary().getInfoPersonnel().getPrenom() : "N/A") +
-                        ", Médecin: " + (savedRendezVousDto.getMedecinSummary() != null && savedRendezVousDto.getMedecinSummary().getInfoPersonnel() != null ? savedRendezVousDto.getMedecinSummary().getInfoPersonnel().getNom() : "N/A") +
-                        ", Salle: " + (savedRendezVousDto.getSalleSummary() != null ? savedRendezVousDto.getSalleSummary().getNumero() : "N/A") +
-                        ", Date: " + savedRendezVousDto.getJour() + ", Heure: " + savedRendezVousDto.getHeure()
+                "Création du rendez-vous ID: " + savedRendezVousRequestDto.getId() +
+                        ", Patient: " + (savedRendezVousRequestDto.getPatientId() != null && savedRendezVousRequestDto.getPatientId().getInfoPersonnel() != null ? savedRendezVousRequestDto.getPatientId().getInfoPersonnel().getNom() + " " + savedRendezVousRequestDto.getPatientId().getInfoPersonnel().getPrenom() : "N/A") +
+                        ", Médecin: " + (savedRendezVousRequestDto.getMedecinId() != null && savedRendezVousRequestDto.getMedecinId().getInfoPersonnel() != null ? savedRendezVousRequestDto.getMedecinId().getInfoPersonnel().getNom() : "N/A") +
+                        ", Salle: " + (savedRendezVousRequestDto.getSalleId() != null ? savedRendezVousRequestDto.getSalleId().getNumero() : "N/A") +
+                        ", Date: " + savedRendezVousRequestDto.getJour() + ", Heure: " + savedRendezVousRequestDto.getHeure()
         );
-        return savedRendezVousDto;
+        return savedRendezVousRequestDto;
     }
 
 
 
     @Override
     @Transactional() // Mark as read-only as it only retrieves data
-    public RendezVousDto findRendezVousById(Integer id) {
+    public RendezVousRequestDto findRendezVousById(Integer id) {
         RendezVous foundRendezVous = rendezVousRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Rendez-vous non trouvé avec l'ID: " + id));
 
-        RendezVousDto foundRendezVousDto = RendezVousDto.fromEntity(foundRendezVous);
+        RendezVousRequestDto foundRendezVousRequestDto = RendezVousRequestDto.fromEntity(foundRendezVous);
 
         historiqueActionService.enregistrerAction(
                 "Recherche du rendez-vous ID: " + id +
-                        ", Patient: " + (foundRendezVousDto.getPatientSummary() != null && foundRendezVousDto.getPatientSummary().getInfoPersonnel() != null ? foundRendezVousDto.getPatientSummary().getInfoPersonnel().getNom() : "N/A") +
-                        ", Date: " + foundRendezVousDto.getJour() + ", Heure: " + foundRendezVousDto.getHeure()
+                        ", Patient: " + (foundRendezVousRequestDto.getPatientId() != null && foundRendezVousRequestDto.getPatientId().getInfoPersonnel() != null ? foundRendezVousRequestDto.getPatientId().getInfoPersonnel().getNom() : "N/A") +
+                        ", Date: " + foundRendezVousRequestDto.getJour() + ", Heure: " + foundRendezVousRequestDto.getHeure()
         );
-        return foundRendezVousDto;
+        return foundRendezVousRequestDto;
     }
 
 
 
     @Override
     @Transactional() // Mark as read-only
-    public List<RendezVousDto> findAllRendezVous() {
-        List<RendezVousDto> allRendezVous = rendezVousRepository.findAll().stream()
-                .map(RendezVousDto::fromEntity)
+    public List<RendezVousRequestDto> findAllRendezVous() {
+        List<RendezVousRequestDto> allRendezVous = rendezVousRepository.findAll().stream()
+                .map(RendezVousRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -148,7 +143,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVousDto updateRendezVous(Integer id, RendezVousDto rendezVousDto) {
+    public RendezVousRequestDto updateRendezVous(Integer id, RendezVousRequestDto rendezVousRequestDto) {
         RendezVous existingRendezVous = rendezVousRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Rendez-vous non trouvé avec l'ID: " + id));
 
@@ -163,40 +158,40 @@ public class RendezVousServiceImpl implements RendezVousService {
         // --- Update Fields and Relationships ---
         boolean timeOrResourceChanged = false;
 
-        if (rendezVousDto.getJour() != null && !rendezVousDto.getJour().equals(oldJour)) {
-            existingRendezVous.setJour(rendezVousDto.getJour());
+        if (rendezVousRequestDto.getJour() != null && !rendezVousRequestDto.getJour().equals(oldJour)) {
+            existingRendezVous.setJour(rendezVousRequestDto.getJour());
             timeOrResourceChanged = true;
         }
-        if (rendezVousDto.getHeure() != null && !rendezVousDto.getHeure().equals(oldHeure)) {
-            existingRendezVous.setHeure(rendezVousDto.getHeure());
+        if (rendezVousRequestDto.getHeure() != null && !rendezVousRequestDto.getHeure().equals(oldHeure)) {
+            existingRendezVous.setHeure(rendezVousRequestDto.getHeure());
             timeOrResourceChanged = true;
         }
-        if (rendezVousDto.getStatut() != null && !rendezVousDto.getStatut().equals(oldStatut)) {
-            existingRendezVous.setStatut(rendezVousDto.getStatut());
+        if (rendezVousRequestDto.getStatut() != null && !rendezVousRequestDto.getStatut().equals(oldStatut)) {
+            existingRendezVous.setStatut(rendezVousRequestDto.getStatut());
         }
-        if (rendezVousDto.getNotes() != null) {
-            existingRendezVous.setNotes(rendezVousDto.getNotes());
+        if (rendezVousRequestDto.getNotes() != null) {
+            existingRendezVous.setNotes(rendezVousRequestDto.getNotes());
         }
-        if (rendezVousDto.getServiceMedical() != null) {
-            existingRendezVous.setServiceMedical(rendezVousDto.getServiceMedical());
+        if (rendezVousRequestDto.getServiceMedical() != null) {
+            existingRendezVous.setServiceMedical(rendezVousRequestDto.getServiceMedical());
         }
 
         // Update relationships if IDs are provided and different
-        if (rendezVousDto.getPatientSummary() != null && rendezVousDto.getPatientSummary().getId() != null && !rendezVousDto.getPatientSummary().getId().equals(oldPatientId)) {
-            Patient patient = patientRepository.findById(rendezVousDto.getPatientSummary().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Nouveau patient non trouvé avec l'ID: " + rendezVousDto.getPatientSummary().getId()));
+        if (rendezVousRequestDto.getPatientId() != null && rendezVousRequestDto.getPatientId().getId() != null && !rendezVousRequestDto.getPatientId().getId().equals(oldPatientId)) {
+            Patient patient = patientRepository.findById(rendezVousRequestDto.getPatientId().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Nouveau patient non trouvé avec l'ID: " + rendezVousRequestDto.getPatientId().getId()));
             existingRendezVous.setPatient(patient);
             // Consider if patient change affects availability - usually not, but keep in mind
         }
-        if (rendezVousDto.getMedecinSummary() != null && rendezVousDto.getMedecinSummary().getId() != null && !rendezVousDto.getMedecinSummary().getId().equals(oldMedecinId)) {
-            Utilisateur medecin = utilisateurRepository.findById(rendezVousDto.getMedecinSummary().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Nouveau médecin non trouvé avec l'ID: " + rendezVousDto.getMedecinSummary().getId()));
+        if (rendezVousRequestDto.getMedecinId() != null && rendezVousRequestDto.getMedecinId().getId() != null && !rendezVousRequestDto.getMedecinId().getId().equals(oldMedecinId)) {
+            Utilisateur medecin = utilisateurRepository.findById(rendezVousRequestDto.getMedecinId().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Nouveau médecin non trouvé avec l'ID: " + rendezVousRequestDto.getMedecinId().getId()));
             existingRendezVous.setMedecin(medecin);
             timeOrResourceChanged = true; // Medecin changed, re-check availability
         }
-        if (rendezVousDto.getSalleSummary() != null && rendezVousDto.getSalleSummary().getId() != null && !rendezVousDto.getSalleSummary().getId().equals(oldSalleId)) {
-            Salle salle = salleRepository.findById(rendezVousDto.getSalleSummary().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Nouvelle salle non trouvée avec l'ID: " + rendezVousDto.getSalleSummary().getId()));
+        if (rendezVousRequestDto.getSalleId() != null && rendezVousRequestDto.getSalleId().getId() != null && !rendezVousRequestDto.getSalleId().getId().equals(oldSalleId)) {
+            Salle salle = salleRepository.findById(rendezVousRequestDto.getSalleId().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Nouvelle salle non trouvée avec l'ID: " + rendezVousRequestDto.getSalleId().getId()));
             existingRendezVous.setSalle(salle);
             timeOrResourceChanged = true; // Salle changed, re-check availability
         }
@@ -215,16 +210,16 @@ public class RendezVousServiceImpl implements RendezVousService {
             }
         }
 
-        RendezVousDto updatedRendezVous = RendezVousDto.fromEntity(rendezVousRepository.save(existingRendezVous));
+        RendezVousRequestDto updatedRendezVous = RendezVousRequestDto.fromEntity(rendezVousRepository.save(existingRendezVous));
 
         // --- Historique Logging ---
         StringBuilder logMessage = new StringBuilder("Mise à jour du rendez-vous ID: " + id + ".");
         if (!Objects.equals(oldJour, updatedRendezVous.getJour())) logMessage.append(" Date: ").append(oldJour).append(" -> ").append(updatedRendezVous.getJour()).append(".");
         if (!Objects.equals(oldHeure, updatedRendezVous.getHeure())) logMessage.append(" Heure: ").append(oldHeure).append(" -> ").append(updatedRendezVous.getHeure()).append(".");
         if (!Objects.equals(oldStatut, updatedRendezVous.getStatut())) logMessage.append(" Statut: ").append(oldStatut).append(" -> ").append(updatedRendezVous.getStatut()).append(".");
-        if (!Objects.equals(oldPatientId, (updatedRendezVous.getPatientSummary() != null ? updatedRendezVous.getPatientSummary().getId() : null))) logMessage.append(" Patient ID: ").append(oldPatientId).append(" -> ").append(updatedRendezVous.getPatientSummary() != null ? updatedRendezVous.getPatientSummary().getId() : "N/A").append(".");
-        if (!Objects.equals(oldMedecinId, (updatedRendezVous.getMedecinSummary() != null ? updatedRendezVous.getMedecinSummary().getId() : null))) logMessage.append(" Médecin ID: ").append(oldMedecinId).append(" -> ").append(updatedRendezVous.getMedecinSummary() != null ? updatedRendezVous.getMedecinSummary().getId() : "N/A").append(".");
-        if (!Objects.equals(oldSalleId, (updatedRendezVous.getSalleSummary() != null ? updatedRendezVous.getSalleSummary().getId() : null))) logMessage.append(" Salle ID: ").append(oldSalleId).append(" -> ").append(updatedRendezVous.getSalleSummary() != null ? updatedRendezVous.getSalleSummary().getId() : "N/A").append(".");
+        if (!Objects.equals(oldPatientId, (updatedRendezVous.getPatientId() != null ? updatedRendezVous.getPatientId().getId() : null))) logMessage.append(" Patient ID: ").append(oldPatientId).append(" -> ").append(updatedRendezVous.getPatientId() != null ? updatedRendezVous.getPatientId().getId() : "N/A").append(".");
+        if (!Objects.equals(oldMedecinId, (updatedRendezVous.getMedecinId() != null ? updatedRendezVous.getMedecinId().getId() : null))) logMessage.append(" Médecin ID: ").append(oldMedecinId).append(" -> ").append(updatedRendezVous.getMedecinId() != null ? updatedRendezVous.getMedecinId().getId() : "N/A").append(".");
+        if (!Objects.equals(oldSalleId, (updatedRendezVous.getSalleId() != null ? updatedRendezVous.getSalleId().getId() : null))) logMessage.append(" Salle ID: ").append(oldSalleId).append(" -> ").append(updatedRendezVous.getSalleId() != null ? updatedRendezVous.getSalleId().getId() : "N/A").append(".");
 
         historiqueActionService.enregistrerAction(logMessage.toString());
         return updatedRendezVous;
@@ -258,7 +253,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional()
-    public List<RendezVousDto> findRendezVousByPatientId(Integer patientId) {
+    public List<RendezVousRequestDto> findRendezVousByPatientId(Integer patientId) {
         if (patientId == null) {
             throw new IllegalArgumentException("L'ID du patient ne peut pas être nul.");
         }
@@ -266,8 +261,8 @@ public class RendezVousServiceImpl implements RendezVousService {
         patientRepository.findById(patientId)
                 .orElseThrow(() -> new EntityNotFoundException("Patient non trouvé avec l'ID: " + patientId));
 
-        List<RendezVousDto> rendezVousList = rendezVousRepository.findByPatientId(patientId).stream()
-                .map(RendezVousDto::fromEntity)
+        List<RendezVousRequestDto> rendezVousList = rendezVousRepository.findByPatientId(patientId).stream()
+                .map(RendezVousRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -280,7 +275,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional()
-    public List<RendezVousDto> findRendezVousByMedecinId(Integer medecinId) {
+    public List<RendezVousRequestDto> findRendezVousByMedecinId(Integer medecinId) {
         if (medecinId == null) {
             throw new IllegalArgumentException("L'ID du médecin ne peut pas être nul.");
         }
@@ -288,8 +283,8 @@ public class RendezVousServiceImpl implements RendezVousService {
         utilisateurRepository.findById(medecinId)
                 .orElseThrow(() -> new EntityNotFoundException("Médecin non trouvé avec l'ID: " + medecinId));
 
-        List<RendezVousDto> rendezVousList = rendezVousRepository.findByMedecinId(medecinId).stream()
-                .map(RendezVousDto::fromEntity)
+        List<RendezVousRequestDto> rendezVousList = rendezVousRepository.findByMedecinId(medecinId).stream()
+                .map(RendezVousRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -302,7 +297,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional()
-    public List<RendezVousDto> findRendezVousBySalleId(Integer salleId) {
+    public List<RendezVousRequestDto> findRendezVousBySalleId(Integer salleId) {
         if (salleId == null) {
             throw new IllegalArgumentException("L'ID de la salle ne peut pas être nul.");
         }
@@ -310,8 +305,8 @@ public class RendezVousServiceImpl implements RendezVousService {
         salleRepository.findById(salleId)
                 .orElseThrow(() -> new EntityNotFoundException("Salle non trouvée avec l'ID: " + salleId));
 
-        List<RendezVousDto> rendezVousList = rendezVousRepository.findBySalleId(salleId).stream()
-                .map(RendezVousDto::fromEntity)
+        List<RendezVousRequestDto> rendezVousList = rendezVousRepository.findBySalleId(salleId).stream()
+                .map(RendezVousRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -324,12 +319,12 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional()
-    public List<RendezVousDto> findRendezVousByJour(LocalDate jour) {
+    public List<RendezVousRequestDto> findRendezVousByJour(LocalDate jour) {
         if (jour == null) {
             throw new IllegalArgumentException("La date ne peut pas être nulle.");
         }
-        List<RendezVousDto> rendezVousList = rendezVousRepository.findByJour(jour).stream()
-                .map(RendezVousDto::fromEntity)
+        List<RendezVousRequestDto> rendezVousList = rendezVousRepository.findByJour(jour).stream()
+                .map(RendezVousRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -342,12 +337,12 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional()
-    public List<RendezVousDto> findRendezVousByStatut(StatutRDV statut) {
+    public List<RendezVousRequestDto> findRendezVousByStatut(StatutRDV statut) {
         if (statut == null) {
             throw new IllegalArgumentException("Le statut ne peut pas être nul.");
         }
-        List<RendezVousDto> rendezVousList = rendezVousRepository.findByStatut(statut).stream()
-                .map(RendezVousDto::fromEntity)
+        List<RendezVousRequestDto> rendezVousList = rendezVousRepository.findByStatut(statut).stream()
+                .map(RendezVousRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -360,7 +355,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVousDto cancelRendezVous(Integer id) {
+    public RendezVousRequestDto cancelRendezVous(Integer id) {
         RendezVous rendezVous = rendezVousRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Rendez-vous non trouvé avec l'ID: " + id));
 
@@ -370,7 +365,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
         StatutRDV oldStatut = rendezVous.getStatut(); // Capture old status for logging
         rendezVous.setStatut(StatutRDV.ANNULE);
-        RendezVousDto updatedRendezVous = RendezVousDto.fromEntity(rendezVousRepository.save(rendezVous));
+        RendezVousRequestDto updatedRendezVous = RendezVousRequestDto.fromEntity(rendezVousRepository.save(rendezVous));
 
         historiqueActionService.enregistrerAction(
                 "Annulation du rendez-vous ID: " + id + ", Ancien statut: " + oldStatut + " -> Nouveau statut: " + StatutRDV.ANNULE

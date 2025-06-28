@@ -1,25 +1,21 @@
 package com.example.GestionClinique.service;
 
-import com.example.GestionClinique.dto.MessageDto;
-import com.example.GestionClinique.model.entity.Message;
-import lombok.Builder;
-import lombok.Data;
+import com.example.GestionClinique.dto.ResponseDto.MessageResponseDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
 public interface MessageService {
-    MessageDto save(MessageDto message);
-    MessageDto updateMessage(Integer id, MessageDto message);
-    MessageDto findMessageById(Integer id);
-    List<MessageDto> findAllMessages();
+    MessageResponseDto save(MessageResponseDto message);
+    MessageResponseDto updateMessage(Integer id, MessageResponseDto message);
+    MessageResponseDto findMessageById(Integer id);
+    List<MessageResponseDto> findAllMessages();
     void deleteMessageById(Integer id);
 
     // Nouvelle méthode: Trouver les messages envoyés par un utilisateur
-    List<MessageDto> findMessagesBySenderId(Integer senderId);
+    List<MessageResponseDto> findMessagesBySenderId(Integer senderId);
     // Nouvelle méthode: Trouver les messages reçus par un utilisateur
-    List<MessageDto> findMessagesByReceiverId(Integer receiverId);
+    List<MessageResponseDto> findMessagesByReceiverId(Integer receiverId);
     // Nouvelle méthode: Marquer un message comme lu
-    MessageDto markMessageAsRead(Integer messageId);
+    MessageResponseDto markMessageAsRead(Integer messageId);
 }

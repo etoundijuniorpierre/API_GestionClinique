@@ -1,7 +1,7 @@
 package com.example.GestionClinique.model.entity;
 
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.InfoPersonnel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,11 +14,9 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "patient")
-public class Patient extends EntityAbstracte {
-    @Embedded
-    private InfoPersonnel infoPersonnel;
+public class Patient extends InfoPersonnel {
 
-    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Ajouté Lazy
+    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true) // Ajouté Lazy
     private DossierMedical dossierMedical;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

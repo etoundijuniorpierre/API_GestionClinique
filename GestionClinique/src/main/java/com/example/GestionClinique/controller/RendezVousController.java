@@ -2,7 +2,7 @@ package com.example.GestionClinique.controller;
 
 
 import com.example.GestionClinique.controller.controllerApi.RendezVousApi;
-import com.example.GestionClinique.dto.RendezVousDto;
+import com.example.GestionClinique.dto.RequestDto.RendezVousRequestDto;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -26,18 +25,18 @@ public class RendezVousController implements RendezVousApi {
     }
 
     @Override
-    public RendezVousDto createRendezVous(RendezVousDto rendezVousDto) {
-        return rendezVousService.createRendezVous(rendezVousDto);
+    public RendezVousRequestDto createRendezVous(RendezVousRequestDto rendezVousRequestDto) {
+        return rendezVousService.createRendezVous(rendezVousRequestDto);
     }
 
     @Override
-    public RendezVousDto findRendezVousById(Integer id) {
+    public RendezVousRequestDto findRendezVousById(Integer id) {
         return rendezVousService.findRendezVousById(id);
     }
 
     @Override
-    public RendezVousDto updateRendezVous(Integer id, RendezVousDto rendezVousDto) {
-        return rendezVousService.updateRendezVous(id, rendezVousDto);
+    public RendezVousRequestDto updateRendezVous(Integer id, RendezVousRequestDto rendezVousRequestDto) {
+        return rendezVousService.updateRendezVous(id, rendezVousRequestDto);
     }
 
     @Override
@@ -46,32 +45,32 @@ public class RendezVousController implements RendezVousApi {
     }
 
     @Override
-    public List<RendezVousDto> findAllRendezVous() {
+    public List<RendezVousRequestDto> findAllRendezVous() {
         return rendezVousService.findAllRendezVous();
     }
 
     @Override
-    public List<RendezVousDto> findRendezVousByStatut(StatutRDV statut) {
+    public List<RendezVousRequestDto> findRendezVousByStatut(StatutRDV statut) {
         return rendezVousService.findRendezVousByStatut(statut);
     }
 
     @Override
-    public List<RendezVousDto> findRendezVousBySalleId(Integer id) {
+    public List<RendezVousRequestDto> findRendezVousBySalleId(Integer id) {
         return rendezVousService.findRendezVousBySalleId(id);
     }
 
     @Override
-    public List<RendezVousDto> findRendezVousByPatientId(Integer id) {
+    public List<RendezVousRequestDto> findRendezVousByPatientId(Integer id) {
         return rendezVousService.findRendezVousByPatientId(id);
     }
 
     @Override
-    public List<RendezVousDto> findRendezVousByMedecinId(Integer id) {
+    public List<RendezVousRequestDto> findRendezVousByMedecinId(Integer id) {
         return rendezVousService.findRendezVousByMedecinId(id);
     }
 
     @Override
-    public List<RendezVousDto> findRendezVousByJour(LocalDate jour) {
+    public List<RendezVousRequestDto> findRendezVousByJour(LocalDate jour) {
         return rendezVousService.findRendezVousByJour(jour);
     }
 
@@ -81,7 +80,7 @@ public class RendezVousController implements RendezVousApi {
     }
 
     @Override
-    public RendezVousDto cancelRendezVous(Integer idRendezVous) {
+    public RendezVousRequestDto cancelRendezVous(Integer idRendezVous) {
         return rendezVousService.cancelRendezVous(idRendezVous);
     }
 }

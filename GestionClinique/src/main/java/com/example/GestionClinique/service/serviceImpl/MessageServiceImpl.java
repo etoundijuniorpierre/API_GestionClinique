@@ -1,7 +1,6 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.MessageDto;
-import com.example.GestionClinique.dto.UtilisateurSummaryDto;
+import com.example.GestionClinique.dto.ResponseDto.MessageResponseDto;
 import com.example.GestionClinique.model.entity.Message;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.repository.MessageRepository;
@@ -35,25 +34,25 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageDto save(MessageDto messageDto) {
-        if (messageDto.getContenu() == null || messageDto.getContenu().trim().isEmpty()) {
+    public MessageResponseDto save(MessageResponseDto messageResponseDto) {
+        if (messageResponseDto.getContenu() == null || messageResponseDto.getContenu().trim().isEmpty()) {
             throw new IllegalArgumentException("Le contenu du message ne peut pas être vide.");
         }
-        if (messageDto.getExpediteurSummary() == null || messageDto.getExpediteurSummary().getId() == null) {
+        if (messageResponseDto.getExpediteurSummary() == null || messageResponseDto.getExpediteurSummary().getId() == null) {
             throw new IllegalArgumentException("L'expéditeur du message doit être spécifié.");
         }
-        if (messageDto.getDestinataireSummary() == null || messageDto.getDestinataireSummary().getId() == null) {
+        if (messageResponseDto.getDestinataireSummary() == null || messageResponseDto.getDestinataireSummary().getId() == null) {
             throw new IllegalArgumentException("Le destinataire du message doit être spécifié.");
         }
 
-        Utilisateur expediteur = utilisateurRepository.findById(messageDto.getExpediteurSummary().getId())
-                .orElseThrow(() -> new EntityNotFoundException("L'expéditeur avec l'ID " + messageDto.getExpediteurSummary().getId() + " n'existe pas ou n'est pas valide."));
-        Utilisateur destinataire = utilisateurRepository.findById(messageDto.getDestinataireSummary().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Le destinataire avec l'ID " + messageDto.getDestinataireSummary().getId() + " n'existe pas ou n'est pas valide."));
+        Utilisateur expediteur = utilisateurRepository.findById(messageResponseDto.getExpediteurSummary().getId())
+                .orElseThrow(() -> new EntityNotFoundException("L'expéditeur avec l'ID " + messageResponseDto.getExpediteurSummary().getId() + " n'existe pas ou n'est pas valide."));
+        Utilisateur destinataire = utilisateurRepository.findById(messageResponseDto.getDestinataireSummary().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Le destinataire avec l'ID " + messageResponseDto.getDestinataireSummary().getId() + " n'existe pas ou n'est pas valide."));
 
         Message message = new Message();
-        message.setContenu(messageDto.getContenu());
-        message.setDateEnvoi(messageDto.getDateEnvoi() != null ? messageDto.getDateEnvoi() : LocalDateTime.now());
+        message.setContenu(messageResponseDto.getContenu());
+        message.setDateEnvoi(messageResponseDto.getDateEnvoi() != null ? messageResponseDto.getDateEnvoi() : LocalDateTime.now());
         message.setLu(false);
 
         message.setExpediteur(expediteur);
@@ -61,20 +60,20 @@ public class MessageServiceImpl implements MessageService {
 
         Message savedMessageEntity = messageRepository.save(message);
 
-        MessageDto savedMessageDto = MessageDto.fromEntity(savedMessageEntity);
+        MessageResponseDto savedMessageResponseDto = MessageResponseDto.fromEntity(savedMessageEntity);
 
         historiqueActionService.enregistrerAction(
-                "Message ID " + savedMessageDto.getId() + " envoyé de " +
+                "Message ID " + savedMessageResponseDto.getId() + " envoyé de " +
                         (expediteur.getInfoPersonnel() != null ? expediteur.getInfoPersonnel().getNom() : "N/A") + " à " +
                         (destinataire.getInfoPersonnel() != null ? destinataire.getInfoPersonnel().getNom() : "N/A")
         );
 
-        return savedMessageDto;
+        return savedMessageResponseDto;
     }
 
     @Override
     @Transactional
-    public MessageDto updateMessage(Integer messageId, MessageDto messageDto) {
+    public MessageResponseDto updateMessage(Integer messageId, MessageResponseDto messageResponseDto) {
         Message existingMessage = messageRepository.findById(messageId)
                 .orElseThrow(() -> new EntityNotFoundException("Le message avec l'ID " + messageId + " n'existe pas."));
 
@@ -83,17 +82,17 @@ public class MessageServiceImpl implements MessageService {
         boolean oldLuStatus = existingMessage.getLu(); // Using getLu() for Message entity
 
         // Update the content if provided and different from existing
-        if (messageDto.getContenu() != null && !messageDto.getContenu().trim().isEmpty() &&
-                !Objects.equals(oldContenu, messageDto.getContenu())) {
-            existingMessage.setContenu(messageDto.getContenu());
+        if (messageResponseDto.getContenu() != null && !messageResponseDto.getContenu().trim().isEmpty() &&
+                !Objects.equals(oldContenu, messageResponseDto.getContenu())) {
+            existingMessage.setContenu(messageResponseDto.getContenu());
         }
 
         // Update read status if provided and different from existing
-        if (messageDto.getLu() != oldLuStatus) { // Using getLu() for MessageDto
-            existingMessage.setLu(messageDto.getLu()); // Using getLu() for MessageDto to set on Entity
+        if (messageResponseDto.getLu() != oldLuStatus) { // Using getLu() for MessageDto
+            existingMessage.setLu(messageResponseDto.getLu()); // Using getLu() for MessageDto to set on Entity
         }
 
-        MessageDto updatedMessage = MessageDto.fromEntity(messageRepository.save(existingMessage));
+        MessageResponseDto updatedMessage = MessageResponseDto.fromEntity(messageRepository.save(existingMessage));
 
         StringBuilder logMessage = new StringBuilder("Mise à jour du message ID: " + messageId + ".");
         if (!Objects.equals(oldContenu, updatedMessage.getContenu())) {
@@ -109,7 +108,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional()
-    public MessageDto findMessageById(Integer messageId) {
+    public MessageResponseDto findMessageById(Integer messageId) {
         Message foundMessageEntity = messageRepository.findById(messageId)
                 .orElseThrow(() -> new EntityNotFoundException("Le message avec l'ID " + messageId + " n'existe pas."));
 
@@ -117,16 +116,16 @@ public class MessageServiceImpl implements MessageService {
                 "Recherche du message ID: " + messageId
         );
 
-        return MessageDto.fromEntity(foundMessageEntity);
+        return MessageResponseDto.fromEntity(foundMessageEntity);
     }
 
     @Override
     @Transactional()
-    public List<MessageDto> findAllMessages() {
-        List<MessageDto> allMessages = messageRepository.findAll()
+    public List<MessageResponseDto> findAllMessages() {
+        List<MessageResponseDto> allMessages = messageRepository.findAll()
                 .stream()
                 .filter(Objects::nonNull)
-                .map(MessageDto::fromEntity)
+                .map(MessageResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -157,12 +156,12 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional()
-    public List<MessageDto> findMessagesBySenderId(Integer expediteurId) {
+    public List<MessageResponseDto> findMessagesBySenderId(Integer expediteurId) {
         Utilisateur expediteur = utilisateurRepository.findById(expediteurId)
                 .orElseThrow(() -> new EntityNotFoundException("L'expéditeur avec l'ID " + expediteurId + " n'existe pas."));
 
-        List<MessageDto> messages = messageRepository.findByExpediteur(expediteur).stream()
-                .map(MessageDto::fromEntity)
+        List<MessageResponseDto> messages = messageRepository.findByExpediteur(expediteur).stream()
+                .map(MessageResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -174,12 +173,12 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional()
-    public List<MessageDto> findMessagesByReceiverId(Integer destinataireId) {
+    public List<MessageResponseDto> findMessagesByReceiverId(Integer destinataireId) {
         Utilisateur destinataire = utilisateurRepository.findById(destinataireId)
                 .orElseThrow(() -> new EntityNotFoundException("Le destinataire avec l'ID " + destinataireId + " n'existe pas."));
 
-        List<MessageDto> messages = messageRepository.findByDestinataire(destinataire).stream()
-                .map(MessageDto::fromEntity)
+        List<MessageResponseDto> messages = messageRepository.findByDestinataire(destinataire).stream()
+                .map(MessageResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -191,14 +190,14 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageDto markMessageAsRead(Integer messageId) {
+    public MessageResponseDto markMessageAsRead(Integer messageId) {
         Message existingMessage = messageRepository.findById(messageId)
                 .orElseThrow(() -> new EntityNotFoundException("Le message avec l'ID " + messageId + " n'existe pas."));
 
         boolean oldLuStatus = existingMessage.getLu(); // Using getLu() for Message entity
         existingMessage.setLu(true);
 
-        MessageDto markedMessage = MessageDto.fromEntity(messageRepository.save(existingMessage));
+        MessageResponseDto markedMessage = MessageResponseDto.fromEntity(messageRepository.save(existingMessage));
 
         historiqueActionService.enregistrerAction(
                 "Message ID " + messageId + " marqué comme lu. Statut: " + oldLuStatus + " -> " + markedMessage.getLu() // Using getLu() for MessageDto

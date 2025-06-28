@@ -1,9 +1,7 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.ConsultationSummaryDto;
-import com.example.GestionClinique.dto.DossierMedicalDto;
-import com.example.GestionClinique.dto.PatientDto;
-import com.example.GestionClinique.dto.PrescriptionDto;
+import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
+import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import com.example.GestionClinique.model.entity.Consultation;
 import com.example.GestionClinique.model.entity.DossierMedical;
 import com.example.GestionClinique.model.entity.Patient;
@@ -19,7 +17,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime; // Using LocalDateTime for creationDate (from abstract entity)
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,8 +47,8 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
 
     @Override
     @Transactional
-    public DossierMedicalDto createDossierMedicalForPatient(Integer patientId, DossierMedicalDto dossierMedicalDto) {
-        if (dossierMedicalDto == null) {
+    public DossierMedicalRequestDto createDossierMedicalForPatient(Integer patientId, DossierMedicalRequestDto dossierMedicalRequestDto) {
+        if (dossierMedicalRequestDto == null) {
             throw new IllegalArgumentException("Les données du dossier médical ne peuvent pas être nulles.");
         }
 
@@ -64,11 +61,11 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
 
         DossierMedical newDossierMedical = new DossierMedical();
         // dateCreation is automatically handled by @CreationTimestamp in EntityAbstracte
-        newDossierMedical.setGroupeSanguin(dossierMedicalDto.getGroupeSanguin());
-        newDossierMedical.setAntecedentsMedicaux(dossierMedicalDto.getAntecedentsMedicaux());
-        newDossierMedical.setAllergies(dossierMedicalDto.getAllergies());
-        newDossierMedical.setTraitementsEnCours(dossierMedicalDto.getTraitementsEnCours());
-        newDossierMedical.setObservations(dossierMedicalDto.getObservations());
+        newDossierMedical.setGroupeSanguin(dossierMedicalRequestDto.getGroupeSanguin());
+        newDossierMedical.setAntecedentsMedicaux(dossierMedicalRequestDto.getAntecedentsMedicaux());
+        newDossierMedical.setAllergies(dossierMedicalRequestDto.getAllergies());
+        newDossierMedical.setTraitementsEnCours(dossierMedicalRequestDto.getTraitementsEnCours());
+        newDossierMedical.setObservations(dossierMedicalRequestDto.getObservations());
 
         newDossierMedical.setPatient(patient);
         patient.setDossierMedical(newDossierMedical);
@@ -81,15 +78,15 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
                         " (Nom: " + patient.getInfoPersonnel().getNom() + " " + patient.getInfoPersonnel().getPrenom() + ")"
         );
 
-        return DossierMedicalDto.fromEntity(savedDossier);
+        return DossierMedicalRequestDto.fromEntity(savedDossier);
     }
 
 
 
     @Override
     @Transactional
-    public DossierMedicalDto updateDossierMedical(Integer id, DossierMedicalDto dossierMedicalDto) {
-        if (dossierMedicalDto == null) {
+    public DossierMedicalRequestDto updateDossierMedical(Integer id, DossierMedicalRequestDto dossierMedicalRequestDto) {
+        if (dossierMedicalRequestDto == null) {
             throw new IllegalArgumentException("Les données de mise à jour du dossier médical ne peuvent pas être nulles.");
         }
 
@@ -104,25 +101,25 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         String oldObservations = existingDossierMedical.getObservations();
 
         // Update direct attributes (only if provided in DTO)
-        if (dossierMedicalDto.getGroupeSanguin() != null && !dossierMedicalDto.getGroupeSanguin().trim().isEmpty()) {
-            existingDossierMedical.setGroupeSanguin(dossierMedicalDto.getGroupeSanguin());
+        if (dossierMedicalRequestDto.getGroupeSanguin() != null && !dossierMedicalRequestDto.getGroupeSanguin().trim().isEmpty()) {
+            existingDossierMedical.setGroupeSanguin(dossierMedicalRequestDto.getGroupeSanguin());
         }
-        if (dossierMedicalDto.getAntecedentsMedicaux() != null) {
-            existingDossierMedical.setAntecedentsMedicaux(dossierMedicalDto.getAntecedentsMedicaux());
+        if (dossierMedicalRequestDto.getAntecedentsMedicaux() != null) {
+            existingDossierMedical.setAntecedentsMedicaux(dossierMedicalRequestDto.getAntecedentsMedicaux());
         }
-        if (dossierMedicalDto.getAllergies() != null) {
-            existingDossierMedical.setAllergies(dossierMedicalDto.getAllergies());
+        if (dossierMedicalRequestDto.getAllergies() != null) {
+            existingDossierMedical.setAllergies(dossierMedicalRequestDto.getAllergies());
         }
-        if (dossierMedicalDto.getTraitementsEnCours() != null) {
-            existingDossierMedical.setTraitementsEnCours(dossierMedicalDto.getTraitementsEnCours());
+        if (dossierMedicalRequestDto.getTraitementsEnCours() != null) {
+            existingDossierMedical.setTraitementsEnCours(dossierMedicalRequestDto.getTraitementsEnCours());
         }
-        if (dossierMedicalDto.getObservations() != null) {
-            existingDossierMedical.setObservations(dossierMedicalDto.getObservations());
+        if (dossierMedicalRequestDto.getObservations() != null) {
+            existingDossierMedical.setObservations(dossierMedicalRequestDto.getObservations());
         }
 
         // --- Handling Collections (Consultations and Prescriptions) ---
-        if (dossierMedicalDto.getConsultationSummaries() != null) {
-            List<Consultation> updatedConsultations = dossierMedicalDto.getConsultationSummaries().stream()
+        if (dossierMedicalRequestDto.getConsultationSummaries() != null) {
+            List<Consultation> updatedConsultations = dossierMedicalRequestDto.getConsultationSummaries().stream()
                     .map(summaryDto -> {
                         if (summaryDto.getId() == null) {
                             throw new IllegalArgumentException("Une consultation dans la liste de mise à jour n'a pas d'ID. Les nouvelles consultations doivent être créées via leur service dédié.");
@@ -141,8 +138,8 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
             existingDossierMedical.getConsultations().addAll(updatedConsultations);
         }
 
-        if (dossierMedicalDto.getPrescriptions() != null) {
-            List<Prescription> updatedPrescriptions = dossierMedicalDto.getPrescriptions().stream()
+        if (dossierMedicalRequestDto.getPrescriptions() != null) {
+            List<Prescription> updatedPrescriptions = dossierMedicalRequestDto.getPrescriptions().stream()
                     .map(prescriptionDto -> {
                         if (prescriptionDto.getId() == null) {
                             throw new IllegalArgumentException("Une prescription dans la liste de mise à jour n'a pas d'ID. Les nouvelles prescriptions doivent être créées via leur service dédié.");
@@ -161,7 +158,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
             existingDossierMedical.getPrescriptions().addAll(updatedPrescriptions);
         }
 
-        DossierMedicalDto updatedDossier = DossierMedicalDto.fromEntity(
+        DossierMedicalRequestDto updatedDossier = DossierMedicalRequestDto.fromEntity(
                 dossierMedicalRepository.save(existingDossierMedical)
         );
 
@@ -186,7 +183,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
 
     @Override
     @Transactional()
-    public DossierMedicalDto findDossierMedicalById(Integer id) {
+    public DossierMedicalRequestDto findDossierMedicalById(Integer id) {
         DossierMedical foundDossierMedical = dossierMedicalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Le Dossier médical avec l'ID " + id + " n'existe pas."));
 
@@ -194,17 +191,17 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
                 "Recherche du dossier médical ID: " + id
         );
 
-        return DossierMedicalDto.fromEntity(foundDossierMedical);
+        return DossierMedicalRequestDto.fromEntity(foundDossierMedical);
     }
 
 
 
     @Override
     @Transactional()
-    public List<DossierMedicalDto> findAllDossierMedical() {
-        List<DossierMedicalDto> allDossiers = dossierMedicalRepository.findAll()
+    public List<DossierMedicalRequestDto> findAllDossierMedical() {
+        List<DossierMedicalRequestDto> allDossiers = dossierMedicalRepository.findAll()
                 .stream()
-                .map(DossierMedicalDto::fromEntity)
+                .map(DossierMedicalRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -218,20 +215,20 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
 
     @Override
     @Transactional()
-    public PatientDto findPatientByDossierMedicalId(Integer dossierMedicalId) {
+    public PatientRequestDto findPatientByDossierMedicalId(Integer dossierMedicalId) {
         DossierMedical dossierMedical = dossierMedicalRepository.findById(dossierMedicalId)
                 .orElseThrow(() -> new EntityNotFoundException("Dossier médical introuvable avec l'ID " + dossierMedicalId));
 
-        PatientDto patientDto = Optional.ofNullable(dossierMedical.getPatient())
-                .map(PatientDto::fromEntity)
+        PatientRequestDto patientRequestDto = Optional.ofNullable(dossierMedical.getPatient())
+                .map(PatientRequestDto::fromEntity)
                 .orElseThrow(() -> new EntityNotFoundException("Aucun patient associé au dossier médical avec l'ID " + dossierMedicalId));
 
         historiqueActionService.enregistrerAction(
                 "Recherche du patient associé au dossier médical ID: " + dossierMedicalId +
-                        " (Nom du patient: " + patientDto.getInfoPersonnel().getNom() + " " + patientDto.getInfoPersonnel().getPrenom() + ")"
+                        " (Nom du patient: " + patientRequestDto.getInfoPersonnel().getNom() + " " + patientRequestDto.getInfoPersonnel().getPrenom() + ")"
         );
 
-        return patientDto;
+        return patientRequestDto;
     }
 
 
@@ -277,7 +274,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
 
     @Override
     @Transactional()
-    public DossierMedicalDto findDossierMedicalByPatientId(Integer patientId) {
+    public DossierMedicalRequestDto findDossierMedicalByPatientId(Integer patientId) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new EntityNotFoundException("Patient introuvable avec l'ID: " + patientId));
 
@@ -288,6 +285,6 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
                 "Recherche du dossier médical pour le patient ID: " + patientId +
                         " (Date Création: " + dossierMedical.getCreationDate() + ")" // Using getCreationDate
         );
-        return DossierMedicalDto.fromEntity(dossierMedical);
+        return DossierMedicalRequestDto.fromEntity(dossierMedical);
     }
 }

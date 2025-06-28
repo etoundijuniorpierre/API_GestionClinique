@@ -1,6 +1,6 @@
 package com.example.GestionClinique.model.entity;
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import jakarta.persistence.*;
@@ -20,7 +20,7 @@ import java.time.LocalTime;
         @UniqueConstraint(columnNames = {"heure", "utilisateur_id"}), // Correct: un médecin ne peut être qu'à un RV à cette date/heure
         @UniqueConstraint(columnNames = {"heure", "salle_id"}) // Correct: une salle ne peut être qu'à un RV à cette date/heure
 })
-public class RendezVous extends EntityAbstracte {
+public class RendezVous extends BaseEntity {
 
     @Column(name = "heure", nullable = false) // unique=true n'est pas nécessaire ici car géré par les uniqueConstraints du tableau
     private LocalTime heure;
@@ -38,7 +38,6 @@ public class RendezVous extends EntityAbstracte {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ServiceMedical serviceMedical;
-
     @ManyToOne(fetch = FetchType.LAZY) // Ajouté Lazy
     @JoinColumn(name = "patient_id", nullable = false) // CORRECTION: Supprimé unique = true
     private Patient patient;

@@ -1,6 +1,6 @@
 package com.example.GestionClinique.model.entity;
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "role")
-public class Role extends EntityAbstracte {
+public class Role extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "roleType", unique = true, nullable = false) // Ajouté unique et nullable
     private RoleType roleType;

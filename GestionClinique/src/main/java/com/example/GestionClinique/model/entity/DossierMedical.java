@@ -1,6 +1,6 @@
 package com.example.GestionClinique.model.entity;
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 // import java.time.LocalDate; // No longer needed directly here for dateCreation
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "dossier_medical") // Consistent snake_case
-public class DossierMedical extends EntityAbstracte {
+public class DossierMedical extends BaseEntity {
 
     // Removed 'dateCreation' as it's handled by 'creationDate' in EntityAbstracte
     @Column(name = "groupe_sanguin") // Added field

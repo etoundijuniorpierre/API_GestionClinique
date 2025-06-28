@@ -1,9 +1,9 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.InfoPersonnelDto;
-import com.example.GestionClinique.dto.RoleDto;
-import com.example.GestionClinique.dto.UtilisateurDto;
-import com.example.GestionClinique.model.entity.InfoPersonnel;
+import com.example.GestionClinique.dto.RequestDto.InfoPersonnelRequestDto;
+import com.example.GestionClinique.dto.ResponseDto.RoleResponseDto;
+import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestRequestDto;
+import com.example.GestionClinique.model.InfoPersonnel;
 import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
@@ -50,29 +50,29 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
 
     @Override
     @Transactional
-    public UtilisateurDto createUtilisateur(UtilisateurDto utilisateurDto) {
+    public UtilisateurRequestRequestDto createUtilisateur(UtilisateurRequestRequestDto utilisateurRequestDto) {
         // --- Input Validation ---
-        if (utilisateurDto.getInfoPersonnel() == null || utilisateurDto.getInfoPersonnel().getEmail() == null ||
-                utilisateurDto.getInfoPersonnel().getNom() == null || utilisateurDto.getInfoPersonnel().getPrenom() == null) {
+        if (utilisateurRequestDto.getInfoPersonnel() == null || utilisateurRequestDto.getInfoPersonnel().getEmail() == null ||
+                utilisateurRequestDto.getInfoPersonnel().getNom() == null || utilisateurRequestDto.getInfoPersonnel().getPrenom() == null) {
             throw new IllegalArgumentException("Les informations personnelles (nom, prénom, email) de l'utilisateur sont obligatoires.");
         }
 
-        if (utilisateurRepository.findUtilisateurByInfoPersonnel_Email(utilisateurDto.getInfoPersonnel().getEmail()).isPresent()) {
-            throw new IllegalArgumentException("L'utilisateur avec l'email '" + utilisateurDto.getInfoPersonnel().getEmail() + "' existe déjà.");
+        if (utilisateurRepository.findUtilisateurByInfoPersonnel_Email(utilisateurRequestDto.getInfoPersonnel().getEmail()).isPresent()) {
+            throw new IllegalArgumentException("L'utilisateur avec l'email '" + utilisateurRequestDto.getInfoPersonnel().getEmail() + "' existe déjà.");
         }
 
-        if (utilisateurDto.getMotDePasse() == null || utilisateurDto.getMotDePasse().isEmpty()) {
+        if (utilisateurRequestDto.getMotDePasse() == null || utilisateurRequestDto.getMotDePasse().isEmpty()) {
             throw new IllegalArgumentException("L'utilisateur doit absolument avoir un mot de passe.");
         }
-        if (utilisateurDto.getMotDePasse().length() < 8) {
+        if (utilisateurRequestDto.getMotDePasse().length() < 8) {
             throw new IllegalArgumentException("Le mot de passe doit avoir au minimum 8 caractères."); // Changed to IllegalArgumentException
         }
 
         // Medecin specific validation
-        boolean isMedecin = utilisateurDto.getRoles() != null &&
-                utilisateurDto.getRoles().stream().anyMatch(roleDto -> roleDto.getRoleType() == RoleType.MEDECIN);
+        boolean isMedecin = utilisateurRequestDto.getRoles() != null &&
+                utilisateurRequestDto.getRoles().stream().anyMatch(roleDto -> roleDto.getRoleType() == RoleType.MEDECIN);
 
-        if (isMedecin && utilisateurDto.getServiceMedical() == null) {
+        if (isMedecin && utilisateurRequestDto.getServiceMedical() == null) {
             throw new IllegalArgumentException("Un médecin doit être lié à un service médical.");
         }
 
@@ -80,20 +80,20 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
         Utilisateur utilisateurToSave = new Utilisateur();
 
         // Map InfoPersonnel
-        InfoPersonnel infoPersonnel = InfoPersonnelDto.toEntity(utilisateurDto.getInfoPersonnel());
+        InfoPersonnel infoPersonnel = InfoPersonnelRequestDto.toEntity(utilisateurRequestDto.getInfoPersonnel());
         utilisateurToSave.setInfoPersonnel(infoPersonnel); // Set the InfoPersonnel entity
 
-        utilisateurToSave.setActif(utilisateurDto.getActif() != null ? utilisateurDto.getActif() : true); // Default to active
-        utilisateurToSave.setServiceMedical(utilisateurDto.getServiceMedical());
-        String hashedPassword = passwordEncoder.encode(utilisateurDto.getMotDePasse());
+        utilisateurToSave.setActif(utilisateurRequestDto.getActif() != null ? utilisateurRequestDto.getActif() : true); // Default to active
+        utilisateurToSave.setServiceMedical(utilisateurRequestDto.getServiceMedical());
+        String hashedPassword = passwordEncoder.encode(utilisateurRequestDto.getMotDePasse());
         utilisateurToSave.setMotDePasse(hashedPassword);
 
         // Handle Roles: Fetch existing Role entities and set them as a Set
         Set<Role> roles = new HashSet<>();
-        if (utilisateurDto.getRoles() != null && !utilisateurDto.getRoles().isEmpty()) {
-            for (RoleDto roleDto : utilisateurDto.getRoles()) {
-                Role role = roleRepository.findFirstByRoleType(roleDto.getRoleType())
-                        .orElseThrow(() -> new EntityNotFoundException("Rôle introuvable: " + roleDto.getRoleType() + ". Veuillez vous assurer que ce rôle existe dans la base de données."));
+        if (utilisateurRequestDto.getRoles() != null && !utilisateurRequestDto.getRoles().isEmpty()) {
+            for (RoleResponseDto roleResponseDto : utilisateurRequestDto.getRoles()) {
+                Role role = roleRepository.findFirstByRoleType(roleResponseDto.getRoleType())
+                        .orElseThrow(() -> new EntityNotFoundException("Rôle introuvable: " + roleResponseDto.getRoleType() + ". Veuillez vous assurer que ce rôle existe dans la base de données."));
                 roles.add(role);
             }
         }
@@ -101,47 +101,47 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
 
         // --- Save Entity ---
         Utilisateur savedEntity = utilisateurRepository.save(utilisateurToSave);
-        UtilisateurDto savedUtilisateurDto = UtilisateurDto.fromEntity(savedEntity);
+        UtilisateurRequestRequestDto savedUtilisateurRequestDto = UtilisateurRequestRequestDto.fromEntity(savedEntity);
 
         // --- Historique Logging ---
-        String rolesString = savedUtilisateurDto.getRoles().stream()
+        String rolesString = savedUtilisateurRequestDto.getRoles().stream()
                 .map(r -> r.getRoleType().name())
                 .collect(Collectors.joining(", "));
         historiqueActionService.enregistrerAction(
-                "Création de l'utilisateur ID: " + savedUtilisateurDto.getId() +
-                        ", Nom: " + savedUtilisateurDto.getInfoPersonnel().getNom() + " " + savedUtilisateurDto.getInfoPersonnel().getPrenom() +
+                "Création de l'utilisateur ID: " + savedUtilisateurRequestDto.getId() +
+                        ", Nom: " + savedUtilisateurRequestDto.getInfoPersonnel().getNom() + " " + savedUtilisateurRequestDto.getInfoPersonnel().getPrenom() +
                         ", Rôles: [" + rolesString + "]"
         );
-        return savedUtilisateurDto;
+        return savedUtilisateurRequestDto;
     }
 
 
 
     @Override
     @Transactional()
-    public UtilisateurDto findUtilisateurById(Integer id) {
+    public UtilisateurRequestRequestDto findUtilisateurById(Integer id) {
         Utilisateur foundUtilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("L'utilisateur avec l'ID " + id + " n'existe pas.")); // Use EntityNotFoundException
 
-        UtilisateurDto foundUtilisateurDto = UtilisateurDto.fromEntity(foundUtilisateur);
+        UtilisateurRequestRequestDto foundUtilisateurRequestDto = UtilisateurRequestRequestDto.fromEntity(foundUtilisateur);
 
         historiqueActionService.enregistrerAction(
-                "Recherche de l'utilisateur ID: " + id + ", Nom: " + foundUtilisateurDto.getInfoPersonnel().getNom()
+                "Recherche de l'utilisateur ID: " + id + ", Nom: " + foundUtilisateurRequestDto.getInfoPersonnel().getNom()
         );
-        return foundUtilisateurDto;
+        return foundUtilisateurRequestDto;
     }
 
 
 
     @Override
     @Transactional()
-    public List<UtilisateurDto> findUtilisateurByInfoPersonnel_Nom(String nom) {
+    public List<UtilisateurRequestRequestDto> findUtilisateurByInfoPersonnel_Nom(String nom) {
         if (nom == null || nom.trim().isEmpty()) {
             throw new IllegalArgumentException("Le nom ne peut pas être vide pour la recherche.");
         }
 
-        List<UtilisateurDto> usersByNom = utilisateurRepository.findUtilisateurByInfoPersonnel_Nom(nom).stream()
-                .map(UtilisateurDto::fromEntity)
+        List<UtilisateurRequestRequestDto> usersByNom = utilisateurRepository.findUtilisateurByInfoPersonnel_Nom(nom).stream()
+                .map(UtilisateurRequestRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -154,9 +154,9 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
 
     @Override
     @Transactional()
-    public List<UtilisateurDto> findAllUtilisateur() {
-        List<UtilisateurDto> allUsers = utilisateurRepository.findAll().stream()
-                .map(UtilisateurDto::fromEntity)
+    public List<UtilisateurRequestRequestDto> findAllUtilisateur() {
+        List<UtilisateurRequestRequestDto> allUsers = utilisateurRepository.findAll().stream()
+                .map(UtilisateurRequestRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -169,7 +169,7 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
 
     @Override
     @Transactional
-    public UtilisateurDto updateUtilisateur(Integer utilisateurId, UtilisateurDto utilisateurDto) {
+    public UtilisateurRequestRequestDto updateUtilisateur(Integer utilisateurId, UtilisateurRequestRequestDto utilisateurRequestDto) {
         Utilisateur existingUtilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new EntityNotFoundException("L'utilisateur avec l'ID " + utilisateurId + " n'existe pas.")); // Use EntityNotFoundException
 
@@ -187,8 +187,8 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
         }
 
         // --- Update Personal Information ---
-        if (utilisateurDto.getInfoPersonnel() != null) {
-            InfoPersonnelDto dtoInfo = utilisateurDto.getInfoPersonnel();
+        if (utilisateurRequestDto.getInfoPersonnel() != null) {
+            InfoPersonnelRequestDto dtoInfo = utilisateurRequestDto.getInfoPersonnel();
 
             // Only update if not null and not empty
             if (dtoInfo.getNom() != null && !dtoInfo.getNom().trim().isEmpty()) {
@@ -223,22 +223,22 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
         }
 
         // --- Update Password ---
-        if (utilisateurDto.getMotDePasse() != null && !utilisateurDto.getMotDePasse().isEmpty()) {
-            if (utilisateurDto.getMotDePasse().length() < 8) {
+        if (utilisateurRequestDto.getMotDePasse() != null && !utilisateurRequestDto.getMotDePasse().isEmpty()) {
+            if (utilisateurRequestDto.getMotDePasse().length() < 8) {
                 throw new IllegalArgumentException("Le nouveau mot de passe doit avoir au minimum 8 caractères."); // Changed to IllegalArgumentException
             }
-            existingUtilisateur.setMotDePasse(passwordEncoder.encode(utilisateurDto.getMotDePasse()));
+            existingUtilisateur.setMotDePasse(passwordEncoder.encode(utilisateurRequestDto.getMotDePasse()));
         }
 
         // --- Update Roles ---
         // If the DTO provides a list of roles, clear existing ones and add new ones.
         // If the DTO's roles list is null, it means no change to roles is requested.
         // If it's an empty list, it means all roles should be removed.
-        if (utilisateurDto.getRoles() != null) {
+        if (utilisateurRequestDto.getRoles() != null) {
             Set<Role> newRoles = new HashSet<>();
-            for (RoleDto roleDto : utilisateurDto.getRoles()) { // Iterate through potentially empty list
-                Role role = roleRepository.findFirstByRoleType(roleDto.getRoleType())
-                        .orElseThrow(() -> new EntityNotFoundException("Rôle introuvable: " + roleDto.getRoleType() + ". Veuillez vous assurer que ce rôle existe dans la base de données."));
+            for (RoleResponseDto roleResponseDto : utilisateurRequestDto.getRoles()) { // Iterate through potentially empty list
+                Role role = roleRepository.findFirstByRoleType(roleResponseDto.getRoleType())
+                        .orElseThrow(() -> new EntityNotFoundException("Rôle introuvable: " + roleResponseDto.getRoleType() + ". Veuillez vous assurer que ce rôle existe dans la base de données."));
                 newRoles.add(role);
             }
             existingUtilisateur.setRole(newRoles); // This will replace the old set of roles
@@ -246,17 +246,17 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
 
 
         // --- Update Medical Service ---
-        if (utilisateurDto.getServiceMedical() != null) {
-            existingUtilisateur.setServiceMedical(utilisateurDto.getServiceMedical());
+        if (utilisateurRequestDto.getServiceMedical() != null) {
+            existingUtilisateur.setServiceMedical(utilisateurRequestDto.getServiceMedical());
         }
 
         // --- Update Active Status ---
-        if (utilisateurDto.getActif() != null) {
-            existingUtilisateur.setActif(utilisateurDto.getActif());
+        if (utilisateurRequestDto.getActif() != null) {
+            existingUtilisateur.setActif(utilisateurRequestDto.getActif());
         }
 
         // --- Final Save ---
-        UtilisateurDto updatedUtilisateur = UtilisateurDto.fromEntity(utilisateurRepository.save(existingUtilisateur));
+        UtilisateurRequestRequestDto updatedUtilisateur = UtilisateurRequestRequestDto.fromEntity(utilisateurRepository.save(existingUtilisateur));
 
         // --- Historique Logging ---
         StringBuilder logMessage = new StringBuilder("Mise à jour de l'utilisateur ID: " + utilisateurId + ".");
@@ -317,12 +317,12 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
 
     @Override
     @Transactional()
-    public UtilisateurDto findUtilisateurByInfoPersonnel_Email(String email) {
+    public UtilisateurRequestRequestDto findUtilisateurByInfoPersonnel_Email(String email) {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("L'email ne peut pas être vide pour la recherche.");
         }
-        UtilisateurDto foundUser = utilisateurRepository.findUtilisateurByInfoPersonnel_Email(email)
-                .map(UtilisateurDto::fromEntity)
+        UtilisateurRequestRequestDto foundUser = utilisateurRepository.findUtilisateurByInfoPersonnel_Email(email)
+                .map(UtilisateurRequestRequestDto::fromEntity)
                 .orElseThrow(() -> new EntityNotFoundException("L'utilisateur avec l'email " + email + " n'existe pas.")); // Use EntityNotFoundException
 
         historiqueActionService.enregistrerAction(
@@ -335,14 +335,14 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
 
     @Override
     @Transactional()
-    public List<UtilisateurDto> findUtilisateurByRole_RoleType(RoleType roleType) {
+    public List<UtilisateurRequestRequestDto> findUtilisateurByRole_RoleType(RoleType roleType) {
         if (roleType == null) {
             throw new IllegalArgumentException("Le rôle ne peut pas être vide pour la recherche.");
         }
 
-        List<UtilisateurDto> usersByRole = utilisateurRepository.findUtilisateurByRole_RoleType(roleType).stream()
+        List<UtilisateurRequestRequestDto> usersByRole = utilisateurRepository.findUtilisateurByRole_RoleType(roleType).stream()
                 .filter(Objects::nonNull) // Filter out any potential nulls if the query could return them
-                .map(UtilisateurDto::fromEntity)
+                .map(UtilisateurRequestRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -355,13 +355,13 @@ public class UtilisateurServiceImpl implements UtilisateurService, UserDetailsSe
 
     @Override
     @Transactional
-    public UtilisateurDto updateUtilisateurStatus(Integer utilisateurId, boolean isActive) { // Corrected parameter name
+    public UtilisateurRequestRequestDto updateUtilisateurStatus(Integer utilisateurId, boolean isActive) { // Corrected parameter name
         Utilisateur existingUtilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new EntityNotFoundException("L'utilisateur avec l'ID " + utilisateurId + " n'existe pas.")); // Use EntityNotFoundException
 
         boolean oldStatus = existingUtilisateur.getActif();
         existingUtilisateur.setActif(isActive);
-        UtilisateurDto updatedUser = UtilisateurDto.fromEntity(utilisateurRepository.save(existingUtilisateur));
+        UtilisateurRequestRequestDto updatedUser = UtilisateurRequestRequestDto.fromEntity(utilisateurRepository.save(existingUtilisateur));
 
         historiqueActionService.enregistrerAction(
                 "Mise à jour du statut de l'utilisateur ID: " + utilisateurId + " de '" + oldStatus + "' à '" + isActive + "'. (Nom: " + updatedUser.getInfoPersonnel().getNom() + ")"

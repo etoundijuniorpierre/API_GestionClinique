@@ -1,6 +1,6 @@
 package com.example.GestionClinique.model.entity;
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.InfoPersonnel;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -9,11 +9,11 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.ArrayList; // Keep if other lists are used
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet; // Import HashSet
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set; // Import Set
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
@@ -23,16 +23,16 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "utilisateurs")
-public class Utilisateur extends EntityAbstracte {
-    @Embedded
-    private InfoPersonnel infoPersonnel;
+public class Utilisateur extends InfoPersonnel{
 
     @Column(nullable = false, name = "mot_de_passe")
     @JsonIgnore
     @Size(min = 8, max = 20)
     private String motDePasse;
 
-    @Column(name = "actif", nullable = false)
+    @Column(nullable = false, unique = true)
+    private String email;
+
     private Boolean actif;
 
     @ManyToMany(fetch = FetchType.EAGER) // Keep EAGER or consider LAZY + specific fetching later

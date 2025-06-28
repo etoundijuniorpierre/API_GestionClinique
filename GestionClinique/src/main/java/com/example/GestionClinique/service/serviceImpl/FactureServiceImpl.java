@@ -1,8 +1,7 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.ConsultationSummaryDto; // Make sure to import this
-import com.example.GestionClinique.dto.FactureDto;
-import com.example.GestionClinique.dto.PatientDto; // Still needed for findPatientByFactureId
+import com.example.GestionClinique.dto.RequestDto.FactureRequestDto;
+import com.example.GestionClinique.dto.RequestDto.PatientRequestDto; // Still needed for findPatientByFactureId
 import com.example.GestionClinique.model.entity.Consultation;
 import com.example.GestionClinique.model.entity.Facture;
 import com.example.GestionClinique.model.entity.Patient; // Need to import Patient entity
@@ -19,7 +18,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal; // Import BigDecimal
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -45,37 +43,37 @@ public class FactureServiceImpl implements FactureService {
 
     @Override
     @Transactional
-    public FactureDto updateFacture(Integer factureId, FactureDto factureDto) {
+    public FactureRequestDto updateFacture(Integer factureId, FactureRequestDto factureRequestDto) {
         Facture existingFacture = factureRepository.findById(factureId)
                 .orElseThrow(() -> new EntityNotFoundException("La facture avec l'ID " + factureId + " n'existe pas."));
 
         // Update direct attributes. Use floatValue() to convert BigDecimal back if entity uses Float.
-        existingFacture.setMontant(factureDto.getMontant() != null ? factureDto.getMontant().floatValue() : null);
-        existingFacture.setDateEmission(factureDto.getDateEmission());
-        existingFacture.setStatutPaiement(factureDto.getStatutPaiement());
-        existingFacture.setModePaiement(factureDto.getModePaiement());
+        existingFacture.setMontant(factureRequestDto.getMontant() != null ? factureRequestDto.getMontant().floatValue() : null);
+        existingFacture.setDateEmission(factureRequestDto.getDateEmission());
+        existingFacture.setStatutPaiement(factureRequestDto.getStatutPaiement());
+        existingFacture.setModePaiement(factureRequestDto.getModePaiement());
 
         // Handle related entities from summary DTOs
         // Update Patient if provided
-        if (factureDto.getPatientSummary() != null && factureDto.getPatientSummary().getId() != null) {
-            Patient patient = patientRepository.findById(factureDto.getPatientSummary().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Patient associé introuvable avec l'ID: " + factureDto.getPatientSummary().getId()));
+        if (factureRequestDto.getPatientSummary() != null && factureRequestDto.getPatientSummary().getId() != null) {
+            Patient patient = patientRepository.findById(factureRequestDto.getPatientSummary().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Patient associé introuvable avec l'ID: " + factureRequestDto.getPatientSummary().getId()));
             existingFacture.setPatient(patient);
-        } else if (factureDto.getPatientSummary() != null) {
+        } else if (factureRequestDto.getPatientSummary() != null) {
             existingFacture.setPatient(null); // Explicitly disassociate patient
         }
 
         // Update Consultation if provided
-        if (factureDto.getConsultationSummary() != null && factureDto.getConsultationSummary().getId() != null) {
-            Consultation consultation = consultationRepository.findById(factureDto.getConsultationSummary().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Consultation associée introuvable avec l'ID: " + factureDto.getConsultationSummary().getId()));
+        if (factureRequestDto.getConsultationSummary() != null && factureRequestDto.getConsultationSummary().getId() != null) {
+            Consultation consultation = consultationRepository.findById(factureRequestDto.getConsultationSummary().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Consultation associée introuvable avec l'ID: " + factureRequestDto.getConsultationSummary().getId()));
             existingFacture.setConsultation(consultation);
-        } else if (factureDto.getConsultationSummary() != null) {
+        } else if (factureRequestDto.getConsultationSummary() != null) {
             existingFacture.setConsultation(null); // Explicitly disassociate consultation
         }
 
 
-        FactureDto updatedFactureDto = FactureDto.fromEntity(
+        FactureRequestDto updatedFactureRequestDto = FactureRequestDto.fromEntity(
                 factureRepository.save(existingFacture)
         );
 
@@ -83,14 +81,14 @@ public class FactureServiceImpl implements FactureService {
                 "Facture ID " + factureId + " mise à jour."
         );
 
-        return updatedFactureDto;
+        return updatedFactureRequestDto;
     }
 
     @Override
-    public List<FactureDto> findAllFactures() {
-        List<FactureDto> factures = factureRepository.findAll()
+    public List<FactureRequestDto> findAllFactures() {
+        List<FactureRequestDto> factures = factureRepository.findAll()
                 .stream()
-                .map(FactureDto::fromEntity)
+                .map(FactureRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction("Liste de toutes les factures récupérée.");
@@ -99,10 +97,10 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
-    public List<FactureDto> findFacturesByStatut(StatutPaiement statutPaiement) {
-        List<FactureDto> factures = factureRepository.findFacturesByStatutPaiement(statutPaiement)
+    public List<FactureRequestDto> findFacturesByStatut(StatutPaiement statutPaiement) {
+        List<FactureRequestDto> factures = factureRepository.findFacturesByStatutPaiement(statutPaiement)
                 .stream()
-                .map(FactureDto::fromEntity)
+                .map(FactureRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction("Factures récupérées avec le statut : " + statutPaiement);
@@ -111,10 +109,10 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
-    public List<FactureDto> findFacturesByModePaiement(ModePaiement modePaiement) {
-        List<FactureDto> factures = factureRepository.findFacturesByModePaiement(modePaiement)
+    public List<FactureRequestDto> findFacturesByModePaiement(ModePaiement modePaiement) {
+        List<FactureRequestDto> factures = factureRepository.findFacturesByModePaiement(modePaiement)
                 .stream()
-                .map(FactureDto::fromEntity)
+                .map(FactureRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction("Factures récupérées avec le mode de paiement : " + modePaiement);
@@ -123,14 +121,14 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
-    public FactureDto findById(Integer FactureId) {
-        FactureDto factureDto = factureRepository.findById(FactureId)
-                .map(FactureDto::fromEntity)
+    public FactureRequestDto findById(Integer FactureId) {
+        FactureRequestDto factureRequestDto = factureRepository.findById(FactureId)
+                .map(FactureRequestDto::fromEntity)
                 .orElseThrow(() -> new EntityNotFoundException("Facture avec l'ID : " + FactureId + " non trouvée."));
 
         historiqueActionService.enregistrerAction("Facture ID " + FactureId + " récupérée.");
 
-        return factureDto;
+        return factureRequestDto;
     }
 
     @Override
@@ -146,22 +144,22 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
-    public PatientDto findPatientByFactureId(Integer factureId) {
+    public PatientRequestDto findPatientByFactureId(Integer factureId) {
         Facture facture = factureRepository.findById(factureId)
                 .orElseThrow(() -> new EntityNotFoundException("Facture avec l'ID : " + factureId + " non trouvée."));
 
-        PatientDto patientDto = Optional.ofNullable(facture.getPatient())
-                .map(PatientDto::fromEntity)
+        PatientRequestDto patientRequestDto = Optional.ofNullable(facture.getPatient())
+                .map(PatientRequestDto::fromEntity)
                 .orElseThrow(() -> new EntityNotFoundException("Aucun patient associé à la facture avec l'ID : " + factureId));
 
         historiqueActionService.enregistrerAction("Patient récupéré pour la facture ID : " + factureId);
 
-        return patientDto;
+        return patientRequestDto;
     }
 
     @Override
     @Transactional
-    public FactureDto createFactureForConsultation(Integer consultationId, FactureDto factureDto) {
+    public FactureRequestDto createFactureForConsultation(Integer consultationId, FactureRequestDto factureRequestDto) {
         Consultation consultation = consultationRepository.findById(consultationId)
                 .orElseThrow(() -> new EntityNotFoundException("Consultation avec l'ID : " + consultationId + " non trouvée."));
 
@@ -179,10 +177,10 @@ public class FactureServiceImpl implements FactureService {
 
         Facture newFacture = new Facture();
         // Set direct attributes from the DTO, converting BigDecimal to Float if necessary
-        newFacture.setMontant(factureDto.getMontant() != null ? factureDto.getMontant().floatValue() : null);
-        newFacture.setDateEmission(factureDto.getDateEmission() != null ? factureDto.getDateEmission() : LocalDate.now());
-        newFacture.setStatutPaiement(factureDto.getStatutPaiement() != null ? factureDto.getStatutPaiement() : StatutPaiement.NONPAYE);
-        newFacture.setModePaiement(factureDto.getModePaiement() != null ? factureDto.getModePaiement() : ModePaiement.ESPECE);
+        newFacture.setMontant(factureRequestDto.getMontant() != null ? factureRequestDto.getMontant().floatValue() : null);
+        newFacture.setDateEmission(factureRequestDto.getDateEmission() != null ? factureRequestDto.getDateEmission() : LocalDate.now());
+        newFacture.setStatutPaiement(factureRequestDto.getStatutPaiement() != null ? factureRequestDto.getStatutPaiement() : StatutPaiement.NONPAYE);
+        newFacture.setModePaiement(factureRequestDto.getModePaiement() != null ? factureRequestDto.getModePaiement() : ModePaiement.ESPECE);
 
 
         // Establish relationships by fetching entities
@@ -199,17 +197,17 @@ public class FactureServiceImpl implements FactureService {
                 "Facture créée pour la consultation ID : " + consultationId + ", Facture ID: " + createdFacture.getId()
         );
 
-        return FactureDto.fromEntity(createdFacture);
+        return FactureRequestDto.fromEntity(createdFacture);
     }
 
     @Override
-    public FactureDto updateStatutPaiement(Integer factureId, StatutPaiement nouveauStatut) {
+    public FactureRequestDto updateStatutPaiement(Integer factureId, StatutPaiement nouveauStatut) {
         Facture existingFacture = factureRepository.findById(factureId)
                 .orElseThrow(() -> new EntityNotFoundException("La facture avec l'ID " + factureId + " n'existe pas."));
 
         existingFacture.setStatutPaiement(nouveauStatut);
 
-        FactureDto updatedFactureDto = FactureDto.fromEntity(
+        FactureRequestDto updatedFactureRequestDto = FactureRequestDto.fromEntity(
                 factureRepository.save(existingFacture)
         );
 
@@ -217,6 +215,6 @@ public class FactureServiceImpl implements FactureService {
                 "Statut de paiement de la facture ID " + factureId + " mis à jour à : " + nouveauStatut
         );
 
-        return updatedFactureDto;
+        return updatedFactureRequestDto;
     }
 }

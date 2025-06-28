@@ -1,7 +1,7 @@
 package com.example.GestionClinique.model.entity;
 
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import jakarta.persistence.*;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "salle")
-public class Salle extends EntityAbstracte {
+public class Salle extends BaseEntity {
 
         @Column(name = "numero", nullable = false, unique = true) // Ajouté nullable = false et unique = true
         private String numero;

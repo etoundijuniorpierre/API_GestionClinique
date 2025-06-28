@@ -1,6 +1,6 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.PatientDto;
+import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,16 +26,16 @@ public interface PatientApi {
             description = "Enregistre un nouveau patient dans le système avec ses informations personnelles et médicales")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Patient créé avec succès",
-                    content = @Content(schema = @Schema(implementation = PatientDto.class))),
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données du patient invalides ou incomplètes"),
             @ApiResponse(responseCode = "404", description = "Ressource requise non trouvée (ex: médecin référent)"),
             @ApiResponse(responseCode = "409", description = "Conflit: patient existe déjà (email ou numéro unique)"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
-    PatientDto createPatient(
+    PatientRequestDto createPatient(
             @Parameter(description = "Détails du patient à créer", required = true,
-                    content = @Content(schema = @Schema(implementation = PatientDto.class)))
-            @RequestBody PatientDto patientDto);
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class)))
+            @RequestBody PatientRequestDto patientRequestDto);
 
 
 
@@ -46,18 +46,18 @@ public interface PatientApi {
             description = "Modifie les informations d'un patient existant identifié par son ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patient mis à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = PatientDto.class))),
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de mise à jour invalides"),
             @ApiResponse(responseCode = "404", description = "Patient introuvable"),
             @ApiResponse(responseCode = "409", description = "Conflit: nouvelle email déjà utilisée"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
     })
-    PatientDto updatePatient(
+    PatientRequestDto updatePatient(
             @Parameter(description = "ID du patient à mettre à jour", required = true, example = "1")
             @PathVariable("id") Integer id,
             @Parameter(description = "Nouvelles informations du patient", required = true,
-                    content = @Content(schema = @Schema(implementation = PatientDto.class)))
-            @RequestBody PatientDto patientDto);
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class)))
+            @RequestBody PatientRequestDto patientRequestDto);
 
 
 
@@ -68,11 +68,11 @@ public interface PatientApi {
             description = "Récupère la liste complète des patients enregistrés dans le système")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des patients retournée avec succès",
-                    content = @Content(schema = @Schema(implementation = PatientDto.class))),
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucun patient trouvé"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<PatientDto> findAllPatients();
+    List<PatientRequestDto> findAllPatients();
 
 
 
@@ -82,12 +82,12 @@ public interface PatientApi {
             description = "Récupère les détails complets d'un patient spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patient trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = PatientDto.class))),
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de patient invalide"),
             @ApiResponse(responseCode = "404", description = "Patient introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    PatientDto findById(
+    PatientRequestDto findById(
             @Parameter(description = "ID du patient à récupérer", required = true, example = "1")
             @PathVariable("id") Integer id);
 
@@ -117,12 +117,12 @@ public interface PatientApi {
             description = "Recherche des patients par terme (nom, prénom, email, téléphone, etc.)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Résultats de recherche retournés",
-                    content = @Content(schema = @Schema(implementation = PatientDto.class))),
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucun patient correspondant trouvé"),
             @ApiResponse(responseCode = "400", description = "Terme de recherche trop court ou invalide"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<PatientDto> searchPatients(
+    List<PatientRequestDto> searchPatients(
             @Parameter(description = "Terme de recherche (minimum 3 caractères)", required = true, example = "Dupont")
             @PathVariable("term") String searchTerm);
 
@@ -136,12 +136,12 @@ public interface PatientApi {
             description = "Trouve tous les patients portant exactement le nom spécifié")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patients trouvés et retournés",
-                    content = @Content(schema = @Schema(implementation = PatientDto.class))),
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class))),
             @ApiResponse(responseCode = "204", description = "Aucun patient avec ce nom exact"),
             @ApiResponse(responseCode = "400", description = "Nom invalide (doit contenir seulement des lettres)"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<PatientDto> findPatientByInfoPersonnel_Nom(
+    List<PatientRequestDto> findPatientByInfoPersonnel_Nom(
             @Parameter(description = "Nom exact du patient (case insensitive)", required = true, example = "Dupont")
             @PathVariable("nom") String nom);
 
@@ -153,12 +153,12 @@ public interface PatientApi {
             description = "Trouve un patient unique par son adresse email exacte")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patient trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = PatientDto.class))),
+                    content = @Content(schema = @Schema(implementation = PatientRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'email invalide"),
             @ApiResponse(responseCode = "404", description = "Aucun patient avec cet email"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    PatientDto findPatientByInfoPersonnel_Email(
+    PatientRequestDto findPatientByInfoPersonnel_Email(
             @Parameter(description = "Email exact du patient", required = true, example = "patient@example.com")
             @PathVariable("email") String email);
 }

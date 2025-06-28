@@ -1,6 +1,6 @@
 package com.example.GestionClinique.dto.dtoConnexion;
 
-import com.example.GestionClinique.dto.UtilisateurDto;
+import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginResponse {
     private String jwt;
-    private UtilisateurDto user; // Les informations de l'utilisateur authentifié
+    private UtilisateurRequestRequestDto user;
 }

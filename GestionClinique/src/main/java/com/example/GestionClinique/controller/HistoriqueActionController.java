@@ -2,13 +2,12 @@ package com.example.GestionClinique.controller;
 
 
 import com.example.GestionClinique.controller.controllerApi.HistoriqueActionApi;
-import com.example.GestionClinique.dto.HistoriqueActionDto;
+import com.example.GestionClinique.dto.RequestDto.HistoriqueActionRequestDto;
 import com.example.GestionClinique.service.HistoriqueActionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,22 +26,22 @@ public class HistoriqueActionController implements HistoriqueActionApi {
 
 
     @Override
-    public List<HistoriqueActionDto> findAll() {
+    public List<HistoriqueActionRequestDto> findAll() {
         return historiqueActionService.findAll();
     }
 
     @Override
-    public HistoriqueActionDto findById(Integer id) {
+    public HistoriqueActionRequestDto findById(Integer id) {
         return historiqueActionService.findById(id);
     }
 
     @Override
-    public List<HistoriqueActionDto> findByUtilisateurId(Integer id) {
+    public List<HistoriqueActionRequestDto> findByUtilisateurId(Integer id) {
         return historiqueActionService.findHistoriqueByUtilisateurId(id);
     }
 
     @Override
-    public List<HistoriqueActionDto> findByDateAfterAndDateBefore(LocalDate startDate, LocalDate endDate) {
+    public List<HistoriqueActionRequestDto> findByDateAfterAndDateBefore(LocalDate startDate, LocalDate endDate) {
         return historiqueActionService.findByDateAfterAndDateBefore(startDate, endDate);
     }
 }

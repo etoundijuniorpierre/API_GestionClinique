@@ -1,6 +1,6 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.MessageDto;
+import com.example.GestionClinique.dto.ResponseDto.MessageResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,15 +27,15 @@ public interface MessageApi {
             description = "Enregistre un nouveau message entre utilisateurs de la clinique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Message créé avec succès",
-                    content = @Content(schema = @Schema(implementation = MessageDto.class))),
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Données du message invalides ou incomplètes"),
             @ApiResponse(responseCode = "404", description = "Expéditeur ou destinataire introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
-    MessageDto saveMessage(
+    MessageResponseDto saveMessage(
             @Parameter(description = "Détails du message à créer", required = true,
-                    content = @Content(schema = @Schema(implementation = MessageDto.class)))
-            @RequestBody MessageDto messageDto);
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @RequestBody MessageResponseDto messageResponseDto);
 
 
 
@@ -46,18 +46,18 @@ public interface MessageApi {
             description = "Modifie le contenu d'un message existant (seul l'expéditeur peut modifier)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message mis à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = MessageDto.class))),
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "ID ou données du message invalides"),
             @ApiResponse(responseCode = "403", description = "Non autorisé: seul l'expéditeur peut modifier"),
             @ApiResponse(responseCode = "404", description = "Message introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
     })
-    MessageDto updateMessage(
+    MessageResponseDto updateMessage(
             @Parameter(description = "ID du message à mettre à jour", required = true, example = "1")
             @PathVariable("id") Integer id,
             @Parameter(description = "Nouveau contenu du message", required = true,
-                    content = @Content(schema = @Schema(implementation = MessageDto.class)))
-            @RequestBody MessageDto messageDto);
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+            @RequestBody MessageResponseDto messageResponseDto);
 
 
 
@@ -68,13 +68,13 @@ public interface MessageApi {
             description = "Récupère un message spécifique avec tous ses détails")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = MessageDto.class))),
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de message invalide"),
             @ApiResponse(responseCode = "403", description = "Accès non autorisé (destinataire ou expéditeur uniquement)"),
             @ApiResponse(responseCode = "404", description = "Message introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    MessageDto findMessageById(
+    MessageResponseDto findMessageById(
             @Parameter(description = "ID du message à récupérer", required = true, example = "1")
             @PathVariable("id") Integer id);
 
@@ -88,11 +88,11 @@ public interface MessageApi {
             description = "Récupère tous les messages (réservé aux administrateurs)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des messages retournée",
-                    content = @Content(schema = @Schema(implementation = MessageDto.class))),
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
             @ApiResponse(responseCode = "403", description = "Accès non autorisé (admin uniquement)"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
-    List<MessageDto> findAllMessages();
+    List<MessageResponseDto> findAllMessages();
 
 
 
@@ -121,13 +121,13 @@ public interface MessageApi {
             description = "Récupère tous les messages envoyés par un utilisateur spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Messages trouvés et retournés",
-                    content = @Content(schema = @Schema(implementation = MessageDto.class))),
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "ID expéditeur invalide"),
             @ApiResponse(responseCode = "403", description = "Accès non autorisé (propre compte uniquement)"),
             @ApiResponse(responseCode = "404", description = "Aucun message trouvé"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<MessageDto> findMessagesBySenderId(
+    List<MessageResponseDto> findMessagesBySenderId(
             @Parameter(description = "ID de l'expéditeur", required = true, example = "1")
             @PathVariable("senderId") Integer id);
 
@@ -141,13 +141,13 @@ public interface MessageApi {
             description = "Récupère tous les messages reçus par un utilisateur spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Messages trouvés et retournés",
-                    content = @Content(schema = @Schema(implementation = MessageDto.class))),
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "ID destinataire invalide"),
             @ApiResponse(responseCode = "403", description = "Accès non autorisé (propre compte uniquement)"),
             @ApiResponse(responseCode = "404", description = "Aucun message trouvé"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<MessageDto> findMessagesByReceiverId(
+    List<MessageResponseDto> findMessagesByReceiverId(
             @Parameter(description = "ID du destinataire", required = true, example = "1")
             @PathVariable("receiverId") Integer id);
 
@@ -161,13 +161,13 @@ public interface MessageApi {
             description = "Marque un message spécifique comme lu par le destinataire")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message marqué comme lu",
-                    content = @Content(schema = @Schema(implementation = MessageDto.class))),
+                    content = @Content(schema = @Schema(implementation = MessageResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "ID message invalide"),
             @ApiResponse(responseCode = "403", description = "Non autorisé (destinataire uniquement)"),
             @ApiResponse(responseCode = "404", description = "Message introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
-    MessageDto markMessageAsRead(
+    MessageResponseDto markMessageAsRead(
             @Parameter(description = "ID du message à marquer comme lu", required = true, example = "1")
             @PathVariable("id") Integer id);
 }

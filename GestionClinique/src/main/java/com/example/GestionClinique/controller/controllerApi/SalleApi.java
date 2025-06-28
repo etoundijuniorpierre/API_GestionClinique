@@ -1,7 +1,6 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.RendezVousDto;
-import com.example.GestionClinique.dto.SalleDto;
+import com.example.GestionClinique.dto.RequestDto.SalleResquestDto;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,14 +28,14 @@ public interface SalleApi {
             description = "Crée une nouvelle salle dans le système avec les détails fournis")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Salle créée avec succès",
-                    content = @Content(schema = @Schema(implementation = SalleDto.class))),
+                    content = @Content(schema = @Schema(implementation = SalleResquestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de la salle invalides"),
             @ApiResponse(responseCode = "404", description = "Ressource requise non trouvée"),
             @ApiResponse(responseCode = "500", description = "Erreur serveur lors de la création")
     })
-    SalleDto createSalle(
+    SalleResquestDto createSalle(
             @Parameter(description = "Détails de la salle à créer", required = true)
-            @RequestBody SalleDto salleDto);
+            @RequestBody SalleResquestDto salleResquestDto);
 
 
 
@@ -47,12 +46,12 @@ public interface SalleApi {
             description = "Récupère les informations détaillées d'une salle spécifique par son ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Salle trouvée et retournée",
-                    content = @Content(schema = @Schema(implementation = SalleDto.class))),
+                    content = @Content(schema = @Schema(implementation = SalleResquestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'ID de salle invalide"),
             @ApiResponse(responseCode = "404", description = "Salle non trouvée"),
             @ApiResponse(responseCode = "500", description = "Erreur serveur lors de la récupération")
     })
-    SalleDto findSalleById(
+    SalleResquestDto findSalleById(
             @Parameter(description = "ID de la salle à récupérer", required = true)
             @PathVariable("idSalle") Integer id);
 
@@ -65,12 +64,12 @@ public interface SalleApi {
             description = "Récupère toutes les salles correspondant au statut spécifié")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des salles retournée avec succès",
-                    content = @Content(schema = @Schema(implementation = SalleDto.class))),
+                    content = @Content(schema = @Schema(implementation = SalleResquestDto.class))),
             @ApiResponse(responseCode = "400", description = "Valeur de statut invalide"),
             @ApiResponse(responseCode = "404", description = "Aucune salle trouvée avec ce statut"),
             @ApiResponse(responseCode = "500", description = "Erreur serveur lors de la recherche")
     })
-    List<SalleDto> findSalleByStatut(
+    List<SalleResquestDto> findSalleByStatut(
             @Parameter(description = "Statut pour filtrer les salles", required = true)
             @PathVariable("statutSalle") StatutSalle statutSalle);
 
@@ -83,10 +82,10 @@ public interface SalleApi {
             description = "Récupère une liste complète de toutes les salles du système")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste complète des salles retournée",
-                    content = @Content(schema = @Schema(implementation = SalleDto.class))),
+                    content = @Content(schema = @Schema(implementation = SalleResquestDto.class))),
             @ApiResponse(responseCode = "500", description = "Erreur serveur lors de la récupération")
     })
-    List<SalleDto> findAllSalle();
+    List<SalleResquestDto> findAllSalle();
 
 
 
@@ -97,16 +96,16 @@ public interface SalleApi {
             description = "Met à jour les informations d'une salle existante")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Salle mise à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = SalleDto.class))),
+                    content = @Content(schema = @Schema(implementation = SalleResquestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de salle invalides"),
             @ApiResponse(responseCode = "404", description = "Salle non trouvée"),
             @ApiResponse(responseCode = "500", description = "Erreur serveur lors de la mise à jour")
     })
-    SalleDto updateSalle(
+    SalleResquestDto updateSalle(
             @Parameter(description = "ID de la salle à mettre à jour", required = true)
             @PathVariable("idSalle") Integer id,
             @Parameter(description = "Nouveaux détails de la salle", required = true)
-            @RequestBody SalleDto salleDto);
+            @RequestBody SalleResquestDto salleResquestDto);
 
 
 
@@ -134,12 +133,12 @@ public interface SalleApi {
             description = "Récupère une liste des salles disponibles pour un créneau horaire spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des salles disponibles retournée",
-                    content = @Content(schema = @Schema(implementation = SalleDto.class))),
+                    content = @Content(schema = @Schema(implementation = SalleResquestDto.class))),
             @ApiResponse(responseCode = "400", description = "Paramètres de date/heure invalides"),
             @ApiResponse(responseCode = "404", description = "Aucune salle disponible trouvée"),
             @ApiResponse(responseCode = "500", description = "Erreur serveur lors de la recherche")
     })
-    List<SalleDto> findAvailableSalles(
+    List<SalleResquestDto> findAvailableSalles(
             @Parameter(description = "Date et heure de début du créneau désiré", required = true,
                     example = "2023-12-31T10:00:00")
             @PathVariable("dateHeureDebut") LocalDateTime dateHeureDebut,

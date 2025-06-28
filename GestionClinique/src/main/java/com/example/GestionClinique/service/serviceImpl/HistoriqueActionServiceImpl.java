@@ -1,8 +1,7 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 import com.example.GestionClinique.component.AuthenticationFacade;
-import com.example.GestionClinique.dto.HistoriqueActionDto;
-import com.example.GestionClinique.dto.UtilisateurDto;
+import com.example.GestionClinique.dto.RequestDto.HistoriqueActionRequestDto;
 import com.example.GestionClinique.model.entity.HistoriqueAction;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.repository.HistoriqueActionRepository;
@@ -78,27 +77,27 @@ public class HistoriqueActionServiceImpl implements HistoriqueActionService {
 
     @Override
     @Transactional
-    public List<HistoriqueActionDto> findAll() {
+    public List<HistoriqueActionRequestDto> findAll() {
         logger.debug("Récupération de tous les historiques d'action."); // Internal log
         return historiqueActionRepository
                 .findAll()
                 .stream()
-                .map(HistoriqueActionDto::fromEntity)
+                .map(HistoriqueActionRequestDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public HistoriqueActionDto findById(Integer historiqueId) {
+    public HistoriqueActionRequestDto findById(Integer historiqueId) {
         logger.debug("Recherche de l'historique par ID: {}", historiqueId); // Internal log
         return historiqueActionRepository.findById(historiqueId)
-                .map(HistoriqueActionDto::fromEntity)
+                .map(HistoriqueActionRequestDto::fromEntity)
                 .orElseThrow(() -> new RuntimeException("L'historique avec l'id "+historiqueId+" n'existe pas"));
     }
 
     @Override
     @Transactional
-    public List<HistoriqueActionDto> findHistoriqueByUtilisateurId(Integer utilisateurId) {
+    public List<HistoriqueActionRequestDto> findHistoriqueByUtilisateurId(Integer utilisateurId) {
         logger.debug("Recherche de l'historique pour l'utilisateur ID: {}", utilisateurId); // Internal log
         Utilisateur existingUtilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new IllegalArgumentException("L'utilisateur avec l'id "+utilisateurId+" n'existe pas"));
@@ -110,14 +109,14 @@ public class HistoriqueActionServiceImpl implements HistoriqueActionService {
         return existingUtilisateur.getHistoriqueActions()
                 .stream()
                 .filter(Objects::nonNull)
-                .map(HistoriqueActionDto::fromEntity)
+                .map(HistoriqueActionRequestDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
 
     @Override
     @Transactional
-    public List<HistoriqueActionDto> findHistoriqueByUtilisateurName(String utilisateurName) {
+    public List<HistoriqueActionRequestDto> findHistoriqueByUtilisateurName(String utilisateurName) {
         Collection<Utilisateur> usersByNom = utilisateurRepository.findUtilisateurByInfoPersonnel_Nom(utilisateurName);
 
         if (usersByNom == null || usersByNom.isEmpty()) {
@@ -134,14 +133,14 @@ public class HistoriqueActionServiceImpl implements HistoriqueActionService {
                     return user.getHistoriqueActions().stream();
                 })
                 .filter(Objects::nonNull)
-                .map(HistoriqueActionDto::fromEntity)
+                .map(HistoriqueActionRequestDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
 
     @Override
     @Transactional
-    public List<HistoriqueActionDto> findByDateAfterAndDateBefore(LocalDate startDate, LocalDate endDate) {
+    public List<HistoriqueActionRequestDto> findByDateAfterAndDateBefore(LocalDate startDate, LocalDate endDate) {
         logger.debug("Recherche de l'historique entre {} et {}", startDate, endDate); // Internal log
         if (startDate == null || endDate == null) {
             throw new IllegalArgumentException("startDate et endDate ne peuvent être null"); // Corrected message
@@ -154,7 +153,7 @@ public class HistoriqueActionServiceImpl implements HistoriqueActionService {
         return historiqueActionRepository.findByDateAfterAndDateBefore(startDate, endDate)
                 .stream()
                 .filter(Objects::nonNull)
-                .map(HistoriqueActionDto::fromEntity)
+                .map(HistoriqueActionRequestDto::fromEntity)
                 .collect(Collectors.toList());
     }
 }

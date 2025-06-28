@@ -28,31 +28,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // --- POINT DE CONTRÔLE 1 : L'objet 'utilisateur' est-il réellement trouvé et non null ici ? ---
-        // Explication : Si vous avez mis un breakpoint ici, est-ce que 'utilisateur' est null ?
-        // Normalement, .orElseThrow() devrait éviter qu'il soit null si l'Optional est vide.
-        // Si findUtilisateurByInfoPersonnel_Email() renvoie un Optional.empty(), cette ligne lèvera une exception.
-        // Si elle retourne un Optional avec un Utilisateur qui lui-même contient des champs null,
-        // la NPE arrivera plus tard.
+
         Utilisateur utilisateur = utilisateurRepository.findUtilisateurByInfoPersonnel_Email(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + email));
-
-        // --- POINT DE CONTRÔLE 2 : Vérifier les champs utilisés pour construire UserDetails ---
-        // Chaque appel de méthode sur 'utilisateur' ou 'utilisateur.getInfoPersonnel()'
-        // est une source potentielle de NullPointerException si l'objet est null.
 
         String username = null;
         String password = null;
 
-        if (utilisateur != null) { // Ce bloc devrait être exécuté si orElseThrow n'a pas été déclenché
-            // Vérifier InfoPersonnel
-            if (utilisateur.getInfoPersonnel() != null) {
-                username = utilisateur.getInfoPersonnel().getEmail();
-            } else {
-                // Log ou lancer une exception si infoPersonnel est null (c'est une anomalie si l'email est censé être là)
-                System.err.println("ERREUR: InfoPersonnel est null pour l'utilisateur avec ID: " + utilisateur.getId());
-                throw new IllegalStateException("InfoPersonnel est manquant pour l'utilisateur.");
-            }
+        if (utilisateur != null) {
+
+                username = utilisateur.getEmail();
 
             // Vérifier motDePasse
             password = utilisateur.getMotDePasse();

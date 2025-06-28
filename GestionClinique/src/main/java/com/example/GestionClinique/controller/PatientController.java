@@ -2,7 +2,7 @@ package com.example.GestionClinique.controller;
 
 
 import com.example.GestionClinique.controller.controllerApi.PatientApi;
-import com.example.GestionClinique.dto.PatientDto;
+import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import com.example.GestionClinique.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,22 +20,22 @@ public class PatientController implements PatientApi {
     }
 
     @Override
-    public PatientDto createPatient(PatientDto patientDto) {
-        return patientService.createPatient(patientDto);
+    public PatientRequestDto createPatient(PatientRequestDto patientRequestDto) {
+        return patientService.createPatient(patientRequestDto);
     }
 
     @Override
-    public PatientDto updatePatient(Integer id, PatientDto patientDto) {
-        return patientService.updatePatient(id, patientDto);
+    public PatientRequestDto updatePatient(Integer id, PatientRequestDto patientRequestDto) {
+        return patientService.updatePatient(id, patientRequestDto);
     }
 
     @Override
-    public List<PatientDto> findAllPatients() {
+    public List<PatientRequestDto> findAllPatients() {
         return patientService.findAllPatients();
     }
 
     @Override
-    public PatientDto findById(Integer id) {
+    public PatientRequestDto findById(Integer id) {
         return patientService.findById(id);
     }
 
@@ -45,17 +45,17 @@ public class PatientController implements PatientApi {
     }
 
     @Override
-    public List<PatientDto> searchPatients(String searchTerm) {
+    public List<PatientRequestDto> searchPatients(String searchTerm) {
         return patientService.searchPatients(searchTerm);
     }
 
     @Override
-    public List<PatientDto> findPatientByInfoPersonnel_Nom(String nom) {
+    public List<PatientRequestDto> findPatientByInfoPersonnel_Nom(String nom) {
         return patientService.findPatientByInfoPersonnel_Nom(nom);
     }
 
     @Override
-    public PatientDto findPatientByInfoPersonnel_Email(String email) {
+    public PatientRequestDto findPatientByInfoPersonnel_Email(String email) {
         return patientService.findPatientByInfoPersonnel_Email(email);
     }
 }

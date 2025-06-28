@@ -1,6 +1,6 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.*;
+import com.example.GestionClinique.dto.RequestDto.RendezVousRequestDto;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
@@ -16,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -32,15 +31,15 @@ public interface RendezVousApi {
             description = "Permet de programmer un nouveau rendez-vous entre un patient et un professionnel de santé")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Rendez-vous créé avec succès",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données du rendez-vous invalides ou conflit de planning"),
             @ApiResponse(responseCode = "404", description = "Patient ou professionnel de santé non trouvé"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
-    RendezVousDto createRendezVous(
+    RendezVousRequestDto createRendezVous(
             @Parameter(description = "Détails du rendez-vous à créer", required = true,
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class)))
-            @RequestBody RendezVousDto rendezVousDto);
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class)))
+            @RequestBody RendezVousRequestDto rendezVousRequestDto);
 
 
 
@@ -51,12 +50,12 @@ public interface RendezVousApi {
             description = "Récupère les informations détaillées d'un rendez-vous spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rendez-vous trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'ID de rendez-vous invalide"),
             @ApiResponse(responseCode = "404", description = "Rendez-vous non trouvé avec l'ID fourni"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    RendezVousDto findRendezVousById(
+    RendezVousRequestDto findRendezVousById(
             @Parameter(description = "ID du rendez-vous à récupérer", required = true,
                     example = "123")
             @PathVariable("idRendezVous") Integer id);
@@ -72,18 +71,18 @@ public interface RendezVousApi {
             description = "Modifie les détails d'un rendez-vous programmé")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rendez-vous mis à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de mise à jour invalides ou conflit de planning"),
             @ApiResponse(responseCode = "404", description = "Rendez-vous non trouvé avec l'ID fourni"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
     })
-    RendezVousDto updateRendezVous(
+    RendezVousRequestDto updateRendezVous(
             @Parameter(description = "ID du rendez-vous à mettre à jour", required = true,
                     example = "123")
             @PathVariable("idRendezVous") Integer id,
             @Parameter(description = "Nouveaux détails du rendez-vous", required = true,
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class)))
-            @RequestBody RendezVousDto rendezVousDto);
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class)))
+            @RequestBody RendezVousRequestDto rendezVousRequestDto);
 
 
 
@@ -117,10 +116,10 @@ public interface RendezVousApi {
             description = "Récupère la liste complète de tous les rendez-vous programmés")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste complète des rendez-vous retournée",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<RendezVousDto> findAllRendezVous();
+    List<RendezVousRequestDto> findAllRendezVous();
 
 
 
@@ -132,12 +131,12 @@ public interface RendezVousApi {
             description = "Filtre les rendez-vous selon leur statut (confirmé, annulé, etc.)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rendez-vous filtrés retournés avec succès",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Valeur de statut invalide"),
             @ApiResponse(responseCode = "404", description = "Aucun rendez-vous trouvé avec ce statut"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors du filtrage")
     })
-    List<RendezVousDto> findRendezVousByStatut(
+    List<RendezVousRequestDto> findRendezVousByStatut(
             @Parameter(description = "Statut pour filtrer", required = true,
                     schema = @Schema(implementation = StatutRDV.class))
             @PathVariable("statut") StatutRDV statut);
@@ -152,12 +151,12 @@ public interface RendezVousApi {
             description = "Liste tous les rendez-vous programmés dans une salle spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rendez-vous par salle retournés avec succès",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'ID de salle invalide"),
             @ApiResponse(responseCode = "404", description = "Aucun rendez-vous trouvé pour cette salle"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<RendezVousDto> findRendezVousBySalleId(
+    List<RendezVousRequestDto> findRendezVousBySalleId(
             @Parameter(description = "ID de la salle à rechercher", required = true,
                     example = "5")
             @PathVariable("idSalle") Integer id);
@@ -172,12 +171,12 @@ public interface RendezVousApi {
             description = "Liste tous les rendez-vous d'un patient spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rendez-vous du patient retournés avec succès",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'ID patient invalide"),
             @ApiResponse(responseCode = "404", description = "Aucun rendez-vous trouvé pour ce patient"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<RendezVousDto> findRendezVousByPatientId(
+    List<RendezVousRequestDto> findRendezVousByPatientId(
             @Parameter(description = "ID du patient à rechercher", required = true,
                     example = "42")
             @PathVariable("idPatient") Integer id);
@@ -192,12 +191,12 @@ public interface RendezVousApi {
             description = "Liste tous les rendez-vous d'un médecin ou professionnel de santé spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rendez-vous du professionnel retournés avec succès",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'ID professionnel invalide"),
             @ApiResponse(responseCode = "404", description = "Aucun rendez-vous trouvé pour ce professionnel"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<RendezVousDto> findRendezVousByMedecinId(
+    List<RendezVousRequestDto> findRendezVousByMedecinId(
             @Parameter(description = "ID du professionnel de santé", required = true,
                     example = "7")
             @PathVariable("idMedecin") Integer id);
@@ -236,12 +235,12 @@ public interface RendezVousApi {
             description = "Récupère une liste de tous les rendez-vous programmés pour une date spécifique.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des rendez-vous pour le jour retournée avec succès",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format de date invalide"),
             @ApiResponse(responseCode = "404", description = "Aucun rendez-vous trouvé pour ce jour"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
     })
-    List<RendezVousDto> findRendezVousByJour(
+    List<RendezVousRequestDto> findRendezVousByJour(
             @Parameter(description = "Date du jour à rechercher (format yyyy-MM-dd)", required = true,
                     example = "2025-06-22") // Example is current date
             @PathVariable("jour") LocalDate jour);
@@ -255,12 +254,12 @@ public interface RendezVousApi {
             description = "Change le statut d'un rendez-vous existant à 'annulé'")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rendez-vous annulé avec succès",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Format d'ID de rendez-vous invalide"),
             @ApiResponse(responseCode = "404", description = "Rendez-vous non trouvé avec l'ID fourni"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de l'annulation")
     })
-    RendezVousDto cancelRendezVous(
+    RendezVousRequestDto cancelRendezVous(
             @Parameter(description = "ID du rendez-vous à annuler", required = true,
                     example = "123")
             @PathVariable("idRendezVous") Integer idRendezVous);

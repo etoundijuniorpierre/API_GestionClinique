@@ -1,8 +1,7 @@
 package com.example.GestionClinique.configuration.dataInitConfig;
 
 
-import com.example.GestionClinique.dto.RoleDto;
-import com.example.GestionClinique.model.entity.InfoPersonnel;
+import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestRequestDto;
 import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;
@@ -11,7 +10,6 @@ import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.repository.RoleRepository;
 import com.example.GestionClinique.repository.SalleRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,18 +58,14 @@ public class DataInitializer {
                 // 2. Créer l'utilisateur admin
                 Utilisateur admin = new Utilisateur();
 
-                // S'assurer que InfoPersonnel est initialisé
-                if (admin.getInfoPersonnel() == null) {
-                    admin.setInfoPersonnel(new InfoPersonnel());
-                }
 
-                admin.getInfoPersonnel().setNom("admin");
-                admin.getInfoPersonnel().setPrenom("admin");
-                admin.getInfoPersonnel().setEmail("admin@gmail.com");
-                admin.getInfoPersonnel().setDateNaissance(LocalDate.parse("2001-09-08"));
-                admin.getInfoPersonnel().setTelephone("+2370061");
-                admin.getInfoPersonnel().setAdresse("Yaounde Mimboman Sapeur");
-                admin.getInfoPersonnel().setGenre("M");
+                admin.setNom("admin");
+                admin.setPrenom("admin");
+                admin.setEmail("admin@gmail.com");
+                admin.setDateNaissance(LocalDate.parse("2001-09-08"));
+                admin.setTelephone("+2370061");
+                admin.setAdresse("Yaounde Mimboman Sapeur");
+                admin.setGenre("M");
                 admin.setMotDePasse(passwordEncoder.encode("administrateur"));
                 admin.setActif(true);
 
@@ -80,7 +74,7 @@ public class DataInitializer {
                 // ou une méthode 'addRole' si vous préférez ajouter un par un.
                 Set<Role> roles = new HashSet<>();
                 roles.add(adminRole);
-                admin.getRole().add(adminRole);
+                admin.setRole(roles);
 
                 // 4. Sauvegarder l'utilisateur (ceci devrait aussi sauvegarder la relation ManyToMany)
                 utilisateurRepository.save(admin);

@@ -1,6 +1,9 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.*; // Import all DTOs
+import com.example.GestionClinique.dto.RequestDto.ConsultationRequestDto;
+import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
+import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
+import com.example.GestionClinique.dto.RequestDto.RendezVousRequestDto;
 import com.example.GestionClinique.model.entity.*;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.*;
@@ -48,35 +51,35 @@ public class ConsultationServiceImpl implements ConsultationService {
 
     @Override
     @Transactional
-    public ConsultationDto createConsultation(ConsultationDto consultationDto) {
+    public ConsultationRequestDto createConsultation(ConsultationRequestDto consultationRequestDto) {
         Consultation consultation = new Consultation();
         // Set direct attributes from DTO to entity
-        consultation.setMotifs(consultationDto.getMotifs());
-        consultation.setTensionArterielle(consultationDto.getTensionArterielle());
-        consultation.setTemperature(consultationDto.getTemperature());
-        consultation.setPoids(consultationDto.getPoids());
-        consultation.setTaille(consultationDto.getTaille());
-        consultation.setCompteRendu(consultationDto.getCompteRendu());
-        consultation.setDiagnostic(consultationDto.getDiagnostic());
+        consultation.setMotifs(consultationRequestDto.getMotifs());
+        consultation.setTensionArterielle(consultationRequestDto.getTensionArterielle());
+        consultation.setTemperature(consultationRequestDto.getTemperature());
+        consultation.setPoids(consultationRequestDto.getPoids());
+        consultation.setTaille(consultationRequestDto.getTaille());
+        consultation.setCompteRendu(consultationRequestDto.getCompteRendu());
+        consultation.setDiagnostic(consultationRequestDto.getDiagnostic());
 
 
         // Handle relationships by fetching entities using IDs from Summary DTOs
-        if (consultationDto.getRendezVous() != null && consultationDto.getRendezVous().getId() != null) {
-            RendezVous rendezVous = rendezVousRepository.findById(consultationDto.getRendezVous().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Rendez-vous associé introuvable avec l'ID: " + consultationDto.getRendezVous().getId()));
+        if (consultationRequestDto.getRendezVous() != null && consultationRequestDto.getRendezVous().getId() != null) {
+            RendezVous rendezVous = rendezVousRepository.findById(consultationRequestDto.getRendezVous().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Rendez-vous associé introuvable avec l'ID: " + consultationRequestDto.getRendezVous().getId()));
             consultation.setRendezVous(rendezVous);
         }
 
-        if (consultationDto.getDossierMedical() != null && consultationDto.getDossierMedical().getId() != null) {
-            DossierMedical dossierMedical = dossierMedicalRepository.findById(consultationDto.getDossierMedical().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Dossier médical associé introuvable avec l'ID: " + consultationDto.getDossierMedical().getId()));
+        if (consultationRequestDto.getDossierMedical() != null && consultationRequestDto.getDossierMedical().getId() != null) {
+            DossierMedical dossierMedical = dossierMedicalRepository.findById(consultationRequestDto.getDossierMedical().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Dossier médical associé introuvable avec l'ID: " + consultationRequestDto.getDossierMedical().getId()));
             consultation.setDossierMedical(dossierMedical);
         }
 
         // If a Medecin (Utilisateur) is provided in the DTO's summary, fetch and set it
-        if (consultationDto.getMedecin() != null && consultationDto.getMedecin().getId() != null) {
-            Utilisateur medecin = utilisateurRepository.findById(consultationDto.getMedecin().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Médecin associé introuvable avec l'ID: " + consultationDto.getMedecin().getId()));
+        if (consultationRequestDto.getMedecin() != null && consultationRequestDto.getMedecin().getId() != null) {
+            Utilisateur medecin = utilisateurRepository.findById(consultationRequestDto.getMedecin().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Médecin associé introuvable avec l'ID: " + consultationRequestDto.getMedecin().getId()));
             consultation.setMedecin(medecin);
         } else {
             // Potentially derive the médecin from the RendezVous if it's set
@@ -103,32 +106,32 @@ public class ConsultationServiceImpl implements ConsultationService {
                         ", ID Rendez-vous: " + (savedConsultation.getRendezVous() != null ? savedConsultation.getRendezVous().getId() : "N/A") + ")"
         );
 
-        return ConsultationDto.fromEntity(savedConsultation);
+        return ConsultationRequestDto.fromEntity(savedConsultation);
     }
 
     @Override
     @Transactional
-    public ConsultationDto updateConsultation(Integer id, ConsultationDto consultationDto) {
+    public ConsultationRequestDto updateConsultation(Integer id, ConsultationRequestDto consultationRequestDto) {
         Consultation existingConsultation = consultationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("La consultation avec l'ID " + id + " n'existe pas."));
 
         // Update direct attributes
-        existingConsultation.setMotifs(consultationDto.getMotifs());
-        existingConsultation.setTensionArterielle(consultationDto.getTensionArterielle());
-        existingConsultation.setTemperature(consultationDto.getTemperature());
-        existingConsultation.setPoids(consultationDto.getPoids());
-        existingConsultation.setTaille(consultationDto.getTaille());
-        existingConsultation.setCompteRendu(consultationDto.getCompteRendu());
-        existingConsultation.setDiagnostic(consultationDto.getDiagnostic());
+        existingConsultation.setMotifs(consultationRequestDto.getMotifs());
+        existingConsultation.setTensionArterielle(consultationRequestDto.getTensionArterielle());
+        existingConsultation.setTemperature(consultationRequestDto.getTemperature());
+        existingConsultation.setPoids(consultationRequestDto.getPoids());
+        existingConsultation.setTaille(consultationRequestDto.getTaille());
+        existingConsultation.setCompteRendu(consultationRequestDto.getCompteRendu());
+        existingConsultation.setDiagnostic(consultationRequestDto.getDiagnostic());
 
         // Handle updates for related entities via their IDs
         // For DossierMedical, you usually update the association or create if not present.
         // If the DTO provides a DossierMedicalSummary, update the association
-        if (consultationDto.getDossierMedical() != null && consultationDto.getDossierMedical().getId() != null) {
-            DossierMedical dossierMedical = dossierMedicalRepository.findById(consultationDto.getDossierMedical().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Dossier médical associé introuvable avec l'ID: " + consultationDto.getDossierMedical().getId()));
+        if (consultationRequestDto.getDossierMedical() != null && consultationRequestDto.getDossierMedical().getId() != null) {
+            DossierMedical dossierMedical = dossierMedicalRepository.findById(consultationRequestDto.getDossierMedical().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Dossier médical associé introuvable avec l'ID: " + consultationRequestDto.getDossierMedical().getId()));
             existingConsultation.setDossierMedical(dossierMedical);
-        } else if (consultationDto.getDossierMedical() != null && consultationDto.getDossierMedical().getId() == null) {
+        } else if (consultationRequestDto.getDossierMedical() != null && consultationRequestDto.getDossierMedical().getId() == null) {
             // Case where dossier medical is explicitly set to null or disassociated
             existingConsultation.setDossierMedical(null);
         }
@@ -137,20 +140,20 @@ public class ConsultationServiceImpl implements ConsultationService {
         // Updating it here would mean changing the linked rendez-vous, which might be a complex business rule.
         // It's often better to handle rendezvous association at creation (startConsultation) or disallow changing it.
         // If you need to allow changing the associated rendez-vous, implement similar logic as DossierMedical.
-        if (consultationDto.getRendezVous() != null && consultationDto.getRendezVous().getId() != null) {
-            RendezVous rendezVous = rendezVousRepository.findById(consultationDto.getRendezVous().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Rendez-vous associé introuvable avec l'ID: " + consultationDto.getRendezVous().getId()));
+        if (consultationRequestDto.getRendezVous() != null && consultationRequestDto.getRendezVous().getId() != null) {
+            RendezVous rendezVous = rendezVousRepository.findById(consultationRequestDto.getRendezVous().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Rendez-vous associé introuvable avec l'ID: " + consultationRequestDto.getRendezVous().getId()));
             existingConsultation.setRendezVous(rendezVous);
-        } else if (consultationDto.getRendezVous() != null && consultationDto.getRendezVous().getId() == null) {
+        } else if (consultationRequestDto.getRendezVous() != null && consultationRequestDto.getRendezVous().getId() == null) {
             existingConsultation.setRendezVous(null);
         }
 
         // Handle Medecin update (if allowed)
-        if (consultationDto.getMedecin() != null && consultationDto.getMedecin().getId() != null) {
-            Utilisateur medecin = utilisateurRepository.findById(consultationDto.getMedecin().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Médecin associé introuvable avec l'ID: " + consultationDto.getMedecin().getId()));
+        if (consultationRequestDto.getMedecin() != null && consultationRequestDto.getMedecin().getId() != null) {
+            Utilisateur medecin = utilisateurRepository.findById(consultationRequestDto.getMedecin().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Médecin associé introuvable avec l'ID: " + consultationRequestDto.getMedecin().getId()));
             existingConsultation.setMedecin(medecin);
-        } else if (consultationDto.getMedecin() != null && consultationDto.getMedecin().getId() == null) {
+        } else if (consultationRequestDto.getMedecin() != null && consultationRequestDto.getMedecin().getId() == null) {
             existingConsultation.setMedecin(null);
         }
 
@@ -161,13 +164,13 @@ public class ConsultationServiceImpl implements ConsultationService {
                 "Mise à jour de la consultation ID: " + id
         );
 
-        return ConsultationDto.fromEntity(updatedConsultation);
+        return ConsultationRequestDto.fromEntity(updatedConsultation);
     }
 
 
     @Override
     @Transactional
-    public ConsultationDto findById(Integer id) {
+    public ConsultationRequestDto findById(Integer id) {
         Consultation consultation = consultationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("La consultation avec l'ID " + id + " n'existe pas."));
 
@@ -175,14 +178,14 @@ public class ConsultationServiceImpl implements ConsultationService {
                 "Consultation ID: " + id + " recherchée"
         );
 
-        return ConsultationDto.fromEntity(consultation);
+        return ConsultationRequestDto.fromEntity(consultation);
     }
 
     @Override
     @Transactional
-    public List<ConsultationDto> findAll() {
-        List<ConsultationDto> allConsultations = consultationRepository.findAll().stream()
-                .map(ConsultationDto::fromEntity)
+    public List<ConsultationRequestDto> findAll() {
+        List<ConsultationRequestDto> allConsultations = consultationRepository.findAll().stream()
+                .map(ConsultationRequestDto::fromEntity)
                 .collect(Collectors.toList());
 
         historiqueActionService.enregistrerAction(
@@ -194,7 +197,7 @@ public class ConsultationServiceImpl implements ConsultationService {
 
     @Override
     @Transactional
-    public DossierMedicalDto findDossierMedicalByConsultationId(Integer id) {
+    public DossierMedicalRequestDto findDossierMedicalByConsultationId(Integer id) {
         Consultation consultation = consultationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Consultation introuvable avec l'ID: " + id));
 
@@ -207,12 +210,12 @@ public class ConsultationServiceImpl implements ConsultationService {
                 "Dossier médical lié à la consultation ID: " + id + " affiché"
         );
 
-        return DossierMedicalDto.fromEntity(dossierMedical);
+        return DossierMedicalRequestDto.fromEntity(dossierMedical);
     }
 
     @Override
     @Transactional
-    public RendezVousDto findRendezVousByConsultationId(Integer id) {
+    public RendezVousRequestDto findRendezVousByConsultationId(Integer id) {
         Consultation consultation = consultationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Consultation introuvable avec l'ID: " + id));
 
@@ -225,7 +228,7 @@ public class ConsultationServiceImpl implements ConsultationService {
                 "Rendez-vous lié à la consultation ID: " + id + " affiché"
         );
 
-        return RendezVousDto.fromEntity(rendezVous);
+        return RendezVousRequestDto.fromEntity(rendezVous);
     }
 
     @Override
@@ -269,7 +272,7 @@ public class ConsultationServiceImpl implements ConsultationService {
 
     @Override
     @Transactional
-    public ConsultationDto startConsultation(Integer rendezVousId, ConsultationDto consultationDetails) {
+    public ConsultationRequestDto startConsultation(Integer rendezVousId, ConsultationRequestDto consultationDetails) {
         RendezVous rendezVous = rendezVousRepository.findById(rendezVousId)
                 .orElseThrow(() -> new EntityNotFoundException("Rendez-vous introuvable avec l'ID " + rendezVousId));
 
@@ -321,23 +324,23 @@ public class ConsultationServiceImpl implements ConsultationService {
                 "Lancement de la consultation ID: " + savedConsultation.getId() + " pour le rendez-vous ID: " + rendezVousId
         );
 
-        return ConsultationDto.fromEntity(savedConsultation);
+        return ConsultationRequestDto.fromEntity(savedConsultation);
     }
 
     @Override
     @Transactional
-    public ConsultationDto addPrescriptionToConsultation(Integer consultationId, PrescriptionDto prescriptionDto) {
+    public ConsultationRequestDto addPrescriptionToConsultation(Integer consultationId, PrescriptionRequestDto prescriptionRequestDto) {
         Consultation consultation = consultationRepository.findById(consultationId)
                 .orElseThrow(() -> new EntityNotFoundException("Consultation introuvable avec l'ID " + consultationId));
 
         Prescription newPrescription = new Prescription();
         // Set direct attributes for the new Prescription
-        newPrescription.setDatePrescription(prescriptionDto.getDatePrescription() != null ? prescriptionDto.getDatePrescription() : LocalDate.now());
-        newPrescription.setTypePrescription(prescriptionDto.getTypePrescription());
-        newPrescription.setMedicaments(prescriptionDto.getMedicaments());
-        newPrescription.setInstructions(prescriptionDto.getInstructions());
-        newPrescription.setDureePrescription(prescriptionDto.getDureePrescription());
-        newPrescription.setQuantite(prescriptionDto.getQuantite());
+        newPrescription.setDatePrescription(prescriptionRequestDto.getDatePrescription() != null ? prescriptionRequestDto.getDatePrescription() : LocalDate.now());
+        newPrescription.setTypePrescription(prescriptionRequestDto.getTypePrescription());
+        newPrescription.setMedicaments(prescriptionRequestDto.getMedicaments());
+        newPrescription.setInstructions(prescriptionRequestDto.getInstructions());
+        newPrescription.setDureePrescription(prescriptionRequestDto.getDureePrescription());
+        newPrescription.setQuantite(prescriptionRequestDto.getQuantite());
 
 
         // Establish relationships for the Prescription
@@ -365,12 +368,12 @@ public class ConsultationServiceImpl implements ConsultationService {
                 "Ajout d'une prescription (ID: " + savedPrescription.getId() + ") à la consultation ID: " + consultationId
         );
 
-        return ConsultationDto.fromEntity(consultationRepository.findById(consultationId).orElseThrow()); // Re-fetch to ensure all relationships are fresh
+        return ConsultationRequestDto.fromEntity(consultationRepository.findById(consultationId).orElseThrow()); // Re-fetch to ensure all relationships are fresh
     }
 
     @Override
     @Transactional
-    public List<PrescriptionDto> findPrescriptionsByConsultationId(Integer consultationId) {
+    public List<PrescriptionRequestDto> findPrescriptionsByConsultationId(Integer consultationId) {
         Consultation consultation = consultationRepository.findById(consultationId)
                 .orElseThrow(() -> new EntityNotFoundException("Consultation introuvable avec l'ID " + consultationId));
 
@@ -385,7 +388,7 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         return consultation.getPrescriptions().stream()
                 .filter(Objects::nonNull)
-                .map(PrescriptionDto::fromEntity)
+                .map(PrescriptionRequestDto::fromEntity)
                 .collect(Collectors.toList());
     }
 }

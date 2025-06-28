@@ -1,11 +1,9 @@
 package com.example.GestionClinique.model.entity;
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -14,22 +12,17 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "message")
-public class Message extends EntityAbstracte {
+public class Message extends BaseEntity {
 
     @Column(name="contenu", nullable = false, columnDefinition = "TEXT")
     private String contenu;
 
-    @Column(name="date_envoi", nullable = false)
-    private LocalDateTime dateEnvoi;
-
     @Column(name="lu", nullable = false)
     private boolean lu;
-
 
     public boolean getLu() {
         return this.lu;
     }
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "expediteur_id", nullable = false)

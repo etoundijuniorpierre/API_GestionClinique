@@ -1,6 +1,9 @@
 package com.example.GestionClinique.controller.controllerApi;
 
-import com.example.GestionClinique.dto.*;
+import com.example.GestionClinique.dto.RequestDto.ConsultationRequestDto;
+import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
+import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
+import com.example.GestionClinique.dto.RequestDto.RendezVousRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,15 +30,15 @@ public interface ConsultationApi {
             description = "Enregistre une nouvelle consultation médicale dans le système")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Consultation créée avec succès",
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class))),
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de la consultation invalides"),
             @ApiResponse(responseCode = "404", description = "Ressource nécessaire non trouvée"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
-    ConsultationDto createConsultation(
+    ConsultationRequestDto createConsultation(
             @Parameter(description = "Détails de la consultation à créer", required = true,
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class)))
-            @RequestBody ConsultationDto consultationDto);
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class)))
+            @RequestBody ConsultationRequestDto consultationRequestDto);
 
 
 
@@ -45,18 +48,18 @@ public interface ConsultationApi {
             description = "Crée et démarre une consultation liée à un rendez-vous existant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Consultation démarrée avec succès",
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class))),
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de requête invalides"),
             @ApiResponse(responseCode = "404", description = "Rendez-vous introuvable"),
             @ApiResponse(responseCode = "409", description = "Conflit: le rendez-vous est déjà lié ou son statut ne permet pas le démarrage"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
-    ConsultationDto startConsultation(
+    ConsultationRequestDto startConsultation(
             @Parameter(description = "ID du rendez-vous à lier", required = true, example = "1")
             @PathVariable("idRendezVous") Integer idRendezVous,
             @Parameter(description = "Détails de la consultation", required = true,
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class)))
-            @RequestBody ConsultationDto consultationDto);
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class)))
+            @RequestBody ConsultationRequestDto consultationRequestDto);
 
 
 
@@ -66,17 +69,17 @@ public interface ConsultationApi {
             description = "Modifie les informations d'une consultation existante")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Consultation mise à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class))),
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de mise à jour invalides"),
             @ApiResponse(responseCode = "404", description = "Consultation introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
     })
-    ConsultationDto updateConsultation(
+    ConsultationRequestDto updateConsultation(
             @Parameter(description = "ID de la consultation à mettre à jour", required = true, example = "1")
             @PathVariable("idConsultation") Integer id,
             @Parameter(description = "Nouveaux détails de la consultation", required = true,
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class)))
-            @RequestBody ConsultationDto consultationDto);
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class)))
+            @RequestBody ConsultationRequestDto consultationRequestDto);
 
 
 
@@ -86,12 +89,12 @@ public interface ConsultationApi {
             description = "Récupère les détails complets d'une consultation spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Consultation trouvée et retournée",
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class))),
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de consultation invalide"),
             @ApiResponse(responseCode = "404", description = "Consultation introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    ConsultationDto findById(
+    ConsultationRequestDto findById(
             @Parameter(description = "ID de la consultation à récupérer", required = true, example = "1")
             @PathVariable("idConsultation") Integer id);
 
@@ -103,10 +106,10 @@ public interface ConsultationApi {
             description = "Récupère la liste complète des consultations enregistrées")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Liste des consultations retournée avec succès",
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class))),
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class))),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<ConsultationDto> findAll();
+    List<ConsultationRequestDto> findAll();
 
 
 
@@ -116,12 +119,12 @@ public interface ConsultationApi {
             description = "Récupère le dossier médical associé à une consultation spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossier médical trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = DossierMedicalDto.class))),
+                    content = @Content(schema = @Schema(implementation = DossierMedicalRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de consultation invalide"),
             @ApiResponse(responseCode = "404", description = "Dossier médical ou consultation introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    DossierMedicalDto findDossierMedicalByConsultationId(
+    DossierMedicalRequestDto findDossierMedicalByConsultationId(
             @Parameter(description = "ID de la consultation", required = true, example = "1")
             @PathVariable("idConsultation") Integer idConsultation);
 
@@ -133,12 +136,12 @@ public interface ConsultationApi {
             description = "Récupère le rendez-vous associé à une consultation spécifique")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rendez-vous trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = RendezVousDto.class))),
+                    content = @Content(schema = @Schema(implementation = RendezVousRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de consultation invalide"),
             @ApiResponse(responseCode = "404", description = "Rendez-vous ou consultation introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    RendezVousDto findRendezVousByConsultationId(
+    RendezVousRequestDto findRendezVousByConsultationId(
             @Parameter(description = "ID de la consultation", required = true, example = "1")
             @PathVariable("idConsultation") Integer idConsultation);
 
@@ -166,17 +169,17 @@ public interface ConsultationApi {
             description = "Ajoute une prescription médicale à une consultation existante")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Prescription ajoutée avec succès",
-                    content = @Content(schema = @Schema(implementation = ConsultationDto.class))),
+                    content = @Content(schema = @Schema(implementation = ConsultationRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "Données de prescription invalides"),
             @ApiResponse(responseCode = "404", description = "Consultation introuvable"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de l'ajout")
     })
-    ConsultationDto addPrescriptionToConsultation(
+    ConsultationRequestDto addPrescriptionToConsultation(
             @Parameter(description = "ID de la consultation", required = true, example = "1")
             @PathVariable("idConsultation") Integer id,
             @Parameter(description = "Détails de la prescription", required = true,
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class)))
-            @RequestBody PrescriptionDto prescriptionDto);
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class)))
+            @RequestBody PrescriptionRequestDto prescriptionRequestDto);
 
 
 
@@ -186,12 +189,12 @@ public interface ConsultationApi {
             description = "Récupère toutes les prescriptions associées à une consultation")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Prescriptions trouvées et retournées",
-                    content = @Content(schema = @Schema(implementation = PrescriptionDto.class))),
+                    content = @Content(schema = @Schema(implementation = PrescriptionRequestDto.class))),
             @ApiResponse(responseCode = "400", description = "ID de consultation invalide"),
             @ApiResponse(responseCode = "404", description = "Aucune prescription trouvée pour cette consultation"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
-    List<PrescriptionDto> findPrescriptionsByConsultationId(
+    List<PrescriptionRequestDto> findPrescriptionsByConsultationId(
             @Parameter(description = "ID de la consultation", required = true, example = "1")
             @PathVariable("idConsultation") Integer id);
 }

@@ -1,6 +1,6 @@
 package com.example.GestionClinique.model.entity;
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import jakarta.persistence.*;
@@ -8,7 +8,6 @@ import lombok.*;
 
 
 import java.time.LocalDate;
-import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -17,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "facture")
-public class Facture extends EntityAbstracte {
+public class Facture extends BaseEntity {
 
     @Column(name = "montant", nullable = false) // Ajouté nullable = false
     private Float montant;

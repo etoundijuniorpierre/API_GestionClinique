@@ -1,12 +1,11 @@
 package com.example.GestionClinique.model.entity;
 
 
-import com.example.GestionClinique.model.EntityAbstracte;
+import com.example.GestionClinique.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "historiqueAction")
-public class HistoriqueAction extends EntityAbstracte {
+public class HistoriqueAction extends BaseEntity {
     @Column(name = "date", nullable = false) // Ajouté nullable = false
     private LocalDate date;
 

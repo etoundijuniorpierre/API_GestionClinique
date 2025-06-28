@@ -1,9 +1,8 @@
 package com.example.GestionClinique.controller;
 
 import com.example.GestionClinique.controller.controllerApi.DossierMedicalApi;
-import com.example.GestionClinique.dto.ConsultationDto;
-import com.example.GestionClinique.dto.DossierMedicalDto;
-import com.example.GestionClinique.dto.PatientDto;
+import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
+import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import com.example.GestionClinique.service.DossierMedicalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,27 +21,27 @@ public class DossierMedicalController implements DossierMedicalApi {
     }
 
     @Override
-    public DossierMedicalDto createDossierMedicalForPatient(DossierMedicalDto dossierMedicalDto, Integer idPatient) {
-        return dossierMedicalService.createDossierMedicalForPatient(idPatient, dossierMedicalDto);
+    public DossierMedicalRequestDto createDossierMedicalForPatient(DossierMedicalRequestDto dossierMedicalRequestDto, Integer idPatient) {
+        return dossierMedicalService.createDossierMedicalForPatient(idPatient, dossierMedicalRequestDto);
     }
 
     @Override
-    public DossierMedicalDto updateDossierMedical(Integer id, DossierMedicalDto dossierMedicalDto) {
-        return dossierMedicalService.updateDossierMedical(id, dossierMedicalDto);
+    public DossierMedicalRequestDto updateDossierMedical(Integer id, DossierMedicalRequestDto dossierMedicalRequestDto) {
+        return dossierMedicalService.updateDossierMedical(id, dossierMedicalRequestDto);
     }
 
     @Override
-    public DossierMedicalDto findDossierMedicalById(Integer id) {
+    public DossierMedicalRequestDto findDossierMedicalById(Integer id) {
         return dossierMedicalService.findDossierMedicalById(id);
     }
 
     @Override
-    public List<DossierMedicalDto> findAllDossierMedical() {
+    public List<DossierMedicalRequestDto> findAllDossierMedical() {
         return dossierMedicalService.findAllDossierMedical();
     }
 
     @Override
-    public PatientDto findPatientByDossierMedicalId(Integer id) {
+    public PatientRequestDto findPatientByDossierMedicalId(Integer id) {
         return dossierMedicalService.findPatientByDossierMedicalId(id);
     }
 
@@ -53,7 +52,7 @@ public class DossierMedicalController implements DossierMedicalApi {
 
 
     @Override
-    public DossierMedicalDto findDossierMedicalByPatientId(Integer id) {
+    public DossierMedicalRequestDto findDossierMedicalByPatientId(Integer id) {
         return dossierMedicalService.findDossierMedicalByPatientId(id);
     }
 }
