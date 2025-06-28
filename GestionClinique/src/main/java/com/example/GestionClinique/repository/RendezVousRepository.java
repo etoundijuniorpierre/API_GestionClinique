@@ -16,31 +16,20 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface RendezVousRepository extends JpaRepository<RendezVous, Integer> {
+public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
 
-
-    boolean existsBySalle(Salle salleToDelete);
-
-
-    Optional<RendezVous> findBySalleAndJourAndHeure(Salle salle, LocalDate jour, LocalTime heureDebut);
-
-    Optional<RendezVous> findByMedecinAndJourAndHeure(Utilisateur existingMedecin, LocalDate jour, LocalTime heure);
-
-    Optional<RendezVous> findByPatientAndJourAndHeure(Patient existingPatient, LocalDate jour, LocalTime heure);
-
-    List<RendezVous> findByStatut(StatutRDV statut);
 
     List<RendezVous> findByJour(LocalDate jour);
 
-    List<RendezVous> findBySalleId(Integer salleId);
+    Optional<RendezVous> findByJourAndHeureAndSalleId(LocalDate jour, LocalTime heure, Long salleId);
 
-    List<RendezVous> findByMedecinId(Integer medecinId);
+    Optional<RendezVous> findByJourAndHeureAndMedecinId(LocalDate jour, LocalTime heure, Long medecinId);
 
-    List<RendezVous> findByPatientId(Integer patientId);
+    List<RendezVous> findByMedecinId(Long medecinId);
 
-    Optional<RendezVous> findByMedecinAndJourAndHeureAndStatutIn(Utilisateur medecin, LocalDate jour, LocalTime heure, List<StatutRDV> planifie);
+    List<RendezVous> findByPatientId(Long patientId);
 
-    Optional<RendezVous> findBySalleAndJourAndHeureAndStatutIn(Salle salle, LocalDate jour, LocalTime heure, List<StatutRDV> planifie);
+    List<RendezVous> findBySalleId(Long salleId);
 
-    Optional<RendezVous> findBySalleAndJourAndHeureBetween(Salle salle, LocalDate jour, LocalTime heureDebut, LocalTime heureFin);
+    List<RendezVous> findByStatut(StatutRDV statut);
 }

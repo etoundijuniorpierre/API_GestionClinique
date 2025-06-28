@@ -1,21 +1,22 @@
 package com.example.GestionClinique.service;
 
-import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
+
+
+import com.example.GestionClinique.model.entity.Prescription;
 
 import java.util.List;
 
 
 public interface PrescriptionService {
-    PrescriptionRequestDto createPrescription(PrescriptionRequestDto prescriptionRequestDto);
-    PrescriptionRequestDto updatePrescription(Integer id, PrescriptionRequestDto prescriptionRequestDto);
-    PrescriptionRequestDto findById(Integer id);
-    List<PrescriptionRequestDto> findAllPrescription();
+    Prescription createPrescription(Prescription Prescription);
+    Prescription updatePrescription(Integer id, Prescription Prescription);
+    Prescription findById(Integer id);
+    List<Prescription> findAllPrescription();
     void deletePrescription(Integer id);
-    List<PrescriptionRequestDto> findPrescriptionByMedecinId(Integer id);
-    List<PrescriptionRequestDto> findPrescriptionByPatientId(Integer id);
+    List<Prescription> findPrescriptionByMedecinId(Integer id);
+    List<Prescription> findPrescriptionByPatientId(Integer id);
 
-    // Nouvelle méthode: Trouver les prescriptions par ID de consultation
-    List<PrescriptionRequestDto> findPrescriptionByConsultationId(Integer consultationId);
+    List<Prescription> findPrescriptionByConsultationId(Integer consultationId);
 
 }
 

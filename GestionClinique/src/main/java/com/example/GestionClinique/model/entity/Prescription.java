@@ -46,7 +46,6 @@ public class Prescription extends BaseEntity {
     @JoinColumn(name = "dossierMedical_id", nullable = false)
     private DossierMedical dossierMedical;
 
-
 }
 
 

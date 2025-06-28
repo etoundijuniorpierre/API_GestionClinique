@@ -1,5 +1,6 @@
 package com.example.GestionClinique.dto.ResponseDto;
 
+import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestDto;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import lombok.*;
@@ -9,15 +10,21 @@ import java.time.LocalTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class RendezVousResponseDto extends BaseResponseDto {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RendezVousResponseDto extends BaseResponseDto { // Assuming BaseResponseDto has 'id'
+
     private LocalDate jour;
     private LocalTime heure;
     private StatutRDV statut;
     private String notes;
-    private ServiceMedical serviceMedicalId;
-    private PatientResponseDto patientId;
-    private UtilisateurResponseDto medecinId;
-    private SalleResponseDto salleId;
-    private ConsultationResponseDto consultationId;
-
+    private ServiceMedical serviceMedical; // Renamed
+    private Integer patientId; // Just the ID
+    private String patientNomComplet;
+    private Integer medecinId; // Just the ID
+    private String medecinNomComplet; // Or full name for display
+    private Integer salleId; // Just the ID
+    private String nomSalle; // Or room name for display
+    private Integer consultationId; // ID of the associated consultation, if any
 }
