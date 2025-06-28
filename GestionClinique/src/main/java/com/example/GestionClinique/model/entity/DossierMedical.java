@@ -14,9 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "dossier_medical") // Consistent snake_case
-public class DossierMedical extends BaseEntity {
+public class DossierMedical extends BaseEntity { // Assuming BaseEntity has 'id', 'creationDate', 'lastModifiedDate'
 
-    // Removed 'dateCreation' as it's handled by 'creationDate' in EntityAbstracte
     @Column(name = "groupe_sanguin") // Added field
     private String groupeSanguin;
 
@@ -32,13 +31,13 @@ public class DossierMedical extends BaseEntity {
     @Column(name = "observations", columnDefinition = "TEXT")
     private String observations;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "patient_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", nullable = false, unique = true) // patient_id should be unique for a dossier
     private Patient patient;
 
     @OneToMany(mappedBy = "dossierMedical", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Consultation> consultations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "dossierMedical", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "dossierMedical", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Changed FetchType to LAZY
     private List<Prescription> prescriptions = new ArrayList<>();
 }

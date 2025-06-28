@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-
-    List<Message> findByExpediteur(Utilisateur expediteur);
-
-    List<Message> findByDestinataire(Utilisateur destinataire);
+    List<Message> findByExpediteurId(Long expediteurId); // Changed to Long
+    List<Message> findByDestinataireId(Long destinataireId);
 }

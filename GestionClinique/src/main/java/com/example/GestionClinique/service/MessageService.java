@@ -1,21 +1,21 @@
 package com.example.GestionClinique.service;
 
-import com.example.GestionClinique.dto.ResponseDto.MessageResponseDto;
+
+import com.example.GestionClinique.model.entity.Message;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
 
 public interface MessageService {
-    MessageResponseDto save(MessageResponseDto message);
-    MessageResponseDto updateMessage(Integer id, MessageResponseDto message);
-    MessageResponseDto findMessageById(Integer id);
-    List<MessageResponseDto> findAllMessages();
-    void deleteMessageById(Integer id);
+    Message updateMessage(Long id, Message messageDetails); // Takes entity, returns entity
+    Message findMessageById(Long id); // Returns entity
+    List<Message> findAllMessages(); // Returns list of entities
+    void deleteMessageById(Long id);
 
-    // Nouvelle méthode: Trouver les messages envoyés par un utilisateur
-    List<MessageResponseDto> findMessagesBySenderId(Integer senderId);
-    // Nouvelle méthode: Trouver les messages reçus par un utilisateur
-    List<MessageResponseDto> findMessagesByReceiverId(Integer receiverId);
-    // Nouvelle méthode: Marquer un message comme lu
-    MessageResponseDto markMessageAsRead(Integer messageId);
+    List<Message> findMessagesBySenderId(Long senderId); // Takes Long, returns list of entities
+    List<Message> findMessagesByReceiverId(Long receiverId); // Takes Long, returns list of entities
+    Message markMessageAsRead(Long messageId); // Returns entity
+
+    Message saveMessage(Message messageToSave, @NotNull(message = "L'ID de l'expéditeur est requis.") Long expediteurId, @NotNull(message = "L'ID du destinataire est requis.") Long destinataireId);
 }

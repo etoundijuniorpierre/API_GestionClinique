@@ -1,6 +1,7 @@
 package com.example.GestionClinique.service;
 
-import com.example.GestionClinique.dto.RequestDto.HistoriqueActionRequestDto;
+
+import com.example.GestionClinique.model.entity.HistoriqueAction;
 import com.example.GestionClinique.model.entity.Utilisateur;
 
 import java.time.LocalDate;
@@ -8,16 +9,15 @@ import java.util.List;
 
 
 public interface HistoriqueActionService {
-    void enregistrerAction(String actionDescription);
-    void enregistrerAction(String actionDescription, Utilisateur utilisateur);
-    List<HistoriqueActionRequestDto> findAll();
-    HistoriqueActionRequestDto findById(Integer id);
-    List<HistoriqueActionRequestDto> findHistoriqueByUtilisateurId(Integer id);
+    // Methods for recording actions (internal use, no direct DTO conversion needed here)
+    HistoriqueAction enregistrerAction(String actionDescription, Long utilisateurId); // Specific for logging with ID
+    HistoriqueAction enregistrerAction(String actionDescription, Utilisateur utilisateur); // For when Utilisateur entity is available
+    HistoriqueAction enregistrerAction(String actionDescription); // For actions not tied to a specific user or user context unknown
 
-    List<HistoriqueActionRequestDto> findHistoriqueByUtilisateurName(String utilisateurName);
-    // Nouvelle méthode: Filtrer par plage de dates
-    List<HistoriqueActionRequestDto> findByDateAfterAndDateBefore(LocalDate startDate, LocalDate endDate);
-    // Nouvelle méthode: Filtrer par type d'action (nécessite un champ typeAction dans l'HistoriqueActionDto)
-    // List<HistoriqueActionDto> findHistoriqueByActionType(String actionType);
-
+    // Methods for retrieving actions (return entities)
+    List<HistoriqueAction> findAllHistoriqueActions();
+    HistoriqueAction findHistoriqueActionById(Long id);
+    List<HistoriqueAction> findHistoriqueActionsByUtilisateurId(Long utilisateurId); // Changed to Long
+    List<HistoriqueAction> findHistoriqueActionsByUtilisateurName(String utilisateurName);
+    List<HistoriqueAction> findHistoriqueActionsByDateRange(LocalDate startDate, LocalDate endDate);
 }

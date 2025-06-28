@@ -1,7 +1,9 @@
 package com.example.GestionClinique.model.entity.enumElem;
 
 public enum ModePaiement {
-    ESPECE,
-    CARTE,
-    CHEQUE
+    ESPECES,
+    CARTE_BANCAIRE,
+    VIREMENT,
+    CHEQUE,
+    MOBILE_MONEY
 }

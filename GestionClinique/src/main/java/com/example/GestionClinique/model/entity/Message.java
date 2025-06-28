@@ -7,22 +7,18 @@ import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Data // Keep @Data, but the explicit getter will be preferred
+@Data // Keep @Data, it will generate isLu() for 'lu' field
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "message")
-public class Message extends BaseEntity {
+public class Message extends BaseEntity { // Assuming BaseEntity provides 'id', 'creationDate', 'lastModifiedDate'
 
     @Column(name="contenu", nullable = false, columnDefinition = "TEXT")
     private String contenu;
 
     @Column(name="lu", nullable = false)
-    private boolean lu;
-
-    public boolean getLu() {
-        return this.lu;
-    }
+    private boolean lu; // Lombok will generate isLu() for this
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "expediteur_id", nullable = false)

@@ -3,13 +3,16 @@ package com.example.GestionClinique.repository;
 
 import com.example.GestionClinique.model.entity.HistoriqueAction;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
+
+import org.springframework.stereotype.Repository;
 
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.List;
 
-public interface HistoriqueActionRepository extends JpaRepository<HistoriqueAction, Long > {
-    Collection<HistoriqueAction> findByDateAfterAndDateBefore(@Param("startDate")LocalDate startDate, @Param("endDate") LocalDate endDate);
+@Repository
+public interface HistoriqueActionRepository extends JpaRepository<HistoriqueAction, Long> {
+    List<HistoriqueAction> findByUtilisateurId(Long utilisateurId); // Changed to Long for consistency
+    List<HistoriqueAction> findByUtilisateurNomCompletContainingIgnoreCase(String utilisateurName); // Assuming Utilisateur has nomComplet
+    List<HistoriqueAction> findByDateBetween(LocalDate startDate, LocalDate endDate); // Simplified method name
 }

@@ -1,19 +1,19 @@
 package com.example.GestionClinique.service;
 
-import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
+
 import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
+import com.example.GestionClinique.model.entity.DossierMedical;
+import com.example.GestionClinique.model.entity.Patient;
 
 import java.util.List;
 
 
 public interface DossierMedicalService {
-//    DossierMedicalDto createDossierMedical(DossierMedicalDto dossierMedicalDto); // Ajouté: Création initiale
-    DossierMedicalRequestDto createDossierMedicalForPatient(Integer patientId, DossierMedicalRequestDto dossierMedicalRequestDto); // Ajouté: Création liée à un patient
-    DossierMedicalRequestDto updateDossierMedical(Integer id, DossierMedicalRequestDto dossierMedicalRequestDto);
-    DossierMedicalRequestDto findDossierMedicalById(Integer id);
-    List<DossierMedicalRequestDto> findAllDossierMedical();
-    PatientRequestDto findPatientByDossierMedicalId(Integer id); // Renommé pour clarté
-    void deleteDossierMedicalById(Integer id);
-    // Nouvelle méthode: Trouver un dossier médical par l'ID du patient
-    DossierMedicalRequestDto findDossierMedicalByPatientId(Integer patientId);
+    DossierMedical createDossierMedicalForPatient(Long patientId, DossierMedical dossierMedical);
+    DossierMedical updateDossierMedical(Long id, DossierMedical dossierMedicalDetails);
+    DossierMedical findDossierMedicalById(Long id);
+    List<DossierMedical> findAllDossierMedical();
+    Patient findPatientByDossierMedicalId(Long id); // Returns Patient entity
+    void deleteDossierMedicalById(Long id);
+    DossierMedical findDossierMedicalByPatientId(Long patientId);
 }

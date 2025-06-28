@@ -1,12 +1,14 @@
 package com.example.GestionClinique.controller;
 
 import com.example.GestionClinique.dto.RequestDto.ConsultationRequestDto;
+import com.example.GestionClinique.dto.RequestDto.DossierMedicalResponseDto;
 import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.ConsultationResponseDto;
-import com.example.GestionClinique.dto.ResponseDto.DossierMedicalResponseDto;
+
 import com.example.GestionClinique.dto.ResponseDto.PrescriptionResponseDto;
 import com.example.GestionClinique.dto.ResponseDto.RendezVousResponseDto;
 import com.example.GestionClinique.mapper.ConsultationMapper;
+import com.example.GestionClinique.mapper.DossierMedicalMapper;
 import com.example.GestionClinique.mapper.PrescriptionMapper;
 import com.example.GestionClinique.mapper.RendezVousMapper;
 import com.example.GestionClinique.model.entity.*;
@@ -45,16 +47,18 @@ public class ConsultationController {
     private final ConsultationMapper consultationMapper;
     private final PrescriptionMapper prescriptionMapper;
     private final RendezVousMapper rendezVousMapper;
+    private final DossierMedicalMapper dossierMedicalMapper;
 
 
     @Autowired
     public ConsultationController(ConsultationService consultationService,
                                   ConsultationMapper consultationMapper,
-                                  PrescriptionMapper prescriptionMapper, RendezVousMapper rendezVousMapper) { // Add other mappers if needed
+                                  PrescriptionMapper prescriptionMapper, RendezVousMapper rendezVousMapper, DossierMedicalMapper dossierMedicalMapper) { // Add other mappers if needed
         this.consultationService = consultationService;
         this.consultationMapper = consultationMapper;
         this.prescriptionMapper = prescriptionMapper;
         this.rendezVousMapper = rendezVousMapper;
+        this.dossierMedicalMapper = dossierMedicalMapper;
     }
 
     // Helper to get authenticated user ID
@@ -83,7 +87,7 @@ public class ConsultationController {
     public ResponseEntity<ConsultationResponseDto> createEmergencyConsultation(
             @Parameter(description = "Détails de la consultation d'urgence à créer", required = true)
             @Valid @RequestBody ConsultationRequestDto consultationRequestDto) {
- 
+
             Long medecinId = getAuthenticatedUserId();
             Consultation consultationToCreate = consultationMapper.toEntity(consultationRequestDto);
 
@@ -97,7 +101,7 @@ public class ConsultationController {
 
             Consultation createdConsultation = consultationService.createConsultation(consultationToCreate, medecinId);
             return new ResponseEntity<>(consultationMapper.toDto(createdConsultation), HttpStatus.CREATED);
-        
+
     }
 
 
@@ -130,7 +134,7 @@ public class ConsultationController {
 
             Consultation startedConsultation = consultationService.startConsultation(idRendezVous, consultationDetails, medecinId);
             return new ResponseEntity<>(consultationMapper.toDto(startedConsultation), HttpStatus.CREATED);
-        
+
     }
 
 
@@ -181,10 +185,10 @@ public class ConsultationController {
     public ResponseEntity<ConsultationResponseDto> findById(
             @Parameter(description = "ID de la consultation à récupérer", required = true, example = "1")
             @PathVariable("id") Long id) {
-      
+
             Consultation consultation = consultationService.findById(id);
             return ResponseEntity.ok(consultationMapper.toDto(consultation));
-        
+
     }
 
 
@@ -223,12 +227,12 @@ public class ConsultationController {
     public ResponseEntity<DossierMedicalResponseDto> findDossierMedicalByConsultationId(
             @Parameter(description = "ID de la consultation", required = true, example = "1")
             @PathVariable("idConsultation") Long idConsultation) {
-     
+
             DossierMedical dossierMedical = consultationService.findDossierMedicalByConsultationId(idConsultation);
 
  return ResponseEntity.ok(dossierMedicalMapper.toDto(dossierMedical));
 
-        
+
     }
 
 
@@ -247,7 +251,7 @@ public class ConsultationController {
     public ResponseEntity<RendezVousResponseDto> findRendezVousByConsultationId(
             @Parameter(description = "ID de la consultation", required = true, example = "1")
             @PathVariable("idConsultation") Long idConsultation) {
-   
+
             RendezVous rendezVous = consultationService.findRendezVousByConsultationId(idConsultation);
             if (rendezVous == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Or 204 No Content
@@ -256,8 +260,8 @@ public class ConsultationController {
         return ResponseEntity.ok(rendezVousMapper.toDto(rendezVous));
 
 
-        } 
-    
+        }
+
 
 
 
@@ -274,12 +278,12 @@ public class ConsultationController {
     public ResponseEntity<Void> deleteById(
             @Parameter(description = "ID de la consultation à supprimer", required = true, example = "1")
             @PathVariable("id") Long id) {
-   
+
             consultationService.deleteById(id);
             return ResponseEntity.noContent().build();
-        }  
-        
-    
+        }
+
+
 
 
 
@@ -299,13 +303,13 @@ public class ConsultationController {
             @PathVariable("idConsultation") Long idConsultation,
             @Parameter(description = "Détails de la prescription", required = true)
             @Valid @RequestBody PrescriptionRequestDto prescriptionRequestDto) {
-     
+
             Prescription prescriptionToAdd = prescriptionMapper.toEntity(prescriptionRequestDto);
             Prescription addedPrescription = consultationService.addPrescriptionToConsultation(idConsultation, prescriptionToAdd);
             Consultation updatedConsultation = consultationService.findById(idConsultation);
             return new ResponseEntity<>(consultationMapper.toDto(updatedConsultation), HttpStatus.CREATED);
-        } 
-    
+        }
+
 
 
 
@@ -324,13 +328,13 @@ public class ConsultationController {
     public ResponseEntity<List<PrescriptionResponseDto>> findPrescriptionsByConsultationId(
             @Parameter(description = "ID de la consultation", required = true, example = "1")
             @PathVariable("idConsultation") Long idConsultation) {
-       
+
             List<Prescription> prescriptions = consultationService.findPrescriptionsByConsultationId(idConsultation);
             if (prescriptions.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
             return ResponseEntity.ok(prescriptionMapper.toDtoList(prescriptions));
-        
-    
+
+
     }
 }

@@ -2,6 +2,7 @@ package com.example.GestionClinique.model.entity.enumElem;
 
 public enum StatutPaiement {
     PAYE,
-    NONPAYE,
+    IMPAYE,
+    EN_RETARD,
     ANNULE
 }

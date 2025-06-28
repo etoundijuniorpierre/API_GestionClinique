@@ -14,14 +14,15 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "historiqueAction")
-public class HistoriqueAction extends BaseEntity {
-    @Column(name = "date", nullable = false) // Ajouté nullable = false
+public class HistoriqueAction extends BaseEntity { // Assuming BaseEntity provides 'id', 'creationDate', 'lastModifiedDate'
+
+    @Column(name = "date_action", nullable = false) // Renamed column for clarity
     private LocalDate date;
 
-    @Column(name= "action", nullable = false, columnDefinition = "TEXT") // Ajouté nullable = false et columnDefinition
+    @Column(name= "action_description", nullable = false, columnDefinition = "TEXT") // Renamed column for clarity
     private String action;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Ajouté Lazy
-    @JoinColumn(name = "utilisateur_id", nullable = false) // Ajouté nullable = false
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 }

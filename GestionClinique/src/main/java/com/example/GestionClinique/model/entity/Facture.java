@@ -16,27 +16,27 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "facture")
-public class Facture extends BaseEntity {
+public class Facture extends BaseEntity { // Assuming BaseEntity provides 'id', 'creationDate', 'lastModifiedDate'
 
-    @Column(name = "montant", nullable = false) // Ajouté nullable = false
+    @Column(name = "montant", nullable = false)
     private Float montant;
 
-    @Column(name = "dateEmission", nullable = false) // Ajouté nullable = false
+    @Column(name = "date_emission", nullable = false) // Consistent snake_case for column name
     private LocalDate dateEmission;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "statutPaiement", nullable = false) // Ajouté nullable = false
+    @Column(name = "statut_paiement", nullable = false) // Consistent snake_case
     private StatutPaiement statutPaiement;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "modePaiement", nullable = false) // Ajouté nullable = false
+    @Column(name = "mode_paiement", nullable = false) // Consistent snake_case
     private ModePaiement modePaiement;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Ajouté Lazy
-    @JoinColumn(name = "patient_id", nullable = false) // Ajouté nullable = false
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @OneToOne(fetch = FetchType.LAZY) // Ajouté Lazy
-    @JoinColumn(name = "consultation_id", nullable = false, unique = true) // Ajouté nullable = false et unique = true
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultation_id", nullable = false, unique = true)
     private Consultation consultation;
 }

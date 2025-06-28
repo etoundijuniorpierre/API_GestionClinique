@@ -7,12 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface FactureRepository extends JpaRepository<Facture, Long> {
-
-
-    Collection<Facture> findFacturesByStatutPaiement(StatutPaiement statutPaiement);
-
-    Collection<Facture> findFacturesByModePaiement(ModePaiement modePaiement);
+    List<Facture> findByStatutPaiement(StatutPaiement statutPaiement);
+    List<Facture> findByModePaiement(ModePaiement modePaiement);
+    Optional<Facture> findByConsultationId(Long consultationId);
 }
