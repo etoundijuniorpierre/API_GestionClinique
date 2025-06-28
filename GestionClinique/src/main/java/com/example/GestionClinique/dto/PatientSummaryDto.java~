@@ -1,0 +1,13 @@
+package com.example.GestionClinique.dto;
+
+import com.example.GestionClinique.model.entity.Patient;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class PatientSummaryDto {
+    private Integer id;
+    private InfoPersonnelDto infoPersonnel;
+
+}
