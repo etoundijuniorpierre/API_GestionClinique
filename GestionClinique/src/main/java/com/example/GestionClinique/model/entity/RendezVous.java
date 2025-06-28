@@ -51,7 +51,7 @@ public class RendezVous extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medecin_id", nullable = false) // Changed from utilisateur_id for clarity
-    private Utilisateur medecin; // This is actually a Utilisateur (as a doctor)
+    private Utilisateur medecin;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "salle_id", nullable = false)

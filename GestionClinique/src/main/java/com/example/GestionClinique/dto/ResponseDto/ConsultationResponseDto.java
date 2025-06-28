@@ -1,8 +1,9 @@
 package com.example.GestionClinique.dto.ResponseDto;
 
-import com.example.GestionClinique.dto.dtoConnexion.PrescriptionResponseDto;
+
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -15,10 +16,13 @@ public class ConsultationResponseDto extends BaseResponseDto {
     private Float taille;
     private String compteRendu;
     private String diagnostic;
-    private DossierMedicalResponseDto dossierMedical;
-    private UtilisateurResponseDto medecin;
-    private RendezVousResponseDto rendezVous;
-    private List<PrescriptionResponseDto> prescriptions;
-    private FactureResponseDto facture;
+    private LocalDateTime dateHeureDebut;
+    private Integer dureeMinutes;
 
+    private Long dossierMedicalId;
+    private Long medecinId;
+    private Long rendezVousId;
+    private Long factureId;
+
+    private List<PrescriptionResponseDto> prescriptions;
 }

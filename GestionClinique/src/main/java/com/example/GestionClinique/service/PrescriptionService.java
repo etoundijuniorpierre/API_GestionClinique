@@ -8,16 +8,22 @@ import java.util.List;
 
 
 public interface PrescriptionService {
-    Prescription createPrescription(Prescription Prescription);
-    Prescription updatePrescription(Integer id, Prescription Prescription);
-    Prescription findById(Integer id);
+
+    Prescription createPrescription(Prescription prescription);
+
+    Prescription updatePrescription(Long id, Prescription prescriptionDetails);
+
+    Prescription findById(Long id);
+
     List<Prescription> findAllPrescription();
-    void deletePrescription(Integer id);
-    List<Prescription> findPrescriptionByMedecinId(Integer id);
-    List<Prescription> findPrescriptionByPatientId(Integer id);
 
-    List<Prescription> findPrescriptionByConsultationId(Integer consultationId);
+    void deletePrescription(Long id);
 
+    List<Prescription> findPrescriptionByMedecinId(Long medecinId); // Renamed parameter
+
+    List<Prescription> findPrescriptionByPatientId(Long patientId);
+
+    List<Prescription> findPrescriptionByConsultationId(Long consultationId);
 }
 
 

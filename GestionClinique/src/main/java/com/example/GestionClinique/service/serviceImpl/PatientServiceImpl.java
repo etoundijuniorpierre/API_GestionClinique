@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@Transactional
 public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
@@ -20,6 +19,7 @@ public class PatientServiceImpl implements PatientService {
         this.patientRepository = patientRepository;
     }
 
+    @Transactional
     @Override
     public Patient createPatient(Patient patient) {
         // You might add checks here, e.g., if a patient with the same email already exists
@@ -29,6 +29,7 @@ public class PatientServiceImpl implements PatientService {
         return patientRepository.save(patient);
     }
 
+    @Transactional
     @Override
     public Patient updatePatient(Long id, Patient patientDetails) {
         Patient existingPatient = patientRepository.findById(id)
@@ -65,6 +66,7 @@ public class PatientServiceImpl implements PatientService {
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + id));
     }
 
+    @Transactional
     @Override
     public void deletePatient(Long id) {
         Patient patient = patientRepository.findById(id)

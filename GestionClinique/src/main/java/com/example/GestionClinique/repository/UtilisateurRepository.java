@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface UtilisateurRepository extends JpaRepository<Utilisateur, Integer> {
+public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
 
 
 //    Collection<Utilisateur> findUtilisateurByRole_RoleType(RoleType roleType);

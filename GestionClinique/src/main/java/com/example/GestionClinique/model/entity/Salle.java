@@ -5,6 +5,7 @@ import com.example.GestionClinique.model.BaseEntity;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -19,17 +20,20 @@ import java.util.List;
 @Table(name = "salle")
 public class Salle extends BaseEntity {
 
-        @Column(name = "numero", nullable = false, unique = true) // Ajouté nullable = false et unique = true
+        @Column(name = "numero", nullable = false, unique = true)
         private String numero;
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "serviceMedical", nullable = false) // Ajouté nullable = false
+        @NotNull // Ensure this is not null
+        @Column(name = "service_medical", nullable = false) // Changed to snake_case
         private ServiceMedical serviceMedical;
 
-        @Column(name = "statutSalle", nullable = false)
+        @Enumerated(EnumType.STRING) // Ensure EnumType.STRING if you're not already doing it
+        @NotNull // Ensure this is not null
+        @Column(name = "statut_salle", nullable = false) // Changed to snake_case
         private StatutSalle statutSalle;
 
-        @OneToMany(mappedBy = "salle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // Ajouté cascade et orphanRemoval, Lazy
-        private List<RendezVous> rendezVous = new ArrayList<>(); // Initialisation
-}
+        @OneToMany(mappedBy = "salle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+        private List<RendezVous> rendezVous = new ArrayList<>();
 
+}

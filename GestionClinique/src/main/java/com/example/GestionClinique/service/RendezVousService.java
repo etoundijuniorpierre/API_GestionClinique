@@ -34,7 +34,6 @@ public interface RendezVousService {
 
     boolean isRendezVousAvailable(LocalDate jour, LocalTime heure, Long medecinId, Long salleId); // Parameters changed to IDs
 
-    @Transactional(readOnly = true)
     boolean isRendezVousAvailableForUpdate(Long rendezVousId, LocalDate jour, LocalTime heure, Long medecinId, Long salleId);
 
     RendezVous cancelRendezVous(Long rendezVousId);

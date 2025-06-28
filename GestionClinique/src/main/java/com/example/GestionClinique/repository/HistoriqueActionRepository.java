@@ -10,6 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-public interface HistoriqueActionRepository extends JpaRepository<HistoriqueAction, Integer > {
+public interface HistoriqueActionRepository extends JpaRepository<HistoriqueAction, Long > {
     Collection<HistoriqueAction> findByDateAfterAndDateBefore(@Param("startDate")LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

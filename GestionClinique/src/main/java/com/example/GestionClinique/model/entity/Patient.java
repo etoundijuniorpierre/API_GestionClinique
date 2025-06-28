@@ -3,7 +3,6 @@ package com.example.GestionClinique.model.entity;
 
 import com.example.GestionClinique.model.InfoPersonnel;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.*;

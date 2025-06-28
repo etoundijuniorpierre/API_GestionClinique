@@ -1,14 +1,8 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
-import com.example.GestionClinique.model.entity.Consultation;
-import com.example.GestionClinique.model.entity.Patient;
-import com.example.GestionClinique.model.entity.Prescription;
-import com.example.GestionClinique.model.entity.Utilisateur;
-import com.example.GestionClinique.repository.ConsultationRepository;
-import com.example.GestionClinique.repository.PatientRepository;
-import com.example.GestionClinique.repository.PrescriptionRepository;
-import com.example.GestionClinique.repository.UtilisateurRepository;
+import com.example.GestionClinique.model.entity.*;
+import com.example.GestionClinique.repository.*;
 import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.PrescriptionService;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,259 +16,122 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class PrescriptionServiceImpl implements PrescriptionService {
 
     private final PrescriptionRepository prescriptionRepository;
     private final ConsultationRepository consultationRepository;
-    private final UtilisateurRepository utilisateurRepository; // For Medecin
+    private final UtilisateurRepository utilisateurRepository;
     private final PatientRepository patientRepository;
-    private final HistoriqueActionService historiqueActionService;
+    private final DossierMedicalRepository dossierMedicalRepository;
 
     @Autowired
     public PrescriptionServiceImpl(PrescriptionRepository prescriptionRepository,
                                    ConsultationRepository consultationRepository,
                                    UtilisateurRepository utilisateurRepository,
                                    PatientRepository patientRepository,
-                                   HistoriqueActionService historiqueActionService) {
+                                   DossierMedicalRepository dossierMedicalRepository) {
         this.prescriptionRepository = prescriptionRepository;
         this.consultationRepository = consultationRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.patientRepository = patientRepository;
-        this.historiqueActionService = historiqueActionService;
+        this.dossierMedicalRepository = dossierMedicalRepository;
     }
 
-
     @Override
-    @Transactional
-    public PrescriptionRequestDto createPrescription(PrescriptionRequestDto prescriptionRequestDto) {
-        // 1. Validate mandatory associations from DTO
-        if (prescriptionRequestDto.getConsultationId() == null ) {
-            throw new IllegalArgumentException("Une prescription doit être associée à une consultation existante (ID de consultation manquant).");
-        }
+    public Prescription createPrescription(Prescription prescription) {
+        // Fetch and set associated entities based on their IDs from the incoming Prescription object
+        Consultation consultation = consultationRepository.findById(prescription.getConsultation().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + prescription.getConsultation().getId()));
+        Utilisateur medecin = utilisateurRepository.findById(prescription.getMedecin().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + prescription.getMedecin().getId()));
+        Patient patient = patientRepository.findById(prescription.getPatient().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + prescription.getPatient().getId()));
+        DossierMedical dossierMedical = dossierMedicalRepository.findById(prescription.getDossierMedical().getId())
+                .orElseThrow(() -> new IllegalArgumentException("DossierMedical not found with ID: " + prescription.getDossierMedical().getId()));
 
-        // 2. Fetch the associated Consultation entity
-        Consultation consultation = consultationRepository.findById(prescriptionRequestDto.getConsultationId())
-                .orElseThrow(() -> new EntityNotFoundException("La consultation avec l'ID " + prescriptionRequestDto.getConsultationId() + " n'existe pas."));
+        prescription.setConsultation(consultation);
+        prescription.setMedecin(medecin);
+        prescription.setPatient(patient);
+        prescription.setDossierMedical(dossierMedical);
 
-        // 3. Create a new Prescription entity and set its direct properties from the DTO
-        Prescription newPrescription = new Prescription();
-        newPrescription.setTypePrescription(prescriptionRequestDto.getTypePrescription());
-        newPrescription.setMedicaments(prescriptionRequestDto.getMedicaments());
-        newPrescription.setInstructions(prescriptionRequestDto.getInstructions());
-        newPrescription.setDureePrescription(prescriptionRequestDto.getDureePrescription());
-        newPrescription.setQuantite(prescriptionRequestDto.getQuantite());
-        newPrescription.setDatePrescription(prescriptionRequestDto.getDatePrescription() != null ? prescriptionRequestDto.getDatePrescription() : LocalDate.now());
-
-        // 4. Set the associated Consultation, Medecin, Patient, and DossierMedical
-        newPrescription.setConsultation(consultation);
-
-        // Link Medecin from the Consultation. Assuming Consultation's Medecin is set correctly.
-        if (consultation.getMedecin() != null) {
-            newPrescription.setMedecin(consultation.getMedecin());
-        } else {
-            // This indicates a data integrity issue if a Consultation exists without a Medecin
-            throw new IllegalStateException("Le médecin n'est pas défini pour la consultation associée (ID: " + consultation.getId() + ").");
-        }
-
-        // Link Patient and DossierMedical from the Consultation's DossierMedical
-        if (consultation.getDossierMedical() != null && consultation.getDossierMedical().getPatient() != null) {
-            newPrescription.setPatient(consultation.getDossierMedical().getPatient());
-            newPrescription.setDossierMedical(consultation.getDossierMedical());
-        } else {
-            // This indicates a data integrity issue if a Consultation exists without a patient or dossier medical
-            throw new IllegalStateException("Le patient ou son dossier médical n'est pas défini pour la consultation associée (ID: " + consultation.getId() + ").");
-        }
-
-        // 5. Save the new prescription
-        Prescription savedPrescriptionEntity = prescriptionRepository.save(newPrescription);
-
-        // 6. Update the Consultation to include this new prescription in its collection
-        // This is important for bidirectional relationships and cascade settings.
-        if (consultation.getPrescriptions() == null) {
-            consultation.setPrescriptions(new java.util.ArrayList<>());
-        }
-        consultation.getPrescriptions().add(savedPrescriptionEntity);
-        consultationRepository.save(consultation); // Persist the updated consultation
-
-        PrescriptionRequestDto savedPrescriptionRequestDto = PrescriptionRequestDto.fromEntity(savedPrescriptionEntity);
-
-        historiqueActionService.enregistrerAction(
-                "Création de la prescription ID: " + savedPrescriptionRequestDto.getId() + " pour la consultation ID: " + consultation.getId() +
-                        " (Médecin: " + (newPrescription.getMedecin() != null && newPrescription.getMedecin().getInfoPersonnel() != null ? newPrescription.getMedecin().getInfoPersonnel().getNom() + " " + newPrescription.getMedecin().getInfoPersonnel().getPrenom() : "N/A") +
-                        ", Patient: " + (newPrescription.getPatient() != null && newPrescription.getPatient().getInfoPersonnel() != null ? newPrescription.getPatient().getInfoPersonnel().getNom() + " " + newPrescription.getPatient().getInfoPersonnel().getPrenom() : "N/A") + ")"
-        );
-
-        return savedPrescriptionRequestDto;
+        return prescriptionRepository.save(prescription);
     }
 
-
-
     @Override
-    @Transactional
-    public PrescriptionRequestDto updatePrescription(Integer prescriptionId, PrescriptionRequestDto prescriptionRequestDto) {
-        Prescription existingPrescription = prescriptionRepository.findById(prescriptionId)
-                .orElseThrow(() -> new EntityNotFoundException("Prescription avec l'ID " + prescriptionId + " n'existe pas."));
+    public Prescription updatePrescription(Long id, Prescription prescriptionDetails) {
+        Prescription existingPrescription = prescriptionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Prescription not found with ID: " + id));
 
-        // Update direct properties from DTO
-        existingPrescription.setTypePrescription(prescriptionRequestDto.getTypePrescription());
-        existingPrescription.setMedicaments(prescriptionRequestDto.getMedicaments());
-        existingPrescription.setInstructions(prescriptionRequestDto.getInstructions());
-        existingPrescription.setDureePrescription(prescriptionRequestDto.getDureePrescription());
-        existingPrescription.setQuantite(prescriptionRequestDto.getQuantite());
-        existingPrescription.setDatePrescription(prescriptionRequestDto.getDatePrescription() != null ? prescriptionRequestDto.getDatePrescription() : existingPrescription.getDatePrescription());
+        // Update scalar fields
+        existingPrescription.setDatePrescription(prescriptionDetails.getDatePrescription());
+        existingPrescription.setTypePrescription(prescriptionDetails.getTypePrescription());
+        existingPrescription.setMedicaments(prescriptionDetails.getMedicaments());
+        existingPrescription.setInstructions(prescriptionDetails.getInstructions());
+        existingPrescription.setDureePrescription(prescriptionDetails.getDureePrescription());
+        existingPrescription.setQuantite(prescriptionDetails.getQuantite());
 
-        // Handle updates to associated entities if provided in DTO (e.g., changing consultation, patient, or medecin)
-        // This is generally less common for an existing prescription; usually, a new one is created.
-        // However, if the business logic allows, you'd fetch the new entities by ID from summary DTOs:
-
-        if (prescriptionRequestDto.getConsultationId() != null) {
-            Consultation newConsultation = consultationRepository.findById(prescriptionRequestDto.getConsultationId())
-                    .orElseThrow(() -> new EntityNotFoundException("La nouvelle consultation associée avec l'ID " + prescriptionRequestDto.getConsultationId() + " n'existe pas."));
+        // Update associated entities if their IDs are provided and differ
+        if (prescriptionDetails.getConsultation() != null && !prescriptionDetails.getConsultation().getId().equals(existingPrescription.getConsultation().getId())) {
+            Consultation newConsultation = consultationRepository.findById(prescriptionDetails.getConsultation().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + prescriptionDetails.getConsultation().getId()));
             existingPrescription.setConsultation(newConsultation);
         }
-        // Similar logic for PatientSummary and UtilisateurSummary (Medecin) if they can be changed.
-        // Be mindful of data integrity if you allow changing these.
-
-        Prescription updatedPrescriptionEntity = prescriptionRepository.save(existingPrescription);
-        PrescriptionRequestDto updatedPrescriptionRequestDto = PrescriptionRequestDto.fromEntity(updatedPrescriptionEntity);
-
-        historiqueActionService.enregistrerAction(
-                "Mise à jour de la prescription ID: " + prescriptionId +
-                        " (Consultation ID: " + (updatedPrescriptionEntity.getConsultation() != null ? updatedPrescriptionEntity.getConsultation().getId() : "N/A") + ")"
-        );
-
-        return updatedPrescriptionRequestDto;
-    }
-
-
-
-    @Override
-    @Transactional
-    public PrescriptionRequestDto findById(Integer prescriptionId) {
-        Prescription foundPrescriptionEntity = prescriptionRepository.findById(prescriptionId)
-                .orElseThrow(() -> new EntityNotFoundException("La prescription avec l'ID " + prescriptionId + " n'existe pas."));
-
-        historiqueActionService.enregistrerAction(
-                "Recherche de la prescription ID: " + prescriptionId
-        );
-
-        return PrescriptionRequestDto.fromEntity(foundPrescriptionEntity);
-    }
-
-
-
-    @Override
-    @Transactional
-    public List<PrescriptionRequestDto> findAllPrescription() {
-        List<PrescriptionRequestDto> allPrescriptions = prescriptionRepository.findAll()
-                .stream()
-                .map(PrescriptionRequestDto::fromEntity)
-                .collect(Collectors.toList());
-
-        historiqueActionService.enregistrerAction("Affichage de toutes les prescriptions.");
-
-        return allPrescriptions;
-    }
-
-
-
-    @Override
-    @Transactional
-    public void deletePrescription(Integer prescriptionId) {
-        Prescription prescriptionToDelete = prescriptionRepository.findById(prescriptionId)
-                .orElseThrow(() -> new EntityNotFoundException("La prescription avec l'ID " + prescriptionId + " n'existe pas et ne peut être supprimée."));
-
-        // IMPORTANT: Handle bidirectional relationship with Consultation if necessary.
-        // If Consultation holds a collection of Prescriptions, ensure to remove this prescription from that collection.
-        Consultation associatedConsultation = prescriptionToDelete.getConsultation();
-        if (associatedConsultation != null) {
-            associatedConsultation.getPrescriptions().remove(prescriptionToDelete);
-            consultationRepository.save(associatedConsultation); // Persist the change on the Consultation side
+        if (prescriptionDetails.getMedecin() != null && !prescriptionDetails.getMedecin().getId().equals(existingPrescription.getMedecin().getId())) {
+            Utilisateur newMedecin = utilisateurRepository.findById(prescriptionDetails.getMedecin().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + prescriptionDetails.getMedecin().getId()));
+            existingPrescription.setMedecin(newMedecin);
+        }
+        if (prescriptionDetails.getPatient() != null && !prescriptionDetails.getPatient().getId().equals(existingPrescription.getPatient().getId())) {
+            Patient newPatient = patientRepository.findById(prescriptionDetails.getPatient().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + prescriptionDetails.getPatient().getId()));
+            existingPrescription.setPatient(newPatient);
+        }
+        if (prescriptionDetails.getDossierMedical() != null && !prescriptionDetails.getDossierMedical().getId().equals(existingPrescription.getDossierMedical().getId())) {
+            DossierMedical newDossierMedical = dossierMedicalRepository.findById(prescriptionDetails.getDossierMedical().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("DossierMedical not found with ID: " + prescriptionDetails.getDossierMedical().getId()));
+            existingPrescription.setDossierMedical(newDossierMedical);
         }
 
-        prescriptionRepository.deleteById(prescriptionId);
-
-        historiqueActionService.enregistrerAction(
-                "Suppression de la prescription ID: " + prescriptionId
-        );
+        return prescriptionRepository.save(existingPrescription);
     }
-
-
 
     @Override
     @Transactional
-    public List<PrescriptionRequestDto> findPrescriptionByMedecinId(Integer utilisateurId) {
-        Utilisateur existingMedecin = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() -> new EntityNotFoundException("Le médecin (utilisateur) avec l'ID " + utilisateurId + " n'existe pas."));
-
-        // Changed from getHistoriqueActions() to getPrescriptions() as in your original code.
-        // This assumes your Utilisateur entity has a @OneToMany(mappedBy = "medecin") List<Prescription> prescriptions;
-        if (existingMedecin.getPrescriptions() == null) {
-            return List.of(); // Return empty list if collection is null
-        }
-
-        List<PrescriptionRequestDto> prescriptions = existingMedecin.getPrescriptions()
-                .stream()
-                .filter(Objects::nonNull) // Filter out any potential nulls in the collection
-                .map(PrescriptionRequestDto::fromEntity)
-                .collect(Collectors.toList());
-
-        historiqueActionService.enregistrerAction(
-                "Recherche des prescriptions par médecin ID: " + utilisateurId
-        );
-
-        return prescriptions;
+    public Prescription findById(Long id) {
+        return prescriptionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Prescription not found with ID: " + id));
     }
-
-
 
     @Override
     @Transactional
-    public List<PrescriptionRequestDto> findPrescriptionByPatientId(Integer patientId) {
-        Patient existingPatient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new EntityNotFoundException("Le patient avec l'ID " + patientId + " n'existe pas."));
-
-        // This assumes your Patient entity has a @OneToMany(mappedBy = "patient") List<Prescription> prescriptions;
-        if (existingPatient.getPrescriptions() == null) {
-            return List.of(); // Return empty list if collection is null
-        }
-
-        List<PrescriptionRequestDto> prescriptions = existingPatient.getPrescriptions()
-                .stream()
-                .filter(Objects::nonNull) // Filter out any potential nulls in the collection
-                .map(PrescriptionRequestDto::fromEntity)
-                .collect(Collectors.toList());
-
-        historiqueActionService.enregistrerAction(
-                "Recherche des prescriptions par patient ID: " + patientId
-        );
-
-        return prescriptions;
+    public List<Prescription> findAllPrescription() {
+        return prescriptionRepository.findAll();
     }
 
-
+    @Override
+    public void deletePrescription(Long id) {
+        Prescription prescription = prescriptionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Prescription not found with ID: " + id));
+        // Add business logic checks if necessary, e.g., cannot delete if consultation is finalized.
+        prescriptionRepository.delete(prescription);
+    }
 
     @Override
     @Transactional
-    public List<PrescriptionRequestDto> findPrescriptionByConsultationId(Integer consultationId) {
-        Consultation existingConsultation = consultationRepository.findById(consultationId)
-                .orElseThrow(() -> new EntityNotFoundException("La consultation avec l'ID " + consultationId + " n'existe pas."));
+    public List<Prescription> findPrescriptionByMedecinId(Long medecinId) {
+        return prescriptionRepository.findByMedecinId(medecinId);
+    }
 
-        // This assumes your Consultation entity has a @OneToMany(mappedBy = "consultation") List<Prescription> prescriptions;
-        if (existingConsultation.getPrescriptions() == null) {
-            return List.of(); // Return empty list if collection is null
-        }
+    @Override
+    @Transactional
+    public List<Prescription> findPrescriptionByPatientId(Long patientId) {
+        return prescriptionRepository.findByPatientId(patientId);
+    }
 
-        List<PrescriptionRequestDto> prescriptions = existingConsultation.getPrescriptions()
-                .stream()
-                .filter(Objects::nonNull) // Filter out any potential nulls in the collection
-                .map(PrescriptionRequestDto::fromEntity)
-                .collect(Collectors.toList());
-
-        historiqueActionService.enregistrerAction(
-                "Recherche des prescriptions par consultation ID: " + consultationId
-        );
-
-        return prescriptions;
+    @Override
+    @Transactional
+    public List<Prescription> findPrescriptionByConsultationId(Long consultationId) {
+        return prescriptionRepository.findByConsultationId(consultationId);
     }
 }

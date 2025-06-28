@@ -53,7 +53,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     @Override
     @Transactional
-    public Utilisateur findUtilisateurById(Integer id) {
+    public Utilisateur findUtilisateurById(Long id) {
         return utilisateurRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
     }
@@ -65,7 +65,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public Utilisateur updateUtilisateur(Integer id, Utilisateur utilisateurDetails) {
+    public Utilisateur updateUtilisateur(Long id, Utilisateur utilisateurDetails) {
         Utilisateur existingUtilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
 
@@ -92,7 +92,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public void deleteUtilisateur(Integer id) {
+    public void deleteUtilisateur(Long id) {
         Utilisateur utilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
         utilisateurRepository.delete(utilisateur);
@@ -117,7 +117,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public Utilisateur updateUtilisateurStatus(Integer id, boolean isActive) {
+    public Utilisateur updateUtilisateurStatus(Long id, boolean isActive) {
         Utilisateur existingUtilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
         existingUtilisateur.setActif(isActive);
@@ -125,7 +125,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
 
-//    public Utilisateur updatePassword(Integer id, String newPassword) {
+//    public Utilisateur updatePassword(Long id, String newPassword) {
 //        Utilisateur utilisateur = utilisateurRepository.findById(id)
 //                .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
 //        utilisateur.setMotDePasse(passwordEncoder.encode(newPassword));

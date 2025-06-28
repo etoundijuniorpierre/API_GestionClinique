@@ -9,13 +9,16 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Table(name = "prescription")
+@Builder // Add @Builder for convenience
+@NoArgsConstructor // Add @NoArgsConstructor for JPA and Builder
+@AllArgsConstructor // Add @AllArgsConstructor for Builder
+@Table(name = "prescription") // Snake_case table name is good.
 public class Prescription extends BaseEntity {
 
-    @Column(name = "typePrescription", nullable = false)
+    @Column(name = "date_prescription", nullable = false) // Add date_prescription as a column
+    private LocalDate datePrescription;
+
+    @Column(name = "type_prescription", nullable = false) // Changed to snake_case
     private String typePrescription;
 
     @Column(name = "medicaments", columnDefinition = "TEXT")
@@ -24,10 +27,10 @@ public class Prescription extends BaseEntity {
     @Column(name = "instructions", columnDefinition = "TEXT")
     private String instructions;
 
-    @Column(name = "dureePrescription") // Conserve ce nom de colonne
+    @Column(name = "duree_prescription") // Changed to snake_case
     private String dureePrescription;
 
-    @Column(name = "quantite")
+    @Column(name = "quantite", nullable = false) // Quantité should probably be non-nullable
     private Integer quantite;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,16 +39,15 @@ public class Prescription extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medecin_id", nullable = false)
-    private Utilisateur medecin;
+    private Utilisateur medecin; // This is a Utilisateur acting as a doctor
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dossierMedical_id", nullable = false)
+    @JoinColumn(name = "dossier_medical_id", nullable = false) // Changed to snake_case
     private DossierMedical dossierMedical;
-
 }
 
 

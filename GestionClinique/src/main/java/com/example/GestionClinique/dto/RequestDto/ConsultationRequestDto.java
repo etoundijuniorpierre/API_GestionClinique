@@ -1,46 +1,51 @@
 package com.example.GestionClinique.dto.RequestDto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ConsultationRequestDto {
 
-    @NotNull
+    @NotBlank(message = "Le motif de la consultation est requis.")
     private String motifs;
 
-    @NotNull
+    @NotBlank(message = "La tension artérielle est requise.")
     private String tensionArterielle;
 
-    @NotNull
+    @NotNull(message = "La température est requise.")
     private Float temperature;
 
-    @NotNull
+    @NotNull(message = "Le poids est requis.")
     private Float poids;
 
-    @NotNull
+    @NotNull(message = "La taille est requise.")
     private Float taille;
 
-    @NotNull
+    @NotBlank(message = "Le compte rendu est requis.")
     private String compteRendu;
 
-    @NotNull
+    @NotBlank(message = "Le diagnostic est requis.")
     private String diagnostic;
 
-    @NotNull
+    @NotNull(message = "La date et l'heure de début sont requises.")
+    private LocalDateTime dateHeureDebut;
+
+    @NotNull(message = "La durée de la consultation est requise.")
+    private Integer dureeMinutes;
+
+    @NotNull(message = "L'ID du dossier médical est requis.")
     private Long dossierMedicalId;
 
-    @NotNull
-    private Long medecinId;
+    private Long rendezVousId; // No @NotNull here
 
-    private Long rendezVousId;
-
-    @NotNull
+    @Size(min = 0, message = "La liste des prescriptions ne peut pas être nulle.")
     private List<PrescriptionRequestDto> prescriptions;
-
-    @NotNull
-    private Long factureId;
-
 }

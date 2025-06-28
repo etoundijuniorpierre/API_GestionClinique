@@ -14,9 +14,7 @@ import lombok.*;
 @Table(name = "role")
 public class Role extends BaseEntity {
     @Enumerated(EnumType.STRING)
-    @Column(name = "roleType", unique = true, nullable = false) // Ajouté unique et nullable
+    @Column(name = "roleType", unique = true, nullable = false)
     private RoleType roleType;
 
-    // Pas de relation ManyToOne ici pour un rôle "lookup"
-    // Si vous aviez besoin d'une relation ManyToMany inverse, elle irait ici.
 }

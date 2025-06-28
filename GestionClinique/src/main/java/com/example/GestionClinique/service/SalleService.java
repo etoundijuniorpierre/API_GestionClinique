@@ -1,20 +1,25 @@
 package com.example.GestionClinique.service;
 
-import com.example.GestionClinique.dto.RequestDto.SalleResquestDto;
+
+import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SalleService {
-    SalleResquestDto createSalle(SalleResquestDto salleResquestDto);
-    SalleResquestDto findSalleById(Integer id);
-    List<SalleResquestDto> findAllSalle();
-    SalleResquestDto updateSalle(Integer id, SalleResquestDto salleResquestDto);
-    void deleteSalle(Integer id);
+    Salle createSalle(Salle salle);
 
-    // Nouvelle méthode: Trouver les salles par statut (enum StatutSalle)
-    List<SalleResquestDto> findSallesByStatut(StatutSalle statutSalle);
+    Salle findSalleById(Long id);
 
-    List<SalleResquestDto> findAvailableSalles(LocalDateTime dateHeureDebut, Integer dureeMinutes);
+    List<Salle> findAllSalle();
+
+    Salle updateSalle(Long id, Salle salleDetails);
+
+    void deleteSalle(Long id);
+
+    List<Salle> findSallesByStatut(StatutSalle statutSalle);
+    
+    List<Salle> findAvailableSalles(LocalDateTime dateHeureDebut, Long dureeMinutes);
 }

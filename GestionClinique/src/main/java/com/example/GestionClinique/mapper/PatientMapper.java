@@ -4,7 +4,6 @@ import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.PatientResponseDto;
 import com.example.GestionClinique.model.entity.Patient;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.List;

@@ -45,9 +45,9 @@ public class RendezVousServiceImpl implements RendezVousService {
         // Fetch and set associated entities (Patient, Medecin, Salle)
         Patient patient = patientRepository.findById(rendezVous.getPatient().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + rendezVous.getPatient().getId()));
-        Utilisateur medecin = utilisateurRepository.findById(Math.toIntExact(rendezVous.getMedecin().getId()))
+        Utilisateur medecin = utilisateurRepository.findById(rendezVous.getMedecin().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + rendezVous.getMedecin().getId()));
-        Salle salle = salleRepository.findById(Math.toIntExact(rendezVous.getSalle().getId()))
+        Salle salle = salleRepository.findById(rendezVous.getSalle().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Salle not found with ID: " + rendezVous.getSalle().getId()));
 
         rendezVous.setPatient(patient);
@@ -94,13 +94,13 @@ public class RendezVousServiceImpl implements RendezVousService {
             existingRendezVous.setPatient(newPatient);
         }
         if (rendezVousDetails.getMedecin() != null && !rendezVousDetails.getMedecin().getId().equals(existingRendezVous.getMedecin().getId())) {
-            Utilisateur newMedecin = utilisateurRepository.findById(Math.toIntExact(rendezVousDetails.getMedecin().getId()))
+            Utilisateur newMedecin = utilisateurRepository.findById(rendezVousDetails.getMedecin().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + rendezVousDetails.getMedecin().getId()));
             existingRendezVous.setMedecin(newMedecin);
         }
         if (rendezVousDetails.getSalle() != null && !rendezVousDetails.getSalle().getId().equals(existingRendezVous.getSalle().getId())) {
-            Salle newSalle = salleRepository.findById(Math.toIntExact(rendezVousDetails.getSalle().getId()))
-                    .orElseThrow(() -> new IllegalArgumentException("Salle not found with ID: " + rendezVousDetails.getSalle().getId()));
+            Salle newSalle = salleRepository.findById(rendezVousDetails.getSalle().getId())
+                    .orElseThrow(() -> new RuntimeException("Salle not found with ID: " + rendezVousDetails.getSalle().getId()));
             existingRendezVous.setSalle(newSalle);
         }
 

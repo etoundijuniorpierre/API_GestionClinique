@@ -76,7 +76,7 @@ public class UtilisateurController {
     })
     public ResponseEntity<UtilisateurResponseDto> findUtilisateurById(
             @Parameter(description = "ID de l'utilisateur à récupérer", required = true, example = "123")
-            @PathVariable("idUtilisateur") Integer id) {
+            @PathVariable("idUtilisateur") Long id) {
         Utilisateur utilisateur = utilisateurService.findUtilisateurById(id); // Get entity from service
         return ResponseEntity.ok(utilisateurMapper.toDto(utilisateur)); // Map to DTO and return 200 OK
     }
@@ -182,7 +182,7 @@ public class UtilisateurController {
     })
     public ResponseEntity<UtilisateurResponseDto> updateUtilisateur(
             @Parameter(description = "ID de l'utilisateur à mettre à jour", required = true, example = "123")
-            @PathVariable("idUtilisateur") Integer id,
+            @PathVariable("idUtilisateur") Long id,
             @Parameter(description = "Nouveaux détails de l'utilisateur", required = true)
             @Valid @RequestBody UtilisateurRequestDto utilisateurRequestDto) { // Added @Valid
         Utilisateur existingUtilisateur = utilisateurService.findUtilisateurById(id); // Fetch existing entity
@@ -206,7 +206,7 @@ public class UtilisateurController {
     })
     public ResponseEntity<UtilisateurResponseDto> updateUtilisateurStatus(
             @Parameter(description = "ID de l'utilisateur à mettre à jour", required = true, example = "123")
-            @PathVariable("idUtilisateur") Integer id,
+            @PathVariable("idUtilisateur") Long id,
             @Parameter(description = "Nouveau statut d'activation (true pour actif, false pour inactif)", required = true, example = "true")
             @PathVariable("isActive") boolean isActive) {
         Utilisateur updatedUtilisateur = utilisateurService.updateUtilisateurStatus(id, isActive);
@@ -227,7 +227,7 @@ public class UtilisateurController {
     })
     public ResponseEntity<Void> deleteUtilisateur( // Use ResponseEntity<Void> for 204 No Content
                                                    @Parameter(description = "ID de l'utilisateur à supprimer", required = true, example = "1")
-                                                   @PathVariable("idUtilisateur") Integer id) {
+                                                   @PathVariable("idUtilisateur") Long id) {
         utilisateurService.deleteUtilisateur(id);
         return ResponseEntity.noContent().build(); // Return 204 No Content
     }
