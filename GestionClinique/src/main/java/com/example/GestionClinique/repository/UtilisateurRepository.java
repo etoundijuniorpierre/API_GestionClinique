@@ -5,6 +5,7 @@ import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +18,11 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 //    Collection<Utilisateur> findUtilisateurByInfoPersonnel_Nom(String nom);
 
 
-    Optional<Utilisateur> findByEmail(String email);
+     Optional<Utilisateur> findByEmail(String email);
 
     List<Utilisateur> findByRole_RoleType(RoleType roleType);
 
     List<Utilisateur> findByNom(String nom);
+
+
 }

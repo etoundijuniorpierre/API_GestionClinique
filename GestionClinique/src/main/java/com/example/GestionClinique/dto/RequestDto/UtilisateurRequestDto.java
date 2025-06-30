@@ -18,7 +18,7 @@ public class UtilisateurRequestDto extends InfoPersonnelRequestDto {
 
     @NotNull
     @Size(min = 8, max = 20)
-    private String motDePasse;
+    private String password;
 
     private ServiceMedical serviceMedicalName;
 

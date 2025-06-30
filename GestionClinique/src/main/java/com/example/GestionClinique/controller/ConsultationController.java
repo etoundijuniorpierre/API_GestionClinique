@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.example.GestionClinique.mapper.ConsultationMapper.prescriptionMapper;
+
 import static com.example.GestionClinique.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Consultations", description = "API pour la gestion des consultations médicales")

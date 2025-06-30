@@ -66,7 +66,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource((CorsConfigurationSource) corsConfigurationSource())) // Activer CORS
                 .authorizeHttpRequests(authorize -> authorize
                         // Permettre l'accès public à l'enregistrement et au login
-                        .requestMatchers("/clinique/utilisateur/login").permitAll()
+                        .requestMatchers("/clinique/login").permitAll()
                         // Permettre l'accès aux endpoints Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(String.valueOf(PathItem.HttpMethod.POST), "/clinique/utilisateur/createUtilisateur").hasRole("ADMIN")

@@ -16,9 +16,6 @@ public abstract class InfoPersonnelRequestDto {
     private String prenom;
 
     @NotEmpty
-    private String email;
-
-    @NotEmpty
     private LocalDate dateNaissance;
 
     @NotEmpty

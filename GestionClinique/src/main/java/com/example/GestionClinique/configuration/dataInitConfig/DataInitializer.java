@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
-import java.util.*;
 
 import static com.example.GestionClinique.model.entity.enumElem.RoleType.ADMIN;
 import static com.example.GestionClinique.model.entity.enumElem.StatutSalle.DISPONIBLE;
@@ -46,7 +45,7 @@ public class DataInitializer {
             if (utilisateurRepository.findAll().isEmpty()) { // Ou mieux: utilisateurRepository.findUtilisateurByInfoPersonnel_Email("admin@gmail.com").isEmpty()
                 // 1. Créer ou récupérer le rôle "ADMIN"
                 final String ADMIN_ROLE_TYPE = "ADMIN"; // Constante pour éviter les fautes de frappe
-                Role adminRole = roleRepository.findFirstByRoleType(RoleType.valueOf(ADMIN_ROLE_TYPE))
+                Role adminRole = roleRepository.findFirstByRoleType(RoleType.ADMIN)
                         .orElseGet(() -> {
                             Role newRole = new Role();
                             newRole.setRoleType(RoleType.valueOf(ADMIN_ROLE_TYPE));
@@ -56,24 +55,20 @@ public class DataInitializer {
 
                 // 2. Créer l'utilisateur admin
                 Utilisateur admin = new Utilisateur();
-
-
                 admin.setNom("admin");
                 admin.setPrenom("admin");
                 admin.setEmail("admin@gmail.com");
                 admin.setDateNaissance(LocalDate.parse("2001-09-08"));
-                admin.setTelephone("+2370061");
+                admin.setTelephone("+237006100");
                 admin.setAdresse("Yaounde Mimboman Sapeur");
                 admin.setGenre("M");
-                admin.setMotDePasse(passwordEncoder.encode("administrateur"));
+                admin.setPassword(passwordEncoder.encode("administrateur"));
                 admin.setActif(true);
-
+                admin.setRole(adminRole);
                 // 3. Assigner le rôle "ADMIN" à l'utilisateur
                 // Assurez-vous que votre entité Utilisateur a une méthode 'setRoles' qui prend un Set<Role>
                 // ou une méthode 'addRole' si vous préférez ajouter un par un.
-                Set<Role> roles = new HashSet<>();
-                roles.add(adminRole);
-                admin.setRole(roles);
+
 
                 // 4. Sauvegarder l'utilisateur (ceci devrait aussi sauvegarder la relation ManyToMany)
                 utilisateurRepository.save(admin);
@@ -99,11 +94,11 @@ public class DataInitializer {
 
                 if (salleRepository.findByServiceMedical(serviceMedicalEnum).isEmpty()) {
                     Salle salle = new Salle();
-                    salle.setNumero("Salle" + serviceMedicalNumber);
+                    salle.setNumeroSalle("Salle" + serviceMedicalNumber);
                     salle.setServiceMedical(serviceMedicalEnum);
                     salle.setStatutSalle(DISPONIBLE);
                     salleRepository.save(salle);
-                    System.out.println("Salle " + salle.getNumero() + " du service médical " + salle.getServiceMedical() + " créée avec succès");
+                    System.out.println("Salle " + salle.getNumeroSalle() + " du service médical " + salle.getServiceMedical() + " créée avec succès");
                 } else {
                     System.out.println("Salle pour le service médical " + serviceMedicalEnum + " existe déjà. Skipping creation.");
                 }

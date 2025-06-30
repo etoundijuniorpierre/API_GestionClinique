@@ -14,7 +14,6 @@ import java.util.*;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "utilisateurs")
@@ -23,10 +22,7 @@ public class Utilisateur extends InfoPersonnel {
     @Column(nullable = false, name = "mot_de_passe")
     @JsonIgnore
     @Size(min = 8, max = 20)
-    private String motDePasse;
-
-    @Column(nullable = false, unique = true)
-    private String email;
+    private String password;
 
     private Boolean actif;
 

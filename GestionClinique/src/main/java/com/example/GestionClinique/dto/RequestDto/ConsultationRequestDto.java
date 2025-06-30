@@ -39,7 +39,7 @@ public class ConsultationRequestDto {
     private LocalDateTime dateHeureDebut;
 
     @NotNull(message = "La durée de la consultation est requise.")
-    private Integer dureeMinutes;
+    private Long dureeMinutes;
 
     @NotNull(message = "L'ID du dossier médical est requis.")
     private Long dossierMedicalId;

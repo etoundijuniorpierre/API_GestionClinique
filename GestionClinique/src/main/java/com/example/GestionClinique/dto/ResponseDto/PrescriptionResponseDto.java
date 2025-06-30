@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrescriptionResponseDto extends BaseResponseDto {
-    private LocalDate datePrescription; // Added
+    private LocalDate datePrescription;
     private String typePrescription;
     private String medicaments;
     private String instructions;

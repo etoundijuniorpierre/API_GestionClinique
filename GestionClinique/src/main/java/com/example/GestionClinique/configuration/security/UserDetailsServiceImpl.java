@@ -3,19 +3,12 @@ package com.example.GestionClinique.configuration.security;
 
 
 import com.example.GestionClinique.model.entity.Utilisateur;
-import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.repository.UtilisateurRepository;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -29,7 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        Utilisateur utilisateur = utilisateurRepository.findUtilisateurByInfoPersonnel_Email(email)
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + email));
 
         String username = null;
@@ -40,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 username = utilisateur.getEmail();
 
             // Vérifier motDePasse
-            password = utilisateur.getMotDePasse();
+            password = utilisateur.getPassword();
             if (password == null) {
                 // Log ou lancer une exception si le mot de passe est null
                 System.err.println("ERREUR: Le mot de passe est null pour l'utilisateur : " + username);

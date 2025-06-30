@@ -14,14 +14,13 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "salle")
 public class Salle extends BaseEntity {
 
         @Column(name = "numero", nullable = false, unique = true)
-        private String numero;
+        private String numeroSalle;
 
         @Enumerated(EnumType.STRING)
         @NotNull // Ensure this is not null

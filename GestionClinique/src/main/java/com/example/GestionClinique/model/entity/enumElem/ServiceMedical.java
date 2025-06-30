@@ -1,5 +1,8 @@
 package com.example.GestionClinique.model.entity.enumElem;
 
+import lombok.Getter;
+
+@Getter
 public enum ServiceMedical {
     MEDECINE_GENERALE(5000.0),
     PEDIATRIE(10000.0),
@@ -24,10 +27,6 @@ public enum ServiceMedical {
 
     ServiceMedical(double montant) {
         this.montant = montant;
-    }
-
-    public double getMontant() {
-        return montant;
     }
 
 

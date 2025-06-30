@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@Builder // Add @Builder for convenience
 @NoArgsConstructor // Add @NoArgsConstructor for JPA and Builder
 @AllArgsConstructor // Add @AllArgsConstructor for Builder
 @Table(name = "prescription") // Snake_case table name is good.

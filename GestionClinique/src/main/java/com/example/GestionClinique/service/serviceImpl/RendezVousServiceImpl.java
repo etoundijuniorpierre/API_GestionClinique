@@ -61,7 +61,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
      
         if (rendezVous.getStatut() == null) {
-            rendezVous.setStatut(StatutRDV.PLANIFIE); 
+            rendezVous.setStatut(StatutRDV.CONFIRME);
         }
 
         return rendezVousRepository.save(rendezVous);

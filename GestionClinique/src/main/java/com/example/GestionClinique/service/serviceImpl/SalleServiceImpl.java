@@ -2,6 +2,7 @@ package com.example.GestionClinique.service.serviceImpl;
 
 
 import com.example.GestionClinique.model.entity.Salle;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import com.example.GestionClinique.repository.SalleRepository;
 import com.example.GestionClinique.service.SalleService;
@@ -30,8 +31,8 @@ public class SalleServiceImpl implements SalleService {
     @Override
     public Salle createSalle(Salle salle) {
         // Check for uniqueness of numero before saving
-        if (salleRepository.findByNumero(salle.getNumero()).isPresent()) {
-            throw new RuntimeException("Salle with number '" + salle.getNumero() + "' already exists.");
+        if (salleRepository.findByNumeroSalle(salle.getNumeroSalle()).isPresent()) {
+            throw new RuntimeException("Salle with number '" + salle.getNumeroSalle() + "' already exists.");
         }
         return salleRepository.save(salle);
     }
@@ -60,13 +61,13 @@ public class SalleServiceImpl implements SalleService {
         Salle existingSalle = salleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Salle not found with ID: " + id));
 
-        if (!salleDetails.getNumero().equals(existingSalle.getNumero())) {
-            if (salleRepository.findByNumero(salleDetails.getNumero()).isPresent()) {
-                throw new RuntimeException("Salle with number '" + salleDetails.getNumero() + "' already exists.");
+        if (!salleDetails.getNumeroSalle().equals(existingSalle.getNumeroSalle())) {
+            if (salleRepository.findByNumeroSalle(salleDetails.getNumeroSalle()).isPresent()) {
+                throw new RuntimeException("Salle with number '" + salleDetails.getNumeroSalle() + "' already exists.");
             }
         }
 
-        existingSalle.setNumero(salleDetails.getNumero());
+        existingSalle.setNumeroSalle(salleDetails.getNumeroSalle());
         existingSalle.setServiceMedical(salleDetails.getServiceMedical());
         existingSalle.setStatutSalle(salleDetails.getStatutSalle());
 
@@ -90,12 +91,17 @@ public class SalleServiceImpl implements SalleService {
         return salleRepository.findByStatutSalle(statutSalle);
     }
 
-
     @Override
     @Transactional
-    public List<Salle> findAvailableSalles(LocalDateTime dateHeureDebut, Long dureeMinutes) {
-        // Calculate dateHeureFin here in the service layer
-        LocalDateTime dateHeureFin = dateHeureDebut.plusMinutes(dureeMinutes);
-        return salleRepository.findAvailableSalles(dateHeureDebut, dateHeureFin);
+    public List<Salle> findSallesByServiceMedical(ServiceMedical serviceMedical) {
+        return salleRepository.findByServiceMedical(serviceMedical);
     }
+
+//    @Override
+//    @Transactional
+//    public List<Salle> findAvailableSalles(LocalDateTime dateHeureDebut, Long dureeMinutes) {
+//        // Calculate dateHeureFin here in the service layer
+//        LocalDateTime dateHeureFin = dateHeureDebut.plusMinutes(dureeMinutes);
+//        return salleRepository.findAvailableSalles(dateHeureDebut, dateHeureFin);
+//    }
 }

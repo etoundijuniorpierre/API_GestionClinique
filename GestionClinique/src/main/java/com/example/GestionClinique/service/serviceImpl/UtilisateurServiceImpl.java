@@ -9,11 +9,18 @@ import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.UtilisateurService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -24,7 +31,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final RoleRepository roleRepository; // Inject RoleRepository
     private final PasswordEncoder passwordEncoder; // Inject PasswordEncoder
 
-    @Autowired
+
     public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository,
                                   RoleRepository roleRepository,
                                   PasswordEncoder passwordEncoder) {
@@ -35,7 +42,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     @Override
     public Utilisateur createUtilisateur(Utilisateur utilisateur) {
-        utilisateur.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
+        utilisateur.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
         
         if (utilisateur.getRole() != null && utilisateur.getRole().getId() != null) {
             Role existingRole = roleRepository.findById(utilisateur.getRole().getId())
@@ -50,6 +57,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         }
         return utilisateurRepository.save(utilisateur);
     }
+
 
     @Override
     @Transactional
@@ -72,7 +80,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         existingUtilisateur.setNom(utilisateurDetails.getNom());
         existingUtilisateur.setPrenom(utilisateurDetails.getPrenom());
         existingUtilisateur.setEmail(utilisateurDetails.getEmail());
-        existingUtilisateur.setMotDePasse(passwordEncoder.encode(utilisateurDetails.getMotDePasse()));
+        existingUtilisateur.setPassword(passwordEncoder.encode(utilisateurDetails.getPassword()));
         existingUtilisateur.setAdresse(utilisateurDetails.getAdresse());
         existingUtilisateur.setTelephone(utilisateurDetails.getTelephone());
         existingUtilisateur.setDateNaissance(utilisateurDetails.getDateNaissance());
@@ -125,6 +133,22 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
 
+//    @Transactional
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        Utilisateur utilisateur = findUtilisateurByEmail(username);
+//
+//        if (utilisateur.getPassword() == null || utilisateur.getPassword().isEmpty()) {
+//            throw new AuthenticationServiceException("Problème d'authentification");
+//        }
+//
+//        return new org.springframework.security.core.userdetails.User(
+//                utilisateur.getEmail(),
+//                utilisateur.getPassword(),
+//                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + utilisateur.getRole()))
+//        );
+//    }
+    
 //    public Utilisateur updatePassword(Long id, String newPassword) {
 //        Utilisateur utilisateur = utilisateurRepository.findById(id)
 //                .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));

@@ -4,11 +4,15 @@ import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponse {
-    private String jwt;
-    private UtilisateurRequestDto user;
+    private String token;
+    private String username;
+    private Collection<? extends GrantedAuthority> authorities;
 }

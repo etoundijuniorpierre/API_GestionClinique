@@ -1,26 +1,17 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.RequestDto.ConsultationRequestDto;
-import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
-import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
-import com.example.GestionClinique.dto.RequestDto.RendezVousRequestDto;
+
 import com.example.GestionClinique.model.entity.*;
-import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.*;
 import com.example.GestionClinique.service.ConsultationService;
-import com.example.GestionClinique.service.HistoriqueActionService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 @Transactional

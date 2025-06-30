@@ -2,6 +2,7 @@ package com.example.GestionClinique.repository;
 
 
 import com.example.GestionClinique.model.entity.Salle;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,15 +17,15 @@ public interface SalleRepository extends JpaRepository<Salle, Long> {
 
     List<Salle> findByStatutSalle(StatutSalle statutSalle);
 
-    Optional<Salle> findByNumero(String numero);
+    Optional<Salle> findByNumeroSalle(String numeroSalle);
 
+    List<Salle> findByServiceMedical(ServiceMedical serviceMedical);
 
-//    @Query("SELECT s FROM Salle s WHERE s.statutSalle = 'DISPONIBLE' AND s.id NOT IN (" +
-//            "  SELECT rv.salle.id FROM RendezVous rv JOIN rv.consultation c " +
-//            "  WHERE rv.salle IS NOT NULL AND c IS NOT NULL " +
-//            "  AND (:slotStart < (c.dateHeureDebut + c.dureeMinutes * INTERVAL '1 MINUTE') AND :slotEnd > c.dateHeureDebut)" +
+//    @Query("SELECT s FROM Salle s WHERE s.id NOT IN (" +
+//            "  SELECT r.salle.id FROM RendezVous r " +
+//            "  WHERE (:start < r.dateHeureFin AND :end > r.dateHeureDebut)" +
 //            ")")
-    List<Salle> findAvailableSalles(
-            @Param("slotStart") LocalDateTime slotStart,
-            @Param("slotEnd") LocalDateTime slotEnd);
+//    List<Salle> findAvailableSalles(
+//            @Param("start") LocalDateTime start,
+//            @Param("end") LocalDateTime end);
 }

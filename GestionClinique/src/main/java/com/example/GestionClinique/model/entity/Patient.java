@@ -10,7 +10,6 @@ import java.util.*;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "patient")

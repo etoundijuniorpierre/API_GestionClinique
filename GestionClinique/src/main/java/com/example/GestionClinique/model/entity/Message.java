@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data // Keep @Data, it will generate isLu() for 'lu' field
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "message")

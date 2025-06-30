@@ -1,6 +1,6 @@
 package com.example.GestionClinique.controller;
 
-import com.example.GestionClinique.configuration.security.jwtConfig.JwtResponse;
+
 import com.example.GestionClinique.configuration.security.jwtConfig.JwtUtil;
 import com.example.GestionClinique.dto.dtoConnexion.LoginRequest;
 import com.example.GestionClinique.dto.dtoConnexion.LoginResponse;
@@ -28,12 +28,12 @@ import static com.example.GestionClinique.utils.Constants.API_NAME;
 @Tag(name = "AUTHENTIFICATION", description = "API pour se login dans notre système")
 @RequestMapping
 @RestController
-public class LoginController {
+public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil; // Injectez votre JwtUtil
 
-    public LoginController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
@@ -64,7 +64,7 @@ public class LoginController {
             }
 
             String jwt = jwtUtil.generateToken(userDetails);
-            return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
+            return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
 
         } catch (org.springframework.security.core.AuthenticationException e) {
 

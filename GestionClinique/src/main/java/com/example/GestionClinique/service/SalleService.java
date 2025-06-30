@@ -2,6 +2,7 @@ package com.example.GestionClinique.service;
 
 
 import com.example.GestionClinique.model.entity.Salle;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import jakarta.transaction.Transactional;
 
@@ -21,5 +22,7 @@ public interface SalleService {
 
     List<Salle> findSallesByStatut(StatutSalle statutSalle);
     
-    List<Salle> findAvailableSalles(LocalDateTime dateHeureDebut, Long dureeMinutes);
+//    List<Salle> findAvailableSalles(LocalDateTime dateHeureDebut, Long dureeMinutes);
+
+    List<Salle> findSallesByServiceMedical(ServiceMedical serviceMedical);
 }

@@ -20,4 +20,5 @@ public interface HistoriqueActionService {
     List<HistoriqueAction> findHistoriqueActionsByUtilisateurId(Long utilisateurId); // Changed to Long
     List<HistoriqueAction> findHistoriqueActionsByUtilisateurName(String utilisateurName);
     List<HistoriqueAction> findHistoriqueActionsByDateRange(LocalDate startDate, LocalDate endDate);
+
 }

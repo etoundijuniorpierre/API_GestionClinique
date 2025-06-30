@@ -17,12 +17,10 @@ public class ConsultationResponseDto extends BaseResponseDto {
     private String compteRendu;
     private String diagnostic;
     private LocalDateTime dateHeureDebut;
-    private Integer dureeMinutes;
-
+    private Long dureeMinutes;
     private Long dossierMedicalId;
     private Long medecinId;
     private Long rendezVousId;
     private Long factureId;
-
     private List<PrescriptionResponseDto> prescriptions;
 }

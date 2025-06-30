@@ -5,6 +5,7 @@ import com.example.GestionClinique.dto.RequestDto.SalleRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.SalleResponseDto;
 import com.example.GestionClinique.mapper.SalleMapper;
 import com.example.GestionClinique.model.entity.Salle;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -26,7 +27,6 @@ import com.example.GestionClinique.service.SalleService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.GestionClinique.utils.Constants.API_NAME;
@@ -48,7 +48,7 @@ public class SalleController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer une nouvelle salle",
             description = "Crée une nouvelle salle dans le système avec les détails fournis")
@@ -70,7 +70,7 @@ public class SalleController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'ADMIN')") // Doctors might need to view salle details
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN')") // Doctors might need to view salle details
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE) // Consolidated path
     @Operation(summary = "Obtenir une salle par ID",
             description = "Récupère les informations détaillées d'une salle spécifique par son ID")
@@ -92,7 +92,7 @@ public class SalleController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN')")
     @GetMapping(path = "/statut/{statutSalle}", produces = MediaType.APPLICATION_JSON_VALUE) // Consolidated path
     @Operation(summary = "Trouver les salles par statut",
             description = "Récupère toutes les salles correspondant au statut spécifié")
@@ -115,7 +115,7 @@ public class SalleController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path for all salles
     @Operation(summary = "Lister toutes les salles",
             description = "Récupère une liste complète de toutes les salles du système")
@@ -135,7 +135,7 @@ public class SalleController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Consolidated path
     @Operation(summary = "Mettre à jour une salle",
             description = "Met à jour les informations d'une salle existante")
@@ -161,7 +161,7 @@ public class SalleController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping(path = "/{id}") // Simplified path
     @Operation(summary = "Supprimer une salle",
             description = "Supprime définitivement une salle du système")
@@ -182,28 +182,55 @@ public class SalleController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'ADMIN')")
-    @GetMapping(path = "/available", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path
-    @Operation(summary = "Trouver les salles disponibles",
-            description = "Récupère une liste des salles disponibles pour un créneau horaire spécifique")
+//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+//    @GetMapping(path = "/available", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path
+//    @Operation(summary = "Trouver les salles disponibles",
+//            description = "Récupère une liste des salles disponibles pour un créneau horaire spécifique")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Liste des salles disponibles retournée",
+//                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SalleResponseDto.class)))), // ArraySchema, Use ResponseDto
+//            @ApiResponse(responseCode = "204", description = "Aucune salle disponible trouvée"),
+//            @ApiResponse(responseCode = "400", description = "Paramètres de date/heure invalides"),
+//            @ApiResponse(responseCode = "500", description = "Erreur serveur lors de la recherche")
+//    })
+//    public ResponseEntity<List<SalleResponseDto>> findAvailableSalles(
+//            @Parameter(description = "Date et heure de début du créneau désiré", required = true,
+//                    example = "2025-06-28T10:00:00") // Updated example date to current year
+//            @RequestParam("dateHeureDebut") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateHeureDebut,
+//            @Parameter(description = "Durée du créneau désiré en minutes", required = true,
+//                    example = "60")
+//            @RequestParam("dureeMinutes") Long dureeMinutes) {
+//        List<Salle> salles = salleService.findAvailableSalles(dateHeureDebut, dureeMinutes);
+//        if (salles.isEmpty()) {
+//            return ResponseEntity.noContent().build();
+//        }
+//        return ResponseEntity.ok(salleMapper.toDtoList(salles));
+//    }
+
+    
+    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+    @GetMapping(path = "/serviceMedical/{serviceMedical}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Rechercher des salles par service médical",
+            description = "Récupère une liste de toutes les salles associées à un service médical spécifique.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Liste des salles disponibles retournée",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SalleResponseDto.class)))), // ArraySchema, Use ResponseDto
-            @ApiResponse(responseCode = "204", description = "Aucune salle disponible trouvée"),
-            @ApiResponse(responseCode = "400", description = "Paramètres de date/heure invalides"),
-            @ApiResponse(responseCode = "500", description = "Erreur serveur lors de la recherche")
+            @ApiResponse(responseCode = "200", description = "Salles trouvées pour le service médical spécifié",
+                    content = @Content(schema = @Schema(implementation = SalleResponseDto.class))),
+            @ApiResponse(responseCode = "204", description = "Aucune salle trouvée pour ce service médical"),
+            @ApiResponse(responseCode = "400", description = "Nom de service médical invalide"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
-    public ResponseEntity<List<SalleResponseDto>> findAvailableSalles(
-            @Parameter(description = "Date et heure de début du créneau désiré", required = true,
-                    example = "2025-06-28T10:00:00") // Updated example date to current year
-            @RequestParam("dateHeureDebut") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateHeureDebut,
-            @Parameter(description = "Durée du créneau désiré en minutes", required = true,
-                    example = "60")
-            @RequestParam("dureeMinutes") Long dureeMinutes) {
-        List<Salle> salles = salleService.findAvailableSalles(dateHeureDebut, dureeMinutes);
-        if (salles.isEmpty()) {
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<List<SalleResponseDto>> findSallesByServiceMedical(
+            @Parameter(description = "Nom du service médical (ex: MEDECINE_GENERALE, PEDIATRIE)", required = true, example = "CARDIOLOGIE")
+            @PathVariable("serviceMedical") ServiceMedical serviceMedical) { 
+        try {
+            List<Salle> salles = salleService.findSallesByServiceMedical(serviceMedical);
+            if (salles.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(salleMapper.toDtoList(salles));
+        } catch (Exception e) {
+           
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(salleMapper.toDtoList(salles));
     }
 }

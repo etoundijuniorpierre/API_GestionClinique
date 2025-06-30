@@ -11,12 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        uses = {PrescriptionMapper.class})
 public interface ConsultationMapper {
-
-
-    @Autowired
-    PrescriptionMapper prescriptionMapper = null;
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dossierMedical", ignore = true)
@@ -30,10 +28,11 @@ public interface ConsultationMapper {
     @Mapping(target = "medecinId", source = "medecin.id")
     @Mapping(target = "rendezVousId", source = "rendezVous.id")
     @Mapping(target = "factureId", source = "facture.id")
-    @Mapping(target = "prescriptions", expression = "java(consultation.getPrescriptions() != null ? prescriptionMapper.toDtoList(consultation.getPrescriptions()) : null)")
-    ConsultationResponseDto toDto(Consultation consultation);
+    @Mapping(target = "prescriptions", source = "prescriptions")
+    @Mapping(target = "dureeMinutes", source = "dureeMinutes")
+    ConsultationResponseDto toDto(Consultation entity);
 
-    List<ConsultationResponseDto> toDtoList(List<Consultation> consultations);
+    List<ConsultationResponseDto> toDtoList(List<Consultation> entities);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dossierMedical", ignore = true)
@@ -42,5 +41,4 @@ public interface ConsultationMapper {
     @Mapping(target = "prescriptions", ignore = true)
     @Mapping(target = "facture", ignore = true)
     void updateEntityFromDto(ConsultationRequestDto dto, @MappingTarget Consultation entity);
-
 }

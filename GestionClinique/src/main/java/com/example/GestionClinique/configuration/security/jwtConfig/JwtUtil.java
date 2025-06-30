@@ -19,19 +19,10 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    // Clé secrète pour signer les JWT. Idéalement, à générer de manière sécurisée.
-    // Stockez-la dans application.properties : jwt.secret=<votre_clé_secrete_longue_et_aléatoire>
-    @Value("${jwt.secret}")
-    private String secret;
 
-    // Durée de validité du token JWT (par exemple, 1 heure = 3600000 ms)
-    @Value("${jwt.expiration}")
-    private long expiration;
-
-    // --- Génération de la clé secrète à partir de la String ---
+    private String secret ="PeO2546SF3Sfs5fs3bds3MH2SFsdfDS5s";
+    private long expiration = 3600000;
     private SecretKey getSigningKey() {
-        // Pour HmacSHA256, la clé doit être d'au moins 256 bits (32 octets).
-        // Keys.hmacShaKeyFor(secret.getBytes()) est une bonne façon de le faire.
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
