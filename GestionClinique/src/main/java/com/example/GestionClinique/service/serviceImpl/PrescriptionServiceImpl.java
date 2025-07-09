@@ -1,19 +1,22 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
+
 import com.example.GestionClinique.model.entity.*;
 import com.example.GestionClinique.repository.*;
-import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.PrescriptionService;
-import jakarta.persistence.EntityNotFoundException;
+import com.itextpdf.layout.property.TextAlignment;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.itextpdf.io.source.ByteArrayOutputStream;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Text;
 
-import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -132,5 +135,101 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Transactional
     public List<Prescription> findPrescriptionByConsultationId(Long consultationId) {
         return prescriptionRepository.findByConsultationId(consultationId);
+    }
+
+
+    @Override
+    public byte[] generatePrescriptionPdf(Long prescriptionId) {
+        Prescription prescription = prescriptionRepository.findById(prescriptionId)
+                .orElseThrow(() -> new IllegalArgumentException("Prescription not found with ID: " + prescriptionId));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+        Document document = new Document(pdf);
+
+        try {
+            // --- Header Section ---
+            document.add(new Paragraph("ORDONNANCE MÉDICALE")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setBold()
+                    .setFontSize(24));
+            document.add(new Paragraph("--------------------------------------")
+                    .setTextAlignment(TextAlignment.CENTER));
+
+            // --- Doctor Information (if available) ---
+            if (prescription.getMedecin() != null) {
+                document.add(new Paragraph("Médecin Prescripteur: ")
+                        .add(new Text(prescription.getMedecin().getNom() + " " + prescription.getMedecin().getPrenom()))
+                        .add("\nSpécialité: ")
+                        .add(new Text(prescription.getMedecin().getServiceMedical() != null ? prescription.getMedecin().getServiceMedical().name() : "N/A"))
+                        .add("\nDate: ")
+                        .add(new Text(prescription.getCreationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
+                        .setTextAlignment(TextAlignment.RIGHT)); // Align doctor info to right
+            } else {
+                document.add(new Paragraph("Médecin: N/A"));
+            }
+
+            document.add(new Paragraph("\n")); // Spacer
+
+            // --- Patient Information (if available) ---
+            if (prescription.getPatient() != null) {
+                document.add(new Paragraph("Patient: ")
+                        .add(new Text(prescription.getPatient().getNom() + " " + prescription.getPatient().getPrenom()))
+                        .add("\nDate de naissance: ")
+                        .add(new Text(prescription.getPatient().getDateNaissance() != null ? prescription.getPatient().getDateNaissance().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A"))
+                        .add("\nSexe: ")
+                        .add(new Text(prescription.getPatient().getGenre() != null ? prescription.getPatient().getGenre() : "N/A")));
+            } else {
+                document.add(new Paragraph("Patient: Non spécifié (Urgence)"));
+            }
+
+            document.add(new Paragraph("\n")); // Spacer
+
+            // --- Prescription Details ---
+            document.add(new Paragraph("Type de Prescription: ")
+                    .add(new Text(prescription.getTypePrescription()).setBold()));
+            document.add(new Paragraph("Médicaments/Articles: ")
+                    .add(new Text(prescription.getMedicaments())));
+            document.add(new Paragraph("Instructions: ")
+                    .add(new Text(prescription.getInstructions())));
+            document.add(new Paragraph("Quantité: ")
+                    .add(new Text(prescription.getQuantite().toString())));
+            if (prescription.getDureePrescription() != null && !prescription.getDureePrescription().isEmpty()) {
+                document.add(new Paragraph("Durée: ")
+                        .add(new Text(prescription.getDureePrescription())));
+            }
+
+            document.add(new Paragraph("\n")); // Spacer
+
+            // --- Consultation Context (if available) ---
+            if (prescription.getConsultation() != null) {
+                document.add(new Paragraph("Consultation Associée:")
+                        .setBold());
+                document.add(new Paragraph("ID Consultation: ")
+                        .add(new Text(prescription.getConsultation().getId().toString())));
+                document.add(new Paragraph("Motif de Consultation: ")
+                        .add(new Text(prescription.getConsultation().getMotifs())));
+                document.add(new Paragraph("Diagnostic: ")
+                        .add(new Text(prescription.getConsultation().getDiagnostic())));
+            }
+
+
+            // --- Footer ---
+            document.add(new Paragraph("\n\n--------------------------------------")
+                    .setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("Signature du médecin")
+                    .setTextAlignment(TextAlignment.RIGHT));
+
+
+        } catch (Exception e) {
+            System.err.println("Error generating PDF for Prescription ID " + prescriptionId + ": " + e.getMessage());
+            throw new RuntimeException("Failed to generate prescription PDF.", e);
+        } finally {
+            if (document != null) {
+                document.close();
+            }
+        }
+        return baos.toByteArray();
     }
 }

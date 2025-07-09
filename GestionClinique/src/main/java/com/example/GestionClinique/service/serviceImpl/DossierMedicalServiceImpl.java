@@ -21,7 +21,8 @@ import java.util.List;
 public class DossierMedicalServiceImpl implements DossierMedicalService {
 
     private final DossierMedicalRepository dossierMedicalRepository;
-    private final PatientRepository patientRepository; // Inject PatientRepository
+    private final PatientRepository patientRepository;
+    // Inject PatientRepository
 
     @Autowired
     public DossierMedicalServiceImpl(DossierMedicalRepository dossierMedicalRepository, PatientRepository patientRepository) {
@@ -47,6 +48,8 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         // Also update the patient to link to the new dossier (for bi-directional relationship management)
         patient.setDossierMedical(savedDossier);
         patientRepository.save(patient); // Save updated patient
+
+
 
         return savedDossier;
     }

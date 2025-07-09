@@ -10,6 +10,7 @@ import java.util.List;
 
 
 public interface FactureService {
+    // This method is now called from ConsultationService
     Facture generateInvoiceForConsultation(Long consultationId, ModePaiement modePaiement);
 
     Facture payerFacture(Long factureId);

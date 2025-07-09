@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Table(name = "facture")
 public class Facture extends BaseEntity {
 

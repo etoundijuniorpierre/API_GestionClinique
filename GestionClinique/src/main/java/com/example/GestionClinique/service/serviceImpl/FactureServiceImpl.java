@@ -9,6 +9,16 @@ import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import com.example.GestionClinique.repository.ConsultationRepository;
 import com.example.GestionClinique.repository.FactureRepository;
 import com.example.GestionClinique.service.FactureService;
+import com.itextpdf.io.source.ByteArrayOutputStream;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Text;
+
+
+
+import com.itextpdf.layout.property.TextAlignment;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,46 +80,6 @@ public class FactureServiceImpl implements FactureService {
         return savedFacture;
     }
 
-
-
-    @Override
-    public Facture createFactureForConsultation(Long consultationId, Facture facture) {
-        Consultation consultation = consultationRepository.findById(consultationId)
-                .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + consultationId));
-
-        if (factureRepository.findByConsultationId(consultationId).isPresent()) {
-            throw new RuntimeException("A facture already exists for Consultation with ID: " + consultationId);
-        }
-
-        facture.setConsultation(consultation);
-
-        // Derive patient from consultation
-        // This part needs adjustment based on the consultation's patient/dossier nullable status
-        if (consultation.getDossierMedical() != null && consultation.getDossierMedical().getPatient() != null) {
-            facture.setPatient(consultation.getDossierMedical().getPatient());
-        } else {
-            // Allow patient to be null if consultation's dossierMedical/patient is null
-            facture.setPatient(null);
-            System.out.println("Warning: Creating invoice via createFactureForConsultation for consultation ID " + consultationId + " without an associated patient.");
-        }
-
-        if (facture.getDateEmission() == null) {
-            facture.setDateEmission(LocalDate.now());
-        }
-        if (facture.getStatutPaiement() == null) {
-            facture.setStatutPaiement(StatutPaiement.IMPAYE);
-        }
-        if (facture.getModePaiement() == null) {
-            facture.setModePaiement(ModePaiement.ESPECES);
-        }
-
-        Facture savedFacture = factureRepository.save(facture);
-
-        consultation.setFacture(savedFacture);
-        consultationRepository.save(consultation);
-
-        return savedFacture;
-    }
 
     @Override
     public Facture updateFacture(Long id, Facture factureDetails) {
@@ -182,6 +152,82 @@ public class FactureServiceImpl implements FactureService {
                 .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + factureId));
         facture.setStatutPaiement(nouveauStatut);
         return factureRepository.save(facture);
+    }
+
+
+
+    @Override
+    public Facture payerFacture(Long factureId) {
+        Facture facture = factureRepository.findById(factureId)
+                .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + factureId));
+
+        if (facture.getStatutPaiement() == StatutPaiement.PAYE) {
+            throw new IllegalArgumentException("Facture with ID: " + factureId + " is already marked as PAID.");
+        }
+
+        facture.setStatutPaiement(StatutPaiement.PAYE);
+        return factureRepository.save(facture);
+    }
+
+
+    // FactureServiceImpl.java (within generateFacturePdf method)
+
+
+
+
+    @Override
+    public byte[] generateFacturePdf(Long factureId) {
+        Facture facture = factureRepository.findById(factureId)
+                .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + factureId));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+        Document document = new Document(pdf);
+
+        try {
+            // --- FIXES HERE: Wrap strings in Paragraph or Text ---
+            document.add(new Paragraph("FACTURE MÉDICALE")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setBold()
+                    .setFontSize(20));
+            document.add(new Paragraph("--------------------------------------")
+                    .setTextAlignment(TextAlignment.CENTER));
+
+            document.add(new Paragraph("Facture ID: ").add(new Text(facture.getId().toString())));
+            document.add(new Paragraph("Date d'émission: ").add(new Text(facture.getDateEmission().toString())));
+            document.add(new Paragraph("Statut: ").add(new Text(facture.getStatutPaiement().toString())));
+            document.add(new Paragraph("Mode de paiement: ").add(new Text(facture.getModePaiement().toString())));
+            document.add(new Paragraph("Montant: ").add(new Text(String.format("%.2f", facture.getMontant()) + " XAF"))); // Assuming XAF as currency
+
+            if (facture.getPatient() != null) {
+                document.add(new Paragraph("Patient: ").add(new Text(facture.getPatient().getNom() + " " + facture.getPatient().getPrenom())));
+            } else {
+                document.add(new Paragraph("Patient: ").add(new Text("Non spécifié (Urgence)")));
+            }
+
+            if (facture.getConsultation() != null) {
+                document.add(new Paragraph("Consultation ID: ").add(new Text(facture.getConsultation().getId().toString())));
+                if (facture.getConsultation().getMedecin() != null) {
+                    document.add(new Paragraph("Médecin: ").add(new Text(facture.getConsultation().getMedecin().getNom() + " " + facture.getConsultation().getMedecin().getPrenom())));
+                }
+                if (facture.getConsultation().getMotifs() != null) {
+                    document.add(new Paragraph("Motif Consultation: ").add(new Text(facture.getConsultation().getMotifs())));
+                }
+            }
+
+            document.add(new Paragraph("\nMerci de votre confiance!").setTextAlignment(TextAlignment.CENTER));
+
+        } catch (Exception e) { // Catch more specific exceptions if possible (e.g., IOException, DocumentException)
+            System.err.println("Error generating PDF for Facture ID " + factureId + ": " + e.getMessage());
+            throw new RuntimeException("Failed to generate invoice PDF.", e);
+        } finally {
+            // Ensure document is closed even if an error occurs
+            if (document != null) {
+                document.close();
+            }
+        }
+        return baos.toByteArray();
     }
 }
 

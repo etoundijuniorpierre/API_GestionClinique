@@ -11,6 +11,8 @@ public interface PrescriptionService {
 
     Prescription createPrescription(Prescription prescription); // Takes a full Prescription entity
 
+    byte[] generatePrescriptionPdf(Long prescriptionId);
+
     Prescription updatePrescription(Long id, Prescription prescriptionDetails); // Takes ID and entity
 
     Prescription findById(Long id);
