@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "rendez_vous", uniqueConstraints = { // Changed table name to snake_case for convention

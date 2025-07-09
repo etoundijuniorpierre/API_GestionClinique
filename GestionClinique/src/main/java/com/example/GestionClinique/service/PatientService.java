@@ -2,6 +2,8 @@ package com.example.GestionClinique.service;
 
 
 import com.example.GestionClinique.model.entity.Patient;
+import com.example.GestionClinique.model.entity.RendezVous;
+import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -24,4 +26,8 @@ public interface PatientService {
     List<Patient> findPatientByNom(String nom);
 
     Patient findPatientByEmail(String email);
+
+    List<RendezVous> findRendezVousByPatientSearchTerm(String patientName);// Renamed parameter for clarity
+
+    List<RendezVous> findRendezVousForPatientByStatus(String patientName, StatutRDV statut);
 }

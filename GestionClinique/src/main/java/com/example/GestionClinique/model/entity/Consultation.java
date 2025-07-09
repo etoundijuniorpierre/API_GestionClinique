@@ -21,6 +21,9 @@ import java.util.List;
 @Table(name = "consultation")
 public class Consultation extends BaseEntity {
 
+    @Column
+    private String type = "NORMALE";
+
     @Column(name = "motifs", nullable = false)
     private String motifs;
 
@@ -42,19 +45,19 @@ public class Consultation extends BaseEntity {
     @Column(name = "diagnostic", nullable = false, columnDefinition = "TEXT")
     private String diagnostic;
 
-    @Column(name = "date_heure_debut", nullable = false)
-    private LocalDateTime dateHeureDebut;
-
-    @Column(name = "duree_minutes", nullable = false)
-    private Long dureeMinutes;
-
-    @Transient
-    public LocalDateTime getDateHeureFin() {
-        if (dateHeureDebut != null && dureeMinutes != null) {
-            return dateHeureDebut.plusMinutes(dureeMinutes);
-        }
-        return null;
-    }
+//    @Column(name = "date_heure_debut", nullable = false)
+//    private LocalDateTime dateHeureDebut;
+//
+//    @Column(name = "duree_minutes", nullable = false)
+//    private Long dureeMinutes;
+//
+//    @Transient
+//    public LocalDateTime getDateHeureFin() {
+//        if (creationDate != null && dureeMinutes != null) {
+//            return creationDate.plusMinutes(dureeMinutes);
+//        }
+//        return null;
+//    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dossier_medical_id", nullable = false)

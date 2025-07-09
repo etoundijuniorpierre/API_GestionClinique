@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -50,17 +49,17 @@ public class ConsultationServiceImpl implements ConsultationService {
                 .orElseThrow(() -> new IllegalArgumentException("DossierMedical not found with ID: " + consultation.getDossierMedical().getId()));
         consultation.setDossierMedical(dossierMedical);
         
-        if (consultation.getRendezVous() != null) {
-            throw new RuntimeException("Emergency consultation cannot be linked to a RendezVous.");
-        }
-        
-        if (consultation.getDateHeureDebut() == null) {
-            consultation.setDateHeureDebut(LocalDateTime.now());
-        }
-        if (consultation.getDureeMinutes() == null || consultation.getDureeMinutes() <= 0) {
-            consultation.setDureeMinutes(30L); 
-        }
+//        if (consultation.getRendezVous() != null) {
+//            throw new RuntimeException("Emergency consultation cannot be linked to a RendezVous.");
+//        }
 
+
+//        if (consultation.getDateHeureDebut() == null) {
+//            consultation.setDateHeureDebut(LocalDateTime.now());
+//        }
+//        if (consultation.getDureeMinutes() == null || consultation.getDureeMinutes() <= 0) {
+//            consultation.setDureeMinutes(30L);
+//        }
 
         return consultationRepository.save(consultation);
     }
@@ -69,8 +68,6 @@ public class ConsultationServiceImpl implements ConsultationService {
     // This is for SCHEDULED consultations (linked to a RendezVous)
     @Override
     public Consultation startConsultation(Long rendezVousId, Consultation consultationDetails, Long medecinId) {
-        
-
         RendezVous rendezVous = rendezVousRepository.findById(rendezVousId)
                 .orElseThrow(() -> new IllegalArgumentException("RendezVous not found with ID: " + rendezVousId));
 
@@ -98,12 +95,14 @@ public class ConsultationServiceImpl implements ConsultationService {
         // If your RendezVous entity also has dateHeureDebut/dureeMinutes for the slot
         // or if the DTO explicitly passes them.
         // For now, assuming dateHeureDebut and dureeMinutes are passed in consultationDetails DTO.
-        if (consultationDetails.getDateHeureDebut() == null) {
-            throw new RuntimeException("Date and time of start are required for scheduled consultation.");
-        }
-        if (consultationDetails.getDureeMinutes() == null || consultationDetails.getDureeMinutes() <= 0) {
-            throw new RuntimeException("Duration of consultation is required.");
-        }
+
+
+//        if (consultationDetails.getDateHeureDebut() == null) {
+//            throw new RuntimeException("Date and time of start are required for scheduled consultation.");
+//        }
+//        if (consultationDetails.getDureeMinutes() == null || consultationDetails.getDureeMinutes() <= 0) {
+//            throw new RuntimeException("Duration of consultation is required.");
+//        }
 
 
         Consultation newConsultation = consultationRepository.save(consultationDetails);
@@ -128,7 +127,8 @@ public class ConsultationServiceImpl implements ConsultationService {
         existingConsultation.setTaille(consultationDetails.getTaille());
         existingConsultation.setCompteRendu(consultationDetails.getCompteRendu());
         existingConsultation.setDiagnostic(consultationDetails.getDiagnostic());
-        existingConsultation.setDateHeureDebut(consultationDetails.getDateHeureDebut());
+        existingConsultation.setDateHeureDebut(consultationDetails
+                .getDateHeureDebut());
         existingConsultation.setDureeMinutes(consultationDetails.getDureeMinutes());
 
         return consultationRepository.save(existingConsultation);

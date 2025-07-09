@@ -6,37 +6,26 @@ import com.example.GestionClinique.model.entity.Patient;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-
-
 import java.util.List;
 
-
-@Mapper(componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        uses = {DossierMedicalMapper.class})
+@Mapper(componentModel = "spring") // Or whatever component model you use
 public interface PatientMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "dossierMedical", ignore = true)
-    @Mapping(target = "rendezVous", ignore = true)
-    @Mapping(target = "factures", ignore = true)
-    @Mapping(target = "prescriptions", ignore = true)
-    @Mapping(target = "creationDate", ignore = true)
-    @Mapping(target = "modificationDate", ignore = true)
-    Patient toEntity(PatientRequestDto dto);
 
-    // Simple mapping without non-existent fields
-    PatientResponseDto toDto(Patient entity);
+        // Mapping explicite pour éviter les surprises
+        @Mapping(target = "nom", source = "nom")
+        @Mapping(target = "prenom", source = "prenom")
+        @Mapping(target = "email", source = "email")
+        @Mapping(target = "dateNaissance", source = "dateNaissance")
+        @Mapping(target = "telephone", source = "telephone")
+        @Mapping(target = "adresse", source = "adresse")
+        @Mapping(target = "genre", source = "genre")
+        Patient toEntity(PatientRequestDto patientRequestDto);
 
-    List<PatientResponseDto> toDtoList(List<Patient> entities);
+        PatientResponseDto toDto(Patient patient);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "dossierMedical", ignore = true)
-    @Mapping(target = "rendezVous", ignore = true)
-    @Mapping(target = "factures", ignore = true)
-    @Mapping(target = "prescriptions", ignore = true)
-    @Mapping(target = "creationDate", ignore = true)
-    @Mapping(target = "modificationDate", ignore = true)
-    void updateEntityFromDto(PatientRequestDto dto, @MappingTarget Patient entity);
-}
+        List<PatientResponseDto> toDtoList(List<Patient> patients);
+
+        void updateEntityFromDto(PatientRequestDto patientRequestDto, @MappingTarget Patient patient);
+    }
+

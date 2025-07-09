@@ -3,16 +3,20 @@ package com.example.GestionClinique.controller;
 
 import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.PatientResponseDto;
+import com.example.GestionClinique.dto.ResponseDto.RendezVousResponseDto;
 import com.example.GestionClinique.mapper.PatientMapper;
+import com.example.GestionClinique.mapper.RendezVousMapper;
 import com.example.GestionClinique.model.entity.Patient;
+import com.example.GestionClinique.model.entity.RendezVous;
+import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
+import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.service.PatientService;
+import com.example.GestionClinique.service.RendezVousService;
 import com.example.GestionClinique.utils.Constants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,26 +37,23 @@ public class PatientController {
 
     private final PatientService patientService;
     private final PatientMapper patientMapper;
+    private final RendezVousService rendezVousService;
+    private final RendezVousMapper rendezVousMapper;
 
     @Autowired
-    public PatientController(PatientService patientService, PatientMapper patientMapper) {
+    public PatientController(PatientService patientService, PatientMapper patientMapper, RendezVousService rendezVousService, RendezVousMapper rendezVousMapper) {
         this.patientService = patientService;
         this.patientMapper = patientMapper;
+        this.rendezVousService = rendezVousService;
+        this.rendezVousMapper = rendezVousMapper;
     }
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer un nouveau patient",
             description = "Enregistre un nouveau patient dans le système avec ses informations personnelles et médicales")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Patient créé avec succès",
-                    content = @Content(schema = @Schema(implementation = PatientResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "Données du patient invalides ou incomplètes"),
-            @ApiResponse(responseCode = "409", description = "Conflit: patient existe déjà (email unique)"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
-    })
     public ResponseEntity<PatientResponseDto> createPatient(
             @Parameter(description = "Détails du patient à créer", required = true)
             @Valid @RequestBody PatientRequestDto patientRequestDto) {
@@ -67,18 +68,10 @@ public class PatientController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour un patient",
             description = "Modifie les informations d'un patient existant identifié par son ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patient mis à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = PatientResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "Données de mise à jour invalides"),
-            @ApiResponse(responseCode = "404", description = "Patient introuvable"),
-            @ApiResponse(responseCode = "409", description = "Conflit: nouvelle email déjà utilisée"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour")
-    })
     public ResponseEntity<PatientResponseDto> updatePatient(
             @Parameter(description = "ID du patient à mettre à jour", required = true, example = "1")
             @PathVariable("id") Long id,
@@ -96,16 +89,10 @@ public class PatientController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Lister tous les patients",
             description = "Récupère la liste complète des patients enregistrés dans le système")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Liste des patients retournée avec succès",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = PatientResponseDto.class)))),
-            @ApiResponse(responseCode = "204", description = "Aucun patient trouvé"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
-    })
     public ResponseEntity<List<PatientResponseDto>> findAllPatients() {
         List<Patient> patients = patientService.findAllPatients();
         if (patients.isEmpty()) {
@@ -116,17 +103,10 @@ public class PatientController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir un patient par son ID",
             description = "Récupère les détails complets d'un patient spécifique")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patient trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = PatientResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "ID de patient invalide"),
-            @ApiResponse(responseCode = "404", description = "Patient introuvable"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
-    })
     public ResponseEntity<PatientResponseDto> findById(
             @Parameter(description = "ID du patient à récupérer", required = true, example = "1")
             @PathVariable("id") Long id) {
@@ -136,17 +116,10 @@ public class PatientController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping(path = "/{id}")
     @Operation(summary = "Supprimer un patient",
             description = "Supprime définitivement un patient du système (archivage selon politique de rétention)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Patient supprimé avec succès"),
-            @ApiResponse(responseCode = "400", description = "ID de patient invalide"),
-            @ApiResponse(responseCode = "404", description = "Patient introuvable"),
-            @ApiResponse(responseCode = "403", description = "Opération non autorisée (dossier médical existant)"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la suppression")
-    })
     public ResponseEntity<Void> deletePatient(
             @Parameter(description = "ID du patient à supprimer", required = true, example = "1")
             @PathVariable("id") Long id) {
@@ -156,17 +129,10 @@ public class PatientController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
     @GetMapping(path = "/search/{searchTerm}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher des patients",
             description = "Recherche des patients par terme (nom, prénom, email, téléphone, etc.)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Résultats de recherche retournés",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = PatientResponseDto.class)))),
-            @ApiResponse(responseCode = "204", description = "Aucun patient correspondant trouvé"),
-            @ApiResponse(responseCode = "400", description = "Terme de recherche trop court ou invalide"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
-    })
     public ResponseEntity<List<PatientResponseDto>> searchPatients(
             @Parameter(description = "Terme de recherche (minimum 3 caractères)", required = true, example = "Dupont")
             @PathVariable("searchTerm") String searchTerm) {
@@ -179,17 +145,10 @@ public class PatientController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
     @GetMapping(path = "/nom/{nom}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher par nom exact",
             description = "Trouve tous les patients portant exactement le nom spécifié")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patients trouvés et retournés",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = PatientResponseDto.class)))),
-            @ApiResponse(responseCode = "204", description = "Aucun patient avec ce nom exact"),
-            @ApiResponse(responseCode = "400", description = "Nom invalide (doit contenir seulement des lettres)"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
-    })
     public ResponseEntity<List<PatientResponseDto>> findPatientByNom(
             @Parameter(description = "Nom exact du patient (case insensitive)", required = true, example = "Dupont")
             @PathVariable("nom") String nom) {
@@ -202,21 +161,60 @@ public class PatientController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
     @GetMapping(path = "/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher par email exact",
             description = "Trouve un patient unique par son adresse email exacte")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patient trouvé et retourné",
-                    content = @Content(schema = @Schema(implementation = PatientResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "Format d'email invalide"),
-            @ApiResponse(responseCode = "404", description = "Aucun patient avec cet email"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la recherche")
-    })
     public ResponseEntity<PatientResponseDto> findPatientByEmail(
             @Parameter(description = "Email exact du patient", required = true, example = "patient@example.com")
             @PathVariable("email") String email) {
         Patient patient = patientService.findPatientByEmail(email);
         return ResponseEntity.ok(patientMapper.toDto(patient));
+    }
+
+
+    @GetMapping("/rendezvous/search")
+    @Operation(summary = "Rechercher les rendez-vous d'un patient par terme",
+            description = "Recherche les rendez-vous d'un patient en utilisant un terme qui peut correspondre à son nom, prénom, email ou ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous récupérée avec succès",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RendezVousResponseDto.class))),
+            @ApiResponse(responseCode = "204", description = "Aucun rendez-vous trouvé pour le terme de recherche donné"),
+            @ApiResponse(responseCode = "400", description = "Paramètre de requête manquant ou invalide")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getRendezVousByPatientSearchTerm(
+            @Parameter(description = "Terme de recherche (nom, prénom, email ou ID du patient)", required = true, example = "Doe")
+            @RequestParam String patientSearchTerm) {
+        List<RendezVous> rendezVousEntities = patientService.findRendezVousByPatientSearchTerm(patientSearchTerm);
+        List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
+
+        if (rendezVousDtos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(rendezVousDtos);
+    }
+
+    @GetMapping("/rendezvous/status")
+    @Operation(summary = "Récupérer les rendez-vous d'un patient par son nom et statut",
+            description = "Permet de filtrer les rendez-vous d'un patient en spécifiant une partie de son nom (nom ou prénom) et un statut de rendez-vous.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous récupérée avec succès",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RendezVousResponseDto.class))),
+            @ApiResponse(responseCode = "204", description = "Aucun rendez-vous trouvé pour les critères donnés"),
+            @ApiResponse(responseCode = "400", description = "Paramètre de requête manquant ou invalide")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getRendezVousForPatientByStatus(
+            @Parameter(description = "Nom ou prénom du patient (recherche partielle)", required = true, example = "Jean")
+            @RequestParam String patientName,
+            @Parameter(description = "Statut du rendez-vous (ex: CONFIRME, ANNULE, TERMINE)", required = true, example = "CONFIRME")
+            @RequestParam StatutRDV statut) {
+        List<RendezVous> rendezVousEntities = patientService.findRendezVousForPatientByStatus(patientName, statut);
+        List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
+        if (rendezVousDtos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(rendezVousDtos);
     }
 }

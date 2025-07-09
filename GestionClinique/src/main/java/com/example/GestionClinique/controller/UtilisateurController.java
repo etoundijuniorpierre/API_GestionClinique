@@ -2,10 +2,14 @@ package com.example.GestionClinique.controller;
 
 
 import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestDto;
+import com.example.GestionClinique.dto.ResponseDto.RendezVousResponseDto;
 import com.example.GestionClinique.dto.ResponseDto.UtilisateurResponseDto;
+import com.example.GestionClinique.mapper.RendezVousMapper;
 import com.example.GestionClinique.mapper.UtilisateurMapper;
+import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
+import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.service.UtilisateurService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -33,15 +38,19 @@ public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;
     private final UtilisateurMapper utilisateurMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final RendezVousMapper rendezVousMapper;
 
-    public UtilisateurController(UtilisateurService utilisateurService, UtilisateurMapper utilisateurMapper) {
+    public UtilisateurController(UtilisateurService utilisateurService, UtilisateurMapper utilisateurMapper, PasswordEncoder passwordEncoder, RendezVousMapper rendezVousMapper) {
         this.utilisateurService = utilisateurService;
         this.utilisateurMapper = utilisateurMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.rendezVousMapper = rendezVousMapper;
     }
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/createUtilisateur" from path, POST to base URL is common for creation
     @Operation(summary = "Créer un nouvel utilisateur",
             description = "Enregistre un nouvel utilisateur dans le système avec les détails fournis")
@@ -63,7 +72,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')") 
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/{idUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /{id}
     @Operation(summary = "Obtenir un utilisateur par son ID",
             description = "Récupère les informations détaillées d'un utilisateur spécifique par son identifiant unique")
@@ -83,7 +92,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/nom/{nomUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /nom/{nom}
     @Operation(summary = "Rechercher des utilisateurs par nom",
             description = "Récupère tous les utilisateurs correspondant au nom spécifié (recherche partielle)")
@@ -107,7 +116,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/email/{emailUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /email/{email}
     @Operation(summary = "Rechercher un utilisateur par email",
             description = "Récupère un seul utilisateur par son adresse email unique")
@@ -127,7 +136,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/role/{roleType}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path
     @Operation(summary = "Rechercher des utilisateurs par rôle",
             description = "Récupère tous les utilisateurs ayant le rôle spécifié dans le système")
@@ -150,7 +159,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: GET to base URL returns all
     @Operation(summary = "Lister tous les utilisateurs",
             description = "Récupère la liste complète de tous les utilisateurs enregistrés dans le système")
@@ -169,7 +178,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping(path = "/{idUtilisateur}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: PUT to /{id}
     @Operation(summary = "Mettre à jour les informations d'un utilisateur",
             description = "Modifie les détails d'un utilisateur existant avec les informations fournies")
@@ -193,7 +202,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @PatchMapping(path = "/{idUtilisateur}/status/{isActive}", produces = MediaType.APPLICATION_JSON_VALUE) // Changed to PATCH for partial update, distinct path
     @Operation(summary = "Mettre à jour le statut d'un utilisateur",
             description = "Active ou désactive un compte utilisateur dans le système")
@@ -215,7 +224,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping(path = "/{idUtilisateur}") // Simplified path: DELETE to /{id}
     @Operation(summary = "Supprimer un utilisateur",
             description = "Supprime définitivement un utilisateur du système")
@@ -225,10 +234,86 @@ public class UtilisateurController {
             @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé avec l'ID fourni"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la suppression")
     })
-    public ResponseEntity<Void> deleteUtilisateur( // Use ResponseEntity<Void> for 204 No Content
-                                                   @Parameter(description = "ID de l'utilisateur à supprimer", required = true, example = "1")
+    public Object deleteUtilisateur( // Use ResponseEntity<Void> for 204 No Content
+                                                   @Parameter(description = "ID de l'utilisateur à supprimer",
+                                                           required = true, example = "1")
                                                    @PathVariable("idUtilisateur") Long id) {
         utilisateurService.deleteUtilisateur(id);
-        return ResponseEntity.noContent().build(); // Return 204 No Content
+        return ResponseEntity.ok("l'utilisateur avec l'ID : "+id+" supprimé avec succès"); // Return 204 No Content
+    }
+
+
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN')")
+    @GetMapping("/rendezvous/medecin/search")
+    @Operation(summary = "Rechercher les rendez-vous d'un médecin par terme de recherche",
+            description = "Recherche les rendez-vous d'un médecin en utilisant un terme qui peut correspondre à son nom, prénom, email ou ID. Accessible par ADMIN et MEDECIN.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous récupérée avec succès",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RendezVousResponseDto.class))),
+            @ApiResponse(responseCode = "204", description = "Aucun rendez-vous trouvé pour le terme de recherche donné"),
+            @ApiResponse(responseCode = "400", description = "Paramètre de requête manquant ou invalide"),
+            @ApiResponse(responseCode = "403", description = "Accès non autorisé")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getRendezVousByMedecinSearchTerm(
+            @Parameter(description = "Terme de recherche (nom, prénom, email ou ID du médecin)", required = true, example = "Dr. Dupont")
+            @RequestParam String medecinSearchTerm) {
+        List<RendezVous> rendezVousEntities = utilisateurService.findRendezVousByMedecinSearchTerm(medecinSearchTerm);
+        List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
+        if (rendezVousDtos.isEmpty()) { return ResponseEntity.noContent().build(); }
+        return ResponseEntity.ok(rendezVousDtos);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN')")
+    @GetMapping("/rendezvous/medecin/status")
+    @Operation(summary = "Récupérer les rendez-vous d'un médecin par son nom et statut",
+            description = "Permet de filtrer les rendez-vous d'un médecin en spécifiant une partie de son nom (nom ou prénom) et un statut de rendez-vous. Accessible par ADMIN et MEDECIN.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous récupérée avec succès",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RendezVousResponseDto.class))),
+            @ApiResponse(responseCode = "204", description = "Aucun rendez-vous trouvé pour les critères donnés"),
+            @ApiResponse(responseCode = "400", description = "Paramètre de requête manquant ou invalide"),
+            @ApiResponse(responseCode = "403", description = "Accès non autorisé")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getRendezVousForMedecinByStatus(
+            @Parameter(description = "Nom ou prénom du médecin (recherche partielle)", required = true, example = "Dr. Jean")
+            @RequestParam String medecinName,
+            @Parameter(description = "Statut du rendez-vous (ex: CONFIRME, ANNULE, TERMINE)", required = true, example = "CONFIRME")
+            @RequestParam StatutRDV statut) {
+        List<RendezVous> rendezVousEntities = utilisateurService.findRendezVousForMedecinByStatus(medecinName, statut);
+        List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
+        if (rendezVousDtos.isEmpty()) { return ResponseEntity.noContent().build(); }
+        return ResponseEntity.ok(rendezVousDtos);
+    }
+
+
+
+
+//    @PreAuthorize("hasAnyRole('MEDECIN')") // Seulement accessible par les médecins eux-mêmes
+    @GetMapping("/rendezvous/medecin/{medecinId}/confirmed/today")
+    @Operation(summary = "Récupérer les rendez-vous confirmés d'un médecin pour aujourd'hui",
+            description = "Recherche les rendez-vous confirmés d'un médecin spécifique (par son ID) pour la date d'aujourd'hui. Accessible uniquement par les MEDECINS.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous récupérée avec succès",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RendezVousResponseDto.class))),
+            @ApiResponse(responseCode = "204", description = "Aucun rendez-vous trouvé pour le médecin et la date d'aujourd'hui"),
+            @ApiResponse(responseCode = "400", description = "ID du médecin invalide"),
+            @ApiResponse(responseCode = "403", description = "Accès non autorisé (seul le médecin concerné ou un ADMIN peut accéder à ces informations)")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getConfirmedRendezVousForThisDayForMedecin(
+            @Parameter(description = "ID du médecin dont on veut les rendez-vous d'aujourd'hui", required = true, example = "2")
+            @PathVariable Long medecinId) {
+        // Dans un cas réel, vous vérifieriez ici que medecinId correspond à l'ID de l'utilisateur connecté.
+        // Pour l'exemple, nous nous basons sur le @PreAuthorize.
+        List<RendezVous> rendezVousEntities = utilisateurService.findRendezVousCONFIRMEThisDay(medecinId);
+        List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
+
+        if (rendezVousDtos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(rendezVousDtos);
     }
 }

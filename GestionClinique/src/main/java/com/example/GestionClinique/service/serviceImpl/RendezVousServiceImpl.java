@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.naming.ConfigurationException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -41,25 +40,14 @@ public class RendezVousServiceImpl implements RendezVousService {
     }
 
     @Override
+@Transactional
     public RendezVous createRendezVous(RendezVous rendezVous) {
-        // Fetch and set associated entities (Patient, Medecin, Salle)
-        Patient patient = patientRepository.findById(rendezVous.getPatient().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + rendezVous.getPatient().getId()));
-        Utilisateur medecin = utilisateurRepository.findById(rendezVous.getMedecin().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + rendezVous.getMedecin().getId()));
-        Salle salle = salleRepository.findById(rendezVous.getSalle().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Salle not found with ID: " + rendezVous.getSalle().getId()));
-
-        rendezVous.setPatient(patient);
-        rendezVous.setMedecin(medecin);
-        rendezVous.setSalle(salle);
-
-
-        if (!isRendezVousAvailable(rendezVous.getJour(), rendezVous.getHeure(), medecin.getId(), salle.getId())) {
+        // Patient, Medecin, Salle are already set by the mapper if Option 1 is chosen
+        // The availability check still needs the IDs from the already set entities
+        if (!isRendezVousAvailable(rendezVous.getJour(), rendezVous.getHeure(), rendezVous.getMedecin().getId(), rendezVous.getSalle().getId())) {
             throw new RuntimeException("Le créneau horaire est déjà pris pour ce médecin ou cette salle.");
         }
 
-     
         if (rendezVous.getStatut() == null) {
             rendezVous.setStatut(StatutRDV.CONFIRME);
         }
@@ -69,7 +57,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public RendezVous findRendezVousById(Long id) {
         return rendezVousRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("RendezVous not found with ID: " + id));
@@ -129,38 +117,27 @@ public class RendezVousServiceImpl implements RendezVousService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RendezVous> findAllRendezVous() {
         return rendezVousRepository.findAll();
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RendezVous> findRendezVousByStatut(StatutRDV statut) {
         return rendezVousRepository.findByStatut(statut);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RendezVous> findRendezVousBySalleId(Long salleId) {
         return rendezVousRepository.findBySalleId(salleId);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<RendezVous> findRendezVousByPatientId(Long patientId) {
-        return rendezVousRepository.findByPatientId(patientId);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<RendezVous> findRendezVousByMedecinId(Long medecinId) {
-        return rendezVousRepository.findByMedecinId(medecinId);
-    }
 
     // Helper method to check availability for creation
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public boolean isRendezVousAvailable(LocalDate jour, LocalTime heure, Long medecinId, Long salleId) {
         // Check if doctor is busy
         Optional<RendezVous> existingMedecinRv = rendezVousRepository.findByJourAndHeureAndMedecinId(jour, heure, medecinId);
@@ -178,7 +155,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
 
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public boolean isRendezVousAvailableForUpdate(Long rendezVousId, LocalDate jour, LocalTime heure, Long medecinId, Long salleId) {
         Optional<RendezVous> existingMedecinRv = rendezVousRepository.findByJourAndHeureAndMedecinId(jour, heure, medecinId);
@@ -199,20 +176,20 @@ public class RendezVousServiceImpl implements RendezVousService {
         RendezVous rendezVous = rendezVousRepository.findById(rendezVousId)
                 .orElseThrow(() -> new IllegalArgumentException("RendezVous not found with ID: " + rendezVousId));
 
-        if (rendezVous.getStatut() == StatutRDV.ANNULE || rendezVous.getStatut() == StatutRDV.CONFIRME) {
+        if (rendezVous.getStatut() == StatutRDV.ANNULE || rendezVous.getStatut() == StatutRDV.ENCOURS) {
             throw new IllegalStateException("Cannot cancel a rendez-vous that is already " + rendezVous.getStatut().name().toLowerCase() + ".");
         }
         if (rendezVous.getJour().isBefore(LocalDate.now()) || (rendezVous.getJour().isEqual(LocalDate.now()) && rendezVous.getHeure().isBefore(LocalTime.now()))) {
             throw new IllegalStateException("Cannot cancel a past rendez-vous.");
         }
 
-        rendezVous.setStatut(StatutRDV.CONFIRME);
+        rendezVous.setStatut(StatutRDV.ANNULE);
         return rendezVousRepository.save(rendezVous);
     }
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RendezVous> findRendezVousByJour(LocalDate jour) {
         return rendezVousRepository.findByJour(jour);
     }

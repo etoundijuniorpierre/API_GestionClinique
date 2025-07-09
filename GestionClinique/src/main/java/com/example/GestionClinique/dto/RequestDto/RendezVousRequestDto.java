@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RendezVousRequestDto {
@@ -33,12 +32,12 @@ public class RendezVousRequestDto {
     private ServiceMedical serviceMedical; // Renamed from serviceMedicalId for clarity
 
     @NotNull(message = "L'ID du patient est requis.")
-    private Integer patientId; // Use Integer as IDs are typically Integer in your entities
+    private Long patientId; // Use Long as IDs are typically Long in your entities
 
     @NotNull(message = "L'ID du médecin est requis.")
-    private Integer medecinId; // Use Integer
+    private Long medecinId; // Use Long
 
     @NotNull(message = "L'ID de la salle est requise.")
-    private Integer salleId; // Use Integer
+    private Long salleId; // Use Long
 
 }

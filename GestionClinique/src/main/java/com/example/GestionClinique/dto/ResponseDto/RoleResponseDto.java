@@ -5,9 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 
-@EqualsAndHashCode(callSuper = true)
+
 @Data
-public class RoleResponseDto extends BaseResponseDto {
+public class RoleResponseDto {
     private Long id;
     private RoleType roleType;
 }

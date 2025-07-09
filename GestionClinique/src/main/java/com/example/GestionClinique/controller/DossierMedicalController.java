@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -58,7 +57,7 @@ public class DossierMedicalController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE')")
     @PostMapping(path = "/create/{idPatient}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer un dossier médical pour un patient",
             description = "Crée un nouveau dossier médical associé à un patient existant")
@@ -86,7 +85,7 @@ public class DossierMedicalController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE')")
     @PutMapping(path = "/update/{idDossierMedical}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour un dossier médical",
             description = "Modifie les informations d'un dossier médical existant")
@@ -113,7 +112,7 @@ public class DossierMedicalController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE')")
     @GetMapping(path = "/recherche/{idDossierMedical}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir un dossier médical par son ID",
             description = "Récupère les informations complètes d'un dossier médical")
@@ -134,7 +133,7 @@ public class DossierMedicalController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE')")
     @GetMapping(path = "/recherche/allDossierMedical", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Lister tous les dossiers médicaux",
             description = "Récupère tous les dossiers médicaux enregistrés")
@@ -154,7 +153,7 @@ public class DossierMedicalController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE')")
     @GetMapping(path = "/{idDossierMedical}/patient", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir le patient associé à un dossier",
             description = "Récupère le patient lié à un dossier médical")
@@ -176,7 +175,7 @@ public class DossierMedicalController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE')")
     @DeleteMapping(path = "/delete/{idDossierMedical}")
     @Operation(summary = "Supprimer un dossier médical",
             description = "Supprime définitivement un dossier médical")
@@ -197,7 +196,7 @@ public class DossierMedicalController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE')")
     @GetMapping(path = "/patient/{idPatient}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir le dossier médical d'un patient",
             description = "Récupère le dossier médical associé à un patient")

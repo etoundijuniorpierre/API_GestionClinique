@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -25,11 +24,11 @@ public interface ConsultationMapper {
     Consultation toEntity(ConsultationRequestDto dto);
 
     @Mapping(target = "dossierMedicalId", source = "dossierMedical.id")
-    @Mapping(target = "medecinId", source = "medecin.id")
+    @Mapping(target = "medecin", source = "medecin.id")
     @Mapping(target = "rendezVousId", source = "rendezVous.id")
     @Mapping(target = "factureId", source = "facture.id")
     @Mapping(target = "prescriptions", source = "prescriptions")
-    @Mapping(target = "dureeMinutes", source = "dureeMinutes")
+//    @Mapping(target = "dureeMinutes", source = "dureeMinutes")
     ConsultationResponseDto toDto(Consultation entity);
 
     List<ConsultationResponseDto> toDtoList(List<Consultation> entities);

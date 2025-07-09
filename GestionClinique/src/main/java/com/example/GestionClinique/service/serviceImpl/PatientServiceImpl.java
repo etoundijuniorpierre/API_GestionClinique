@@ -1,7 +1,10 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 import com.example.GestionClinique.model.entity.Patient;
+import com.example.GestionClinique.model.entity.RendezVous;
+import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.PatientRepository;
+import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.service.PatientService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,19 +16,18 @@ import java.util.List;
 public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
+    private final RendezVousRepository rendezVousRepository;
 
     @Autowired
-    public PatientServiceImpl(PatientRepository patientRepository) {
+    public PatientServiceImpl(PatientRepository patientRepository, RendezVousRepository rendezVousRepository) {
         this.patientRepository = patientRepository;
+        this.rendezVousRepository = rendezVousRepository;
     }
 
     @Transactional
     @Override
     public Patient createPatient(Patient patient) {
-        // You might add checks here, e.g., if a patient with the same email already exists
-        if (patient.getEmail() != null && patientRepository.findByEmail(patient.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Patient with email " + patient.getEmail() + " already exists.");
-        }
+
         return patientRepository.save(patient);
     }
 
@@ -94,5 +96,15 @@ public class PatientServiceImpl implements PatientService {
     public Patient findPatientByEmail(String email) {
         return patientRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found with email: " + email));
+    }
+
+    @Override
+    public List<RendezVous> findRendezVousByPatientSearchTerm(String patientSearchTerm) {
+        return rendezVousRepository.findRendezVousByPatientSearchTerm(patientSearchTerm);
+    }
+
+    @Override
+    public List<RendezVous> findRendezVousForPatientByStatus(String patientName, StatutRDV statut) {
+        return rendezVousRepository.findRendezVousForPatientByStatus(patientName, statut);
     }
 }

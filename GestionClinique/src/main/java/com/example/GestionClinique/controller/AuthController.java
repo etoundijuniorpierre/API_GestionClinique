@@ -1,6 +1,7 @@
 package com.example.GestionClinique.controller;
 
 
+import com.example.GestionClinique.configuration.security.UserDetailsServiceImpl;
 import com.example.GestionClinique.configuration.security.jwtConfig.JwtUtil;
 import com.example.GestionClinique.dto.dtoConnexion.LoginRequest;
 import com.example.GestionClinique.dto.dtoConnexion.LoginResponse;
@@ -32,10 +33,12 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil; // Injectez votre JwtUtil
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsServiceImpl) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.userDetailsServiceImpl = userDetailsServiceImpl;
     }
 
 

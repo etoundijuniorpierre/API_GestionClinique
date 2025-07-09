@@ -4,6 +4,7 @@ import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.UtilisateurResponseDto;
 import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.model.entity.Utilisateur;
+import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -13,10 +14,9 @@ import java.util.List;
         uses = {RoleMapper.class})
 public interface UtilisateurMapper {
 
-    @Mapping(target = "role", source = "roleId", qualifiedByName = "mapRoleIdToRole")
+    @Mapping(target = "role", source = "role", qualifiedByName = "mapRoleIdToRole")
     @Mapping(target = "serviceMedical", source = "serviceMedicalName")
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "password", ignore = true)
     @Mapping(target = "creationDate", ignore = true)
     @Mapping(target = "modificationDate", ignore = true)
     Utilisateur toEntity(UtilisateurRequestDto dto);
@@ -27,7 +27,7 @@ public interface UtilisateurMapper {
 
     List<UtilisateurResponseDto> toDtoList(List<Utilisateur> utilisateurs);
 
-    @Mapping(target = "role", source = "roleId", qualifiedByName = "mapRoleIdToRole")
+    @Mapping(target = "role", source = "role", qualifiedByName = "mapRoleIdToRole")
     @Mapping(target = "serviceMedical", source = "serviceMedicalName")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
@@ -36,12 +36,16 @@ public interface UtilisateurMapper {
     void updateEntityFromDto(UtilisateurRequestDto dto, @MappingTarget Utilisateur utilisateur);
 
     @Named("mapRoleIdToRole")
-    default Role mapRoleIdToRole(Long roleId) {
-        if (roleId == null) {
+    default Role mapRoleIdToRole(String roleName) {
+        if (roleName == null || roleName.isBlank()) {
             return null;
         }
         Role role = new Role();
-        role.setId(roleId);
+        role.setRoleType(RoleType.valueOf(roleName.toUpperCase())); // Assure que le nom correspond à un enum
+
         return role;
     }
+
+
 }
+

@@ -72,7 +72,7 @@ public class ConsultationController {
     }
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+//d
     @PostMapping(path = "/emergency", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // New path for emergency
     @Operation(summary = "Créer une nouvelle consultation d'urgence (sans rendez-vous)",
             description = "Enregistre une nouvelle consultation médicale d'urgence non liée à un rendez-vous existant.")
@@ -106,7 +106,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN')")
     @PostMapping(path = "/start/{idRendezVous}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Démarrer une consultation à partir d'un rendez-vous",
             description = "Crée et démarre une consultation liée à un rendez-vous existant")
@@ -139,7 +139,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN')")
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour une consultation",
             description = "Modifie les informations d'une consultation existante")
@@ -171,7 +171,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir une consultation par son ID",
             description = "Récupère les détails complets d'une consultation spécifique")
@@ -193,7 +193,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Lister toutes les consultations",
             description = "Récupère la liste complète des consultations enregistrées")
@@ -213,7 +213,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     @GetMapping(path = "/{idConsultation}/dossier-medical", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir le dossier médical lié",
             description = "Récupère le dossier médical associé à une consultation spécifique")
@@ -237,7 +237,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     @GetMapping(path = "/{idConsultation}/rendez-vous", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir le rendez-vous lié",
             description = "Récupère le rendez-vous associé à une consultation spécifique")
@@ -265,7 +265,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Supprimer une consultation",
             description = "Supprime définitivement une consultation du système")
@@ -287,7 +287,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN')")
     @PostMapping(path = "/{idConsultation}/prescriptions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Ajouter une prescription",
             description = "Ajoute une prescription médicale à une consultation existante")
@@ -313,7 +313,7 @@ public class ConsultationController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
+//@PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     @GetMapping(path = "/{idConsultation}/prescriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir les prescriptions d'une consultation",
             description = "Récupère toutes les prescriptions associées à une consultation")

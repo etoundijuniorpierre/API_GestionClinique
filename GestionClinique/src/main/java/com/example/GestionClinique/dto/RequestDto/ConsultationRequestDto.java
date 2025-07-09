@@ -35,17 +35,17 @@ public class ConsultationRequestDto {
     @NotBlank(message = "Le diagnostic est requis.")
     private String diagnostic;
 
-    @NotNull(message = "La date et l'heure de début sont requises.")
-    private LocalDateTime dateHeureDebut;
+//    @NotNull(message = "La date et l'heure de début sont requises.")
+//    private LocalDateTime dateHeureDebut;
+//
+//    @NotNull(message = "La durée de la consultation est requise.")
+//    private Long dureeMinutes;
 
-    @NotNull(message = "La durée de la consultation est requise.")
-    private Long dureeMinutes;
-
-    @NotNull(message = "L'ID du dossier médical est requis.")
-    private Long dossierMedicalId;
+//    @NotNull(message = "L'ID du dossier médical est requis.")
+//    private Long dossierMedicalId;
 
     private Long rendezVousId; // No @NotNull here
 
-    @Size(min = 0, message = "La liste des prescriptions ne peut pas être nulle.")
+
     private List<PrescriptionRequestDto> prescriptions;
 }

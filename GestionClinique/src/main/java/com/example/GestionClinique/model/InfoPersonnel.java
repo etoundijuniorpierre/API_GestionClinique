@@ -15,25 +15,25 @@ import java.time.LocalDate;
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
 public abstract class InfoPersonnel extends BaseEntity {
-    @Column(name = "nom", nullable = false) // Ajouté nullable = false
+    @Column(name = "nom") // Ajouté nullable = false
     protected String nom;
 
-    @Column(name = "prenom", nullable = false) // Ajouté nullable = false
+    @Column(name = "prenom") // Ajouté nullable = false
     protected String prenom;
 
-    @Column(unique = true, name = "email", nullable = false) // Ajouté nullable = false
+    @Column(unique = true, name = "email") // Ajouté nullable = false
     protected String email;
 
-    @Column(name = "date_naissance", nullable = false) // Ajouté nullable = false
+    @Column(name = "date_naissance") // Ajouté nullable = false
     protected LocalDate dateNaissance;
 
-    @Column(name = "telephone", nullable = false) // Ajouté nullable = false
+    @Column(name = "telephone") // Ajouté nullable = false
     protected String telephone;
 
-    @Column(name = "adresse", nullable = false) // Ajouté nullable = false
+    @Column(name = "adresse") // Ajouté nullable = false
     protected String adresse;
 
-    @Column(name = "genre", nullable = false) // Ajouté nullable = false
+    @Column(name = "genre") // Ajouté nullable = false
     protected String genre;
 
 }

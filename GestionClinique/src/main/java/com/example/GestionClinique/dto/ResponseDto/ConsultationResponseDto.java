@@ -8,7 +8,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ConsultationResponseDto extends BaseResponseDto {
+public class  ConsultationResponseDto extends BaseResponseDto {
     private String motifs;
     private String tensionArterielle;
     private Float temperature;
@@ -16,11 +16,11 @@ public class ConsultationResponseDto extends BaseResponseDto {
     private Float taille;
     private String compteRendu;
     private String diagnostic;
-    private LocalDateTime dateHeureDebut;
-    private Long dureeMinutes;
-    private Long dossierMedicalId;
-    private Long medecinId;
+//    private LocalDateTime dateHeureDebut;
+//    private Long dureeMinutes;
+    private String dossierMedicalId;
+    private String medecin;
     private Long rendezVousId;
-    private Long factureId;
+//    private Long factureId;
     private List<PrescriptionResponseDto> prescriptions;
 }

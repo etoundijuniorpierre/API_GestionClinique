@@ -13,10 +13,6 @@ import lombok.*;
 public class UtilisateurRequestDto extends InfoPersonnelRequestDto {
 
     @NotNull
-    @Email
-    private String email;
-
-    @NotNull
     @Size(min = 8, max = 20)
     private String password;
 
@@ -25,5 +21,5 @@ public class UtilisateurRequestDto extends InfoPersonnelRequestDto {
     private Boolean actif;
 
     @NotNull
-    private Long roleId;
+    private String role;
 }

@@ -48,7 +48,7 @@ public class HistoriqueActionController {
     // This endpoint is for directly logging an action via an API call,
     // often useful for external systems or specific integrations.
     // For internal logging within the application, you'd typically call service methods directly.
-    @PreAuthorize("hasAnyRole('ADMIN')") // Only Admins should log arbitrary actions
+@PreAuthorize("hasAnyRole('ADMIN')") // Only Admins should log arbitrary actions
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Enregistrer une action manuellement",
             description = "Permet d'enregistrer une action dans l'historique avec un utilisateur et une date spécifiés. Utilisation typique pour les audits ou les intégrations.")
@@ -77,7 +77,7 @@ public class HistoriqueActionController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/recherche/allHistorique" for root GET
     @Operation(summary = "Lister tout l'historique des actions",
             description = "Récupère la liste complète et chronologique de toutes les actions enregistrées dans le système")
@@ -97,7 +97,7 @@ public class HistoriqueActionController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/{idHistorique}", produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/recherche"
     @Operation(summary = "Récupérer une action spécifique par ID",
             description = "Trouve et retourne les détails complets d'une action particulière dans l'historique")
@@ -118,7 +118,7 @@ public class HistoriqueActionController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/utilisateur/{utilisateurId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Historique des actions par utilisateur",
             description = "Récupère la liste chronologique de toutes les actions effectuées par un utilisateur spécifique")
@@ -142,7 +142,7 @@ public class HistoriqueActionController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/utilisateur/nom/{utilisateurName}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Historique des actions par nom d'utilisateur",
             description = "Récupère la liste chronologique de toutes les actions effectuées par un utilisateur dont le nom contient la chaîne spécifiée.")
@@ -166,7 +166,7 @@ public class HistoriqueActionController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/periode", produces = MediaType.APPLICATION_JSON_VALUE) // Use request parameters for date range
     @Operation(summary = "Filtrer l'historique par période temporelle",
             description = "Récupère toutes les actions enregistrées entre deux dates spécifiées (inclusives).")

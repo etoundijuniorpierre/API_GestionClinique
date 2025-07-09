@@ -27,11 +27,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         String username = null;
         String password = null;
+        Long id = null;
 
-        if (utilisateur != null) {
+        if (utilisateur != null && utilisateur.getActif()) {
 
                 username = utilisateur.getEmail();
-
+                id = utilisateur.getId();
             // Vérifier motDePasse
             password = utilisateur.getPassword();
             if (password == null) {
@@ -62,6 +63,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         // IMPORTANT : Construire l'objet UserDetails de Spring Security
         // Si vous arrivez ici, 'username', 'password', et 'utilisateur.getAuthorities()' devraient être non nuls
         return new User(
+                utilisateur.getId(),      // id de l'user à exploiter plutard
                 username,                 // Le nom d'utilisateur (email)
                 password,                 // Le mot de passe haché
                 utilisateur.getAuthorities() // Les rôles/autorisations de l'utilisateur

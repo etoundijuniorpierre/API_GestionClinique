@@ -14,8 +14,8 @@ import java.time.LocalDate;
 @Table(name = "prescription") // Snake_case table name is good.
 public class Prescription extends BaseEntity {
 
-    @Column(name = "date_prescription", nullable = false) // Add date_prescription as a column
-    private LocalDate datePrescription;
+//    @Column(name = "date_prescription", nullable = false) // Add date_prescription as a column
+//    private LocalDate datePrescription;
 
     @Column(name = "type_prescription", nullable = false) // Changed to snake_case
     private String typePrescription;

@@ -12,6 +12,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponse {
+    private Long id;
     private String token;
     private String username;
     private Collection<? extends GrantedAuthority> authorities;

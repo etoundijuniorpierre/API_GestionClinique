@@ -42,7 +42,7 @@ public class PrescriptionController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer une prescription",
             description = "Enregistre une nouvelle prescription médicale dans le système")
@@ -66,7 +66,7 @@ public class PrescriptionController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN')")
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour une prescription",
             description = "Modifie les informations d'une prescription existante")
@@ -92,7 +92,7 @@ public class PrescriptionController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE', 'PATIENT')") // Patient can view their own, Secrétaire for administrative
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE', 'PATIENT')") // Patient can view their own, Secrétaire for administrative
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE) // Consolidated path
     @Operation(summary = "Obtenir une prescription par son ID",
             description = "Récupère les détails complets d'une prescription spécifique")
@@ -114,7 +114,7 @@ public class PrescriptionController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE', 'ADMIN')")
+@PreAuthorize("hasAnyRole('MEDECIN', 'SECRETAIRE', 'ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path for all prescriptions
     @Operation(summary = "Lister toutes les prescriptions",
             description = "Récupère la liste complète des prescriptions enregistrées")
@@ -134,7 +134,7 @@ public class PrescriptionController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN')")
     @DeleteMapping(path = "/{id}") // Simplified path
     @Operation(summary = "Supprimer une prescription",
             description = "Supprime définitivement une prescription du système")
@@ -155,7 +155,7 @@ public class PrescriptionController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN')")
     @GetMapping(path = "/medecin/{medecinId}", produces = MediaType.APPLICATION_JSON_VALUE) // Consolidated path
     @Operation(summary = "Obtenir les prescriptions par médecin",
             description = "Récupère toutes les prescriptions rédigées par un médecin spécifique")
@@ -178,7 +178,7 @@ public class PrescriptionController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN', 'PATIENT')") // Patient can view their own prescriptions
+@PreAuthorize("hasAnyRole('MEDECIN', 'PATIENT')") // Patient can view their own prescriptions
     @GetMapping(path = "/patient/{patientId}", produces = MediaType.APPLICATION_JSON_VALUE) // Consolidated path
     @Operation(summary = "Obtenir les prescriptions par patient",
             description = "Récupère toutes les prescriptions associées à un patient spécifique")
@@ -201,7 +201,7 @@ public class PrescriptionController {
 
 
 
-    @PreAuthorize("hasAnyRole('MEDECIN')")
+@PreAuthorize("hasAnyRole('MEDECIN')")
     @GetMapping(path = "/consultation/{consultationId}", produces = MediaType.APPLICATION_JSON_VALUE) // Consolidated path
     @Operation(summary = "Obtenir les prescriptions par consultation",
             description = "Récupère toutes les prescriptions associées à une consultation spécifique")
