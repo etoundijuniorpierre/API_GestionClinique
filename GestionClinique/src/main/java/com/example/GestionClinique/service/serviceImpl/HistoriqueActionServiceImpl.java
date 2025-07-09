@@ -15,7 +15,8 @@ import java.util.List;
 
 @Service
 @Transactional
-public class HistoriqueActionServiceImpl implements HistoriqueActionService {
+public class
+HistoriqueActionServiceImpl implements HistoriqueActionService {
 
     private final HistoriqueActionRepository historiqueActionRepository;
     private final UtilisateurRepository utilisateurRepository;

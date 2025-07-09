@@ -7,8 +7,12 @@ import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import com.example.GestionClinique.repository.*;
 import com.example.GestionClinique.service.ConsultationService;
 import com.example.GestionClinique.service.FactureService;
+import com.example.GestionClinique.service.HistoriqueActionService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,7 +30,22 @@ public class ConsultationServiceImpl implements ConsultationService {
     private final PrescriptionRepository prescriptionRepository;
     private final SalleRepository salleRepository;
     private final FactureService factureService;
+    private final HistoriqueActionService historiqueActionService;
 
+
+    private Long getCurrentAuthenticatedUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication.getPrincipal() instanceof String && "anonymousUser".equals(authentication.getPrincipal()))) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof Utilisateur) {
+                return ((Utilisateur) principal).getId();
+            } else if (principal instanceof UserDetails) {
+                System.out.println("Principal est UserDetails mais pas MonUserDetailsCustom. Username: " + ((UserDetails)principal).getUsername());
+                return null;
+            }
+        }
+        return null;
+    }
 
     // This is for EMERGENCY consultations (no RendezVous)
     @Override
@@ -69,6 +88,7 @@ public class ConsultationServiceImpl implements ConsultationService {
             System.out.println("No invoice generated for emergency consultation with no linked DossierMedical.");
         }
 
+        historiqueActionService.enregistrerAction("consultation effectué par le medecin : "+Long.valueOf(consultation.getMedecin().getNom()+", service médical : " +Long.valueOf(consultation.getMedecin().getServiceMedical()+", ID du médecin = ", Math.toIntExact(consultation.getMedecin().getId()))));
         return savedConsultation;
     }
 
@@ -134,7 +154,7 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         salle.setStatutSalle(StatutSalle.DISPONIBLE);
         salleRepository.save(salle);
-
+        historiqueActionService.enregistrerAction("consultation effectué par le medecin : "+Long.valueOf(consultationDetails.getMedecin().getNom()+", service médical : " +Long.valueOf(consultationDetails.getMedecin().getServiceMedical()+", sur le patient : "+rendezVous.getPatient().getNom(), Math.toIntExact(consultationDetails.getMedecin().getId()))));
         return newConsultation;
     }
 
