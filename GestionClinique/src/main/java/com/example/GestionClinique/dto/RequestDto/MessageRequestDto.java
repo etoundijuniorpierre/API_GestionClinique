@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-
 public class MessageRequestDto {
     @NotBlank(message = "Le contenu du message ne peut pas être vide.")
     private String contenu;

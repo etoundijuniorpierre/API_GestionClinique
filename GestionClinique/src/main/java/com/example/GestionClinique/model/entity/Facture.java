@@ -9,30 +9,30 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+// Facture.java
 @EqualsAndHashCode(callSuper = true)
-@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "facture")
-public class Facture extends BaseEntity { // Assuming BaseEntity provides 'id', 'creationDate', 'lastModifiedDate'
+public class Facture extends BaseEntity {
 
     @Column(name = "montant", nullable = false)
-    private Float montant;
+    private Double montant;
 
-    @Column(name = "date_emission", nullable = false) // Consistent snake_case for column name
+    @Column(name = "date_emission", nullable = false)
     private LocalDate dateEmission;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "statut_paiement", nullable = false) // Consistent snake_case
+    @Column(name = "statut_paiement", nullable = false)
     private StatutPaiement statutPaiement;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "mode_paiement", nullable = false) // Consistent snake_case
+    @Column(name = "mode_paiement", nullable = false)
     private ModePaiement modePaiement;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(name = "patient_id", nullable = true)
     private Patient patient;
 
     @OneToOne(fetch = FetchType.LAZY)

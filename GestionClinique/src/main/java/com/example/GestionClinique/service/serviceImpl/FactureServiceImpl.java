@@ -35,8 +35,7 @@ public class FactureServiceImpl implements FactureService {
      * This is the method intended to be called by ConsultationService.
      *
      * @param consultationId The ID of the consultation for which to generate the invoice.
-     * @param modePaiement The mode of payment for the invoice.
-     * @return The newly created Facture.
+     * @param modePaiement   The mode of payment for the invoice.
      */
     @Override
     public Facture generateInvoiceForConsultation(Long consultationId, ModePaiement modePaiement) {
@@ -51,33 +50,20 @@ public class FactureServiceImpl implements FactureService {
         Facture facture = new Facture();
         facture.setConsultation(consultation);
 
-        // --- Handle Patient and Dossier Medical for Invoice ---
-        // If consultation has a patient, link it to the invoice.
-        // Otherwise, the invoice might be created without a patient link initially (e.g., for unknown emergency patients).
-        // This requires `Patient` in `Facture` entity to be `nullable = true`.
         if (consultation.getDossierMedical() != null && consultation.getDossierMedical().getPatient() != null) {
             facture.setPatient(consultation.getDossierMedical().getPatient());
         } else {
-            // As per recent consultation changes, patient/dossier can be null for emergency.
-            // If the Facture entity requires a patient, this branch will cause an issue.
-            // You MUST ensure `patient_id` in your `facture` table is `nullable = true`
-            // if you intend to create invoices for consultations without a pre-linked patient.
             System.out.println("Warning: Creating invoice for consultation ID " + consultationId + " without an associated patient.");
             facture.setPatient(null); // Explicitly set to null if no patient
         }
 
-        // Set invoice details
         facture.setDateEmission(LocalDate.now());
-        facture.setStatutPaiement(StatutPaiement.IMPAYE); // Default status
-        facture.setModePaiement(modePaiement); // Passed as argument
-
-        // You might want to calculate the amount here based on consultation type or services
-        // For now, let's assume a default or fetch from consultation details if available
-        facture.setMontant(10000.0F); // Example default amount, adjust as needed
+        facture.setStatutPaiement(StatutPaiement.IMPAYE);
+        facture.setModePaiement(modePaiement);
+        facture.setMontant(consultation.getMedecin().getServiceMedical().getMontant());
 
         Facture savedFacture = factureRepository.save(facture);
 
-        // Update the Consultation to link to this new Facture (bi-directional relationship)
         consultation.setFacture(savedFacture);
         consultationRepository.save(consultation);
 
@@ -85,11 +71,7 @@ public class FactureServiceImpl implements FactureService {
     }
 
 
-    // --- REVIEW THIS METHOD ---
-    // This method `createFactureForConsultation` now overlaps with `generateInvoiceForConsultation`.
-    // Consider deprecating or removing it, or renaming it if it serves a distinct purpose
-    // (e.g., creating a factura manually without specific consultation context, or with more granular details).
-    // If you keep it, ensure it handles null patient/dossier for emergency consultations as well.
+
     @Override
     public Facture createFactureForConsultation(Long consultationId, Facture facture) {
         Consultation consultation = consultationRepository.findById(consultationId)

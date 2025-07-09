@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface PrescriptionService {
 
-    Prescription createPrescription(Prescription prescription);
+    Prescription createPrescription(Prescription prescription); // Takes a full Prescription entity
 
-    Prescription updatePrescription(Long id, Prescription prescriptionDetails);
+    Prescription updatePrescription(Long id, Prescription prescriptionDetails); // Takes ID and entity
 
     Prescription findById(Long id);
 
@@ -19,7 +19,7 @@ public interface PrescriptionService {
 
     void deletePrescription(Long id);
 
-    List<Prescription> findPrescriptionByMedecinId(Long medecinId); // Renamed parameter
+    List<Prescription> findPrescriptionByMedecinId(Long medecinId);
 
     List<Prescription> findPrescriptionByPatientId(Long patientId);
 

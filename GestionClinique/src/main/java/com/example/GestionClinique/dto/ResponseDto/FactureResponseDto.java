@@ -12,12 +12,11 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class FactureResponseDto extends BaseResponseDto { // Assuming BaseResponseDto has ID, dates
-    private Float montant;
-    private String patientNomComplet; //à récupérer à partir de l'id de la consultation
-    private LocalDateTime consultationDateTime; //à récupérer à partir de l'id de la consultation
-    private String serviceMedicalNom; //à récupérer à partir de l'id de la consultation
+public class FactureResponseDto extends BaseResponseDto {
+    private Double montant;
+    private String patientNomComplet;
+//    private LocalDateTime consultationDateTime;
+    private String serviceMedicalNom;
     private StatutPaiement statutPaiement;
     private ModePaiement modePaiement;
 }

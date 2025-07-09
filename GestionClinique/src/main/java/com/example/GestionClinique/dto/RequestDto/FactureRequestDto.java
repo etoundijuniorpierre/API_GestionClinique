@@ -17,10 +17,10 @@ public class FactureRequestDto {
 
     @NotNull(message = "Le montant est requis.")
     @Positive(message = "Le montant doit être positif.")
-    private Float montant;
-
-    @NotNull(message = "La date d'émission est requise.")
-    private LocalDate dateEmission;
+    private Double montant;
+//
+//    @NotNull(message = "La date d'émission est requise.")
+//    private LocalDate dateEmission;
 
     @NotNull(message = "Le statut de paiement est requis.")
     private StatutPaiement statutPaiement = StatutPaiement.IMPAYE;

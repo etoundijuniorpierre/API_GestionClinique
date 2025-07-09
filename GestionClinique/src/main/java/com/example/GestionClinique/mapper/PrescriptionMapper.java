@@ -14,19 +14,30 @@ import java.util.List;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface PrescriptionMapper {
 
-
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "creationDate", ignore = true)
+    @Mapping(target = "modificationDate", ignore = true)
+    @Mapping(target = "consultation", ignore = true)
+    @Mapping(target = "medecin", ignore = true)
+    @Mapping(target = "patient", ignore = true)
     Prescription toEntity(PrescriptionRequestDto dto);
 
-    @Mapping(source = "consultation.id", target = "consultationId")
+
     @Mapping(source = "medecin.id", target = "medecinId")
     @Mapping(target = "medecinNomComplet", expression = "java(entity.getMedecin() != null ? entity.getMedecin().getNom() + \" \" + entity.getMedecin().getPrenom() : null)")
     @Mapping(source = "patient.id", target = "patientId")
     @Mapping(target = "patientNomComplet", expression = "java(entity.getPatient() != null ? entity.getPatient().getNom() + \" \" + entity.getPatient().getPrenom() : null)")
-//    @Mapping(source = "dossierMedical.id", target = "dossierMedicalId")
+    @Mapping(target = "consultationDescription", expression = "java(entity.getConsultation() != null ? entity.getConsultation().getMotifs() : null)")
+    @Mapping(source = "consultation.id", target = "consultationId")
     PrescriptionResponseDto toDto(Prescription entity);
 
     List<PrescriptionResponseDto> toDtoList(List<Prescription> entities);
 
-
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "creationDate", ignore = true)
+    @Mapping(target = "modificationDate", ignore = true)
+    @Mapping(target = "consultation", ignore = true)
+    @Mapping(target = "medecin", ignore = true)
+    @Mapping(target = "patient", ignore = true)
     void updateEntityFromDto(PrescriptionRequestDto dto, @MappingTarget Prescription entity);
 }

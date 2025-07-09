@@ -8,41 +8,25 @@ import com.example.GestionClinique.repository.*;
 import com.example.GestionClinique.service.ConsultationService;
 import com.example.GestionClinique.service.FactureService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Service
-@Transactional
+@AllArgsConstructor
 public class ConsultationServiceImpl implements ConsultationService {
 
     private final ConsultationRepository consultationRepository;
     private final DossierMedicalRepository dossierMedicalRepository;
-    private final UtilisateurRepository utilisateurRepository; // Assuming this is for Medecin
+    private final UtilisateurRepository utilisateurRepository;
     private final RendezVousRepository rendezVousRepository;
     private final PrescriptionRepository prescriptionRepository;
     private final SalleRepository salleRepository;
     private final FactureService factureService;
 
-    @Autowired
-    public ConsultationServiceImpl(
-            ConsultationRepository consultationRepository,
-            DossierMedicalRepository dossierMedicalRepository,
-            UtilisateurRepository utilisateurRepository,
-            RendezVousRepository rendezVousRepository,
-            PrescriptionRepository prescriptionRepository, SalleRepository salleRepository, FactureService factureService) {
-        this.consultationRepository = consultationRepository;
-        this.dossierMedicalRepository = dossierMedicalRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.rendezVousRepository = rendezVousRepository;
-        this.prescriptionRepository = prescriptionRepository;
-        this.salleRepository = salleRepository;
-        this.factureService = factureService;
-    }
 
     // This is for EMERGENCY consultations (no RendezVous)
     @Override
@@ -54,21 +38,8 @@ public class ConsultationServiceImpl implements ConsultationService {
         consultation.setMedecin(medecin);
 
         // --- SCENARIO 2: Patient and Dossier Medical Null for now ---
-        // If DossierMedical ID is provided in the DTO, try to link it.
-        // Otherwise, explicitly set to null as requested for emergency cases.
-        if (consultation.getDossierMedical() != null && consultation.getDossierMedical().getId() != null) {
-            DossierMedical dossierMedical = dossierMedicalRepository.findById(consultation.getDossierMedical().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("DossierMedical not found with ID: " + consultation.getDossierMedical().getId()));
-            consultation.setDossierMedical(dossierMedical);
-        } else {
-            // As per requirement, set to null if not provided for emergency
-            consultation.setDossierMedical(null);
-            // Ensure no RendezVous is linked for emergency consultations
-            if (consultation.getRendezVous() != null) {
-                throw new RuntimeException("Emergency consultation cannot be linked to a RendezVous.");
-            }
-        }
-
+        consultation.setDossierMedical(null);
+        consultation.getDossierMedical().setPatient(null);
         // --- Handle Prescriptions (only if DossierMedical is present and has a patient) ---
         List<Prescription> savedPrescriptions = new ArrayList<>();
         if (consultation.getPrescriptions() != null && !consultation.getPrescriptions().isEmpty()) {
@@ -161,8 +132,13 @@ public class ConsultationServiceImpl implements ConsultationService {
         // Default ModePaiement for scheduled, or get it from DTO if applicable
         factureService.generateInvoiceForConsultation(newConsultation.getId(), ModePaiement.ESPECES);
 
+        salle.setStatutSalle(StatutSalle.DISPONIBLE);
+        salleRepository.save(salle);
+
         return newConsultation;
     }
+
+
 
     @Override
     @Transactional
@@ -186,6 +162,7 @@ public class ConsultationServiceImpl implements ConsultationService {
         return consultationRepository.save(existingConsultation);
     }
 
+
     @Override
     @Transactional
     public Consultation findById(Long id) {
@@ -193,11 +170,13 @@ public class ConsultationServiceImpl implements ConsultationService {
                 .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + id));
     }
 
+
     @Override
     @Transactional
     public List<Consultation> findAll() {
         return consultationRepository.findAll();
     }
+
 
     @Override
     @Transactional
@@ -210,6 +189,7 @@ public class ConsultationServiceImpl implements ConsultationService {
         return consultation.getDossierMedical();
     }
 
+
     @Override
     @Transactional
     public RendezVous findRendezVousByConsultationId(Long id) {
@@ -220,6 +200,7 @@ public class ConsultationServiceImpl implements ConsultationService {
         }
         return consultation.getRendezVous();
     }
+
 
     @Override
     @Transactional
@@ -233,6 +214,8 @@ public class ConsultationServiceImpl implements ConsultationService {
         }
         consultationRepository.delete(consultation);
     }
+
+
 
     @Override
     @Transactional
@@ -250,6 +233,7 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         return prescriptionRepository.save(prescription);
     }
+
 
     @Override
     @Transactional

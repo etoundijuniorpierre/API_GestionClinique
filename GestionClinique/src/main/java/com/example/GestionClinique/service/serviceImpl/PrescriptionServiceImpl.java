@@ -64,7 +64,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found with ID: " + id));
 
         // Update scalar fields
-        existingPrescription.setDatePrescription(prescriptionDetails.getDatePrescription());
         existingPrescription.setTypePrescription(prescriptionDetails.getTypePrescription());
         existingPrescription.setMedicaments(prescriptionDetails.getMedicaments());
         existingPrescription.setInstructions(prescriptionDetails.getInstructions());

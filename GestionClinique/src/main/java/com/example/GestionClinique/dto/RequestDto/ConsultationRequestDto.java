@@ -44,8 +44,7 @@ public class ConsultationRequestDto {
 //    @NotNull(message = "L'ID du dossier médical est requis.")
 //    private Long dossierMedicalId;
 
-    private Long rendezVousId; // No @NotNull here
-
+    private Long rendezVousId;
 
     private List<PrescriptionRequestDto> prescriptions;
 }

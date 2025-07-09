@@ -1,7 +1,6 @@
 package com.example.GestionClinique.service;
 
 
-import com.example.GestionClinique.dto.RequestDto.PatientRequestDto;
 import com.example.GestionClinique.model.entity.Facture;
 import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
@@ -11,11 +10,11 @@ import java.util.List;
 
 
 public interface FactureService {
-    // This method is now called from ConsultationService
     Facture generateInvoiceForConsultation(Long consultationId, ModePaiement modePaiement);
 
-    // Existing methods
-    Facture createFactureForConsultation(Long consultationId, Facture facture); // This method should be reconsidered or renamed, as generateInvoiceForConsultation now handles the creation
+    Facture payerFacture(Long factureId);
+    byte[] generateFacturePdf(Long factureId);
+
     Facture updateFacture(Long id, Facture factureDetails);
     List<Facture> findAllFactures();
     List<Facture> findFacturesByStatut(StatutPaiement statutPaiement);

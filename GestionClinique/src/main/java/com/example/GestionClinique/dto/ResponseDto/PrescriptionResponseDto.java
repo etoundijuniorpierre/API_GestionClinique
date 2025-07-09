@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder // Add @Builder here too
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrescriptionResponseDto extends BaseResponseDto {
@@ -22,6 +21,7 @@ public class PrescriptionResponseDto extends BaseResponseDto {
     private String dureePrescription;
     private Long quantite;
     private String consultationDescription;
+    private Long consultationId;
 //    private Long dossierMedicalId;
 //    private String dossierMedicalReference;
 }

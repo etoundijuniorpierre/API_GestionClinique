@@ -29,5 +29,4 @@ public enum ServiceMedical {
         this.montant = montant;
     }
 
-
 }
