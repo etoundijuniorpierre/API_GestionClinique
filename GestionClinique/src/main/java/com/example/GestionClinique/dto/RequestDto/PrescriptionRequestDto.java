@@ -15,10 +15,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrescriptionRequestDto {
-    @NotNull(message = "La date de prescription est requise.")
-    @FutureOrPresent(message = "La date de prescription ne peut pas être dans le futur.")
-    private LocalDate datePrescription;
-
     @NotBlank(message = "Le type de prescription est requis.")
     private String typePrescription;
 
@@ -43,6 +39,6 @@ public class PrescriptionRequestDto {
     @NotNull(message = "L'ID du patient est requis.")
     private Long patientId; // Use Long
 
-    @NotNull(message = "L'ID du dossier médical est requis.")
-    private Long dossierMedicalId; // Use Long
+//    @NotNull(message = "L'ID du dossier médical est requis.")
+//    private Long dossierMedicalId; // Use Long
 }

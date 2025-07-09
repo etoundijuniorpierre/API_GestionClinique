@@ -6,6 +6,7 @@ import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -14,11 +15,9 @@ import java.time.LocalDate;
 @Builder
 public class FactureResponseDto extends BaseResponseDto { // Assuming BaseResponseDto has ID, dates
     private Float montant;
-    private LocalDate dateEmission;
+    private String patientNomComplet; //à récupérer à partir de l'id de la consultation
+    private LocalDateTime consultationDateTime; //à récupérer à partir de l'id de la consultation
+    private String serviceMedicalNom; //à récupérer à partir de l'id de la consultation
     private StatutPaiement statutPaiement;
-    private ModePaiement modePaiement; // Added to response DTO
-
-    // Include nested DTOs for related entities for a more complete response
-    private PatientResponseDto patient;
-    private ConsultationResponseDto consultation;
+    private ModePaiement modePaiement;
 }

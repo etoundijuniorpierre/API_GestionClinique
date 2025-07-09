@@ -11,6 +11,10 @@ import java.time.LocalDate;
 
 @Data
 public class FactureRequestDto {
+
+    @NotNull
+    private Long ConsultantId;
+
     @NotNull(message = "Le montant est requis.")
     @Positive(message = "Le montant doit être positif.")
     private Float montant;
@@ -19,9 +23,8 @@ public class FactureRequestDto {
     private LocalDate dateEmission;
 
     @NotNull(message = "Le statut de paiement est requis.")
-    private StatutPaiement statutPaiement;
+    private StatutPaiement statutPaiement = StatutPaiement.IMPAYE;
 
     @NotNull(message = "Le mode de paiement est requis.")
-    private ModePaiement modePaiement;
-
+    private ModePaiement modePaiement = ModePaiement.ESPECES;
 }

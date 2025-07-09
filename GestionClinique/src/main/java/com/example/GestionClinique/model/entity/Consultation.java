@@ -21,8 +21,6 @@ import java.util.List;
 @Table(name = "consultation")
 public class Consultation extends BaseEntity {
 
-    @Column
-    private String type = "NORMALE";
 
     @Column(name = "motifs", nullable = false)
     private String motifs;
@@ -60,7 +58,7 @@ public class Consultation extends BaseEntity {
 //    }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dossier_medical_id", nullable = false)
+    @JoinColumn(name = "dossier_medical_id", nullable = true)
     private DossierMedical dossierMedical;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -30,44 +30,101 @@ public class FactureServiceImpl implements FactureService {
         this.consultationRepository = consultationRepository;
     }
 
+    /**
+     * Generates and saves a new invoice for a given consultation.
+     * This is the method intended to be called by ConsultationService.
+     *
+     * @param consultationId The ID of the consultation for which to generate the invoice.
+     * @param modePaiement The mode of payment for the invoice.
+     * @return The newly created Facture.
+     */
     @Override
-    public Facture createFactureForConsultation(Long consultationId, Facture facture) {
+    public Facture generateInvoiceForConsultation(Long consultationId, ModePaiement modePaiement) {
         Consultation consultation = consultationRepository.findById(consultationId)
                 .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + consultationId));
 
-        // Check if a facture already exists for this consultation
+        // Check if a facture already exists for this consultation to prevent duplicates
         if (factureRepository.findByConsultationId(consultationId).isPresent()) {
             throw new RuntimeException("A facture already exists for Consultation with ID: " + consultationId);
         }
 
-        // Link the consultation to the facture
+        Facture facture = new Facture();
         facture.setConsultation(consultation);
 
-        // Derive patient from consultation
-        if (consultation.getDossierMedical().getPatient()== null) { // Assuming Consultation entity has a getPatient() method
-            throw new RuntimeException("Consultation does not have an associated patient.");
-        }
-        facture.setPatient(consultation.getDossierMedical().getPatient());
-
-        // Set dateEmission if not provided in the DTO
-        if (facture.getDateEmission() == null) {
-            facture.setDateEmission(LocalDate.now());
-        }
-        // Set default status if not provided (e.g., IMPAYE)
-        if (facture.getStatutPaiement() == null) {
-            facture.setStatutPaiement(StatutPaiement.IMPAYE);
-        }
-        // Set default mode if not provided (e.g., ESPECES)
-        if (facture.getModePaiement() == null) {
-            facture.setModePaiement(ModePaiement.ESPECES);
+        // --- Handle Patient and Dossier Medical for Invoice ---
+        // If consultation has a patient, link it to the invoice.
+        // Otherwise, the invoice might be created without a patient link initially (e.g., for unknown emergency patients).
+        // This requires `Patient` in `Facture` entity to be `nullable = true`.
+        if (consultation.getDossierMedical() != null && consultation.getDossierMedical().getPatient() != null) {
+            facture.setPatient(consultation.getDossierMedical().getPatient());
+        } else {
+            // As per recent consultation changes, patient/dossier can be null for emergency.
+            // If the Facture entity requires a patient, this branch will cause an issue.
+            // You MUST ensure `patient_id` in your `facture` table is `nullable = true`
+            // if you intend to create invoices for consultations without a pre-linked patient.
+            System.out.println("Warning: Creating invoice for consultation ID " + consultationId + " without an associated patient.");
+            facture.setPatient(null); // Explicitly set to null if no patient
         }
 
+        // Set invoice details
+        facture.setDateEmission(LocalDate.now());
+        facture.setStatutPaiement(StatutPaiement.IMPAYE); // Default status
+        facture.setModePaiement(modePaiement); // Passed as argument
+
+        // You might want to calculate the amount here based on consultation type or services
+        // For now, let's assume a default or fetch from consultation details if available
+        facture.setMontant(10000.0F); // Example default amount, adjust as needed
 
         Facture savedFacture = factureRepository.save(facture);
 
         // Update the Consultation to link to this new Facture (bi-directional relationship)
         consultation.setFacture(savedFacture);
-        consultationRepository.save(consultation); // Save updated consultation
+        consultationRepository.save(consultation);
+
+        return savedFacture;
+    }
+
+
+    // --- REVIEW THIS METHOD ---
+    // This method `createFactureForConsultation` now overlaps with `generateInvoiceForConsultation`.
+    // Consider deprecating or removing it, or renaming it if it serves a distinct purpose
+    // (e.g., creating a factura manually without specific consultation context, or with more granular details).
+    // If you keep it, ensure it handles null patient/dossier for emergency consultations as well.
+    @Override
+    public Facture createFactureForConsultation(Long consultationId, Facture facture) {
+        Consultation consultation = consultationRepository.findById(consultationId)
+                .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + consultationId));
+
+        if (factureRepository.findByConsultationId(consultationId).isPresent()) {
+            throw new RuntimeException("A facture already exists for Consultation with ID: " + consultationId);
+        }
+
+        facture.setConsultation(consultation);
+
+        // Derive patient from consultation
+        // This part needs adjustment based on the consultation's patient/dossier nullable status
+        if (consultation.getDossierMedical() != null && consultation.getDossierMedical().getPatient() != null) {
+            facture.setPatient(consultation.getDossierMedical().getPatient());
+        } else {
+            // Allow patient to be null if consultation's dossierMedical/patient is null
+            facture.setPatient(null);
+            System.out.println("Warning: Creating invoice via createFactureForConsultation for consultation ID " + consultationId + " without an associated patient.");
+        }
+
+        if (facture.getDateEmission() == null) {
+            facture.setDateEmission(LocalDate.now());
+        }
+        if (facture.getStatutPaiement() == null) {
+            facture.setStatutPaiement(StatutPaiement.IMPAYE);
+        }
+        if (facture.getModePaiement() == null) {
+            facture.setModePaiement(ModePaiement.ESPECES);
+        }
+
+        Facture savedFacture = factureRepository.save(facture);
+
+        consultation.setFacture(savedFacture);
+        consultationRepository.save(consultation);
 
         return savedFacture;
     }
@@ -81,9 +138,6 @@ public class FactureServiceImpl implements FactureService {
         existingFacture.setDateEmission(factureDetails.getDateEmission());
         existingFacture.setStatutPaiement(factureDetails.getStatutPaiement());
         existingFacture.setModePaiement(factureDetails.getModePaiement());
-
-        // Patient and Consultation associations are generally not updated here.
-        // If they need to be updated, dedicated methods or more complex logic would be required.
 
         return factureRepository.save(existingFacture);
     }
@@ -114,6 +168,7 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
+    @Transactional
     public void deleteFacture(Long id) {
         Facture facture = factureRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + id));
@@ -132,6 +187,10 @@ public class FactureServiceImpl implements FactureService {
     @Transactional
     public Patient findPatientByFactureId(Long id) {
         Facture facture = findById(id);
+        // Ensure patient is not null before returning if the Facture entity allows null patients
+        if (facture.getPatient() == null) {
+            throw new IllegalStateException("Facture with ID: " + id + " does not have an associated patient.");
+        }
         return facture.getPatient();
     }
 
@@ -143,3 +202,4 @@ public class FactureServiceImpl implements FactureService {
         return factureRepository.save(facture);
     }
 }
+

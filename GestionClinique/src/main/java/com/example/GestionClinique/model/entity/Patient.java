@@ -26,5 +26,4 @@ public class Patient extends InfoPersonnel {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Prescription> prescriptions = new ArrayList<>();
-
 }

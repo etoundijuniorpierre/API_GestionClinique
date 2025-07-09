@@ -18,9 +18,10 @@ public class  ConsultationResponseDto extends BaseResponseDto {
     private String diagnostic;
 //    private LocalDateTime dateHeureDebut;
 //    private Long dureeMinutes;
-    private String dossierMedicalId;
-    private String medecin;
-    private Long rendezVousId;
+//    private Long rendezVousId;
+    private String medecinNomComplet; //qui correspond ici à l'utilisateur(medecin) qui c'est login et qui effectue actuellement la consultation
+    private String patientNomComplet; //à recevoir du rendezVous
+    private String serviceMedecin; //à récupérer chez l'utilisateur(médecin)
 //    private Long factureId;
     private List<PrescriptionResponseDto> prescriptions;
 }

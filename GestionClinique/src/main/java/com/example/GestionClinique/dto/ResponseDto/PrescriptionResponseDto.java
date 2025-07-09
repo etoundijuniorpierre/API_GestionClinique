@@ -12,18 +12,16 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrescriptionResponseDto extends BaseResponseDto {
-    private LocalDate datePrescription;
+    private Long medecinId;
+    private String medecinNomComplet;
+    private Long patientId;
+    private String patientNomComplet;
     private String typePrescription;
     private String medicaments;
     private String instructions;
     private String dureePrescription;
     private Long quantite;
-    private Long consultationId;
     private String consultationDescription;
-    private Long medecinId;
-    private String medecinNomComplet;
-    private Long patientId;
-    private String patientNomComplet;
-    private Long dossierMedicalId;
-    private String dossierMedicalReference;
+//    private Long dossierMedicalId;
+//    private String dossierMedicalReference;
 }

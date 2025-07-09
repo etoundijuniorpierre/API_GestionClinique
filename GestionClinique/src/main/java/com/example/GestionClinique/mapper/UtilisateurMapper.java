@@ -45,7 +45,5 @@ public interface UtilisateurMapper {
 
         return role;
     }
-
-
 }
 
