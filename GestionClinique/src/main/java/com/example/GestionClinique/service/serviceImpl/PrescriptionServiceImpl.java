@@ -41,22 +41,21 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         this.dossierMedicalRepository = dossierMedicalRepository;
     }
 
-    @Override
-    public Prescription createPrescription(Prescription prescription) {
-        // Fetch and set associated entities based on their IDs from the incoming Prescription object
-        Consultation consultation = consultationRepository.findById(prescription.getConsultation().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + prescription.getConsultation().getId()));
-        Utilisateur medecin = utilisateurRepository.findById(prescription.getMedecin().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + prescription.getMedecin().getId()));
-        Patient patient = patientRepository.findById(prescription.getPatient().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + prescription.getPatient().getId()));
-        DossierMedical dossierMedical = dossierMedicalRepository.findById(prescription.getDossierMedical().getId())
-                .orElseThrow(() -> new IllegalArgumentException("DossierMedical not found with ID: " + prescription.getDossierMedical().getId()));
 
-        prescription.setConsultation(consultation);
-        prescription.setMedecin(medecin);
-        prescription.setPatient(patient);
-        prescription.setDossierMedical(dossierMedical);
+        @Override
+        public Prescription addPrescription(Long consultationId, Prescription prescription) {
+
+            Consultation consultation = consultationRepository.findById(consultationId)
+                    .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + consultationId));
+
+            prescription.setConsultation(consultation);
+
+            if (consultation.getMedecin() == null ) {
+                throw new IllegalStateException("Consultation, its Medecin, cannot add prescription.");
+            }
+            prescription.setMedecin(consultation.getMedecin());
+            prescription.setDossierMedical(consultation.getDossierMedical());
+            prescription.setPatient(consultation.getDossierMedical().getPatient());
 
         return prescriptionRepository.save(prescription);
     }
@@ -165,12 +164,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                         .add(new Text(prescription.getMedecin().getServiceMedical() != null ? prescription.getMedecin().getServiceMedical().name() : "N/A"))
                         .add("\nDate: ")
                         .add(new Text(prescription.getCreationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
-                        .setTextAlignment(TextAlignment.RIGHT)); // Align doctor info to right
+                        .setTextAlignment(TextAlignment.RIGHT));
             } else {
                 document.add(new Paragraph("Médecin: N/A"));
             }
 
-            document.add(new Paragraph("\n")); // Spacer
+            document.add(new Paragraph("\n"));
 
             // --- Patient Information (if available) ---
             if (prescription.getPatient() != null) {

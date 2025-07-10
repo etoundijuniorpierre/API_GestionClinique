@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface PrescriptionService {
 
-    Prescription createPrescription(Prescription prescription); // Takes a full Prescription entity
+    Prescription addPrescription(Long consultationId, Prescription prescription); // Takes a full Prescription entity
 
     byte[] generatePrescriptionPdf(Long prescriptionId);
 

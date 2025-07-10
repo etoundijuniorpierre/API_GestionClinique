@@ -14,6 +14,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrescriptionRequestDto {
+    private Long consultantId;
+
     @NotBlank(message = "Le type de prescription est requis.")
     private String typePrescription;
 

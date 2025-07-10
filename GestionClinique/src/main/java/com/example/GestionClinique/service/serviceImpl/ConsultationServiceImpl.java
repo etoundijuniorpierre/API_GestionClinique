@@ -3,6 +3,7 @@ package com.example.GestionClinique.service.serviceImpl;
 
 import com.example.GestionClinique.model.entity.*;
 import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
+import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import com.example.GestionClinique.repository.*;
 import com.example.GestionClinique.service.ConsultationService;
@@ -32,20 +33,6 @@ public class ConsultationServiceImpl implements ConsultationService {
     private final FactureService factureService;
     private final HistoriqueActionService historiqueActionService;
 
-
-    private Long getCurrentAuthenticatedUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && !(authentication.getPrincipal() instanceof String && "anonymousUser".equals(authentication.getPrincipal()))) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof Utilisateur) {
-                return ((Utilisateur) principal).getId();
-            } else if (principal instanceof UserDetails) {
-                System.out.println("Principal est UserDetails mais pas MonUserDetailsCustom. Username: " + ((UserDetails)principal).getUsername());
-                return null;
-            }
-        }
-        return null;
-    }
 
     // This is for EMERGENCY consultations (no RendezVous)
     @Override
@@ -80,13 +67,7 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         Consultation savedConsultation = consultationRepository.save(consultation);
 
-        // --- Create Invoice (only if DossierMedical is present) ---
-        if (savedConsultation.getDossierMedical() != null) {
-            // Default ModePaiement for emergency, or get it from DTO if applicable
-            factureService.generateInvoiceForConsultation(savedConsultation.getId(), ModePaiement.ESPECES);
-        } else {
-            System.out.println("No invoice generated for emergency consultation with no linked DossierMedical.");
-        }
+        factureService.generateInvoiceForConsultation(savedConsultation.getId(), ModePaiement.ESPECES);
 
         return savedConsultation;
     }
@@ -104,7 +85,6 @@ public class ConsultationServiceImpl implements ConsultationService {
         }
 
         // --- SCENARIO 1: Physician is the logged-in user ---
-        // The medecinId parameter should already come from the authenticated user.
         Utilisateur medecin = utilisateurRepository.findById(medecinId)
                 .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + medecinId));
         consultationDetails.setMedecin(medecin);
@@ -118,7 +98,6 @@ public class ConsultationServiceImpl implements ConsultationService {
             throw new IllegalStateException("RendezVous does not have an associated room to mark as occupied.");
         }
 
-
         consultationDetails.setRendezVous(rendezVous);
 
         // Inherit DossierMedical from the Patient associated with the RendezVous
@@ -128,31 +107,29 @@ public class ConsultationServiceImpl implements ConsultationService {
             throw new RuntimeException("RendezVous patient does not have an associated medical record.");
         }
 
-        // --- Handle Prescriptions ---
-        List<Prescription> savedPrescriptions = new ArrayList<>();
+        // Iterate through incoming prescriptions and establish bidirectional links
         if (consultationDetails.getPrescriptions() != null && !consultationDetails.getPrescriptions().isEmpty()) {
             for (Prescription prescription : consultationDetails.getPrescriptions()) {
                 prescription.setConsultation(consultationDetails); // Link prescription to this consultation
                 prescription.setMedecin(medecin); // Associate with the current doctor
                 prescription.setPatient(rendezVous.getPatient()); // Link to patient from RendezVous
                 prescription.setDossierMedical(rendezVous.getPatient().getDossierMedical()); // Link to dossier from RendezVous
-                savedPrescriptions.add(prescriptionRepository.save(prescription));
+                // DO NOT call prescriptionRepository.save(prescription) here!
+                // It will be cascaded when consultationRepository.save(consultationDetails) is called.
             }
-            consultationDetails.setPrescriptions(savedPrescriptions);
         }
 
         Consultation newConsultation = consultationRepository.save(consultationDetails);
 
-        // Update RendezVous to link to this new Consultation (to maintain bi-directional integrity)
         rendezVous.setConsultation(newConsultation);
         rendezVousRepository.save(rendezVous);
 
-        // --- SCENARIO 1: Create the Invoice ---
-        // Default ModePaiement for scheduled, or get it from DTO if applicable
         factureService.generateInvoiceForConsultation(newConsultation.getId(), ModePaiement.ESPECES);
 
         salle.setStatutSalle(StatutSalle.DISPONIBLE);
+        rendezVous.setStatut(StatutRDV.TERMINE);
         salleRepository.save(salle);
+        rendezVousRepository.save(rendezVous);
 
         return newConsultation;
     }

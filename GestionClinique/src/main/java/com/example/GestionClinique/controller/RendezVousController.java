@@ -250,7 +250,7 @@ public class RendezVousController {
 
 
 
-////@PreAuthorize("hasAnyRole('SECRETAIRE')")
+//@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PutMapping(path = "/{idRendezVous}/cancel", produces = MediaType.APPLICATION_JSON_VALUE) // Changed to PATCH or PUT /id/status for clarity
     @Operation(summary = "Annuler un rendez-vous",
             description = "Change le statut d'un rendez-vous existant à 'annulé'")
