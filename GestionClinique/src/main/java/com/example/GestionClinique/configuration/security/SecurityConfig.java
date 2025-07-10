@@ -2,6 +2,8 @@ package com.example.GestionClinique.configuration.security;
 
 
 import com.example.GestionClinique.configuration.security.jwtConfig.JwtAuthenticationFilter;
+import com.example.GestionClinique.service.authService.CustomLogoutHandler;
+import com.example.GestionClinique.service.authService.UserDetailsServiceImpl;
 import io.swagger.v3.oas.models.PathItem;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,10 +34,12 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomLogoutHandler customLogoutHandler;
 
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter, CustomLogoutHandler customLogoutHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.customLogoutHandler = customLogoutHandler;
     }
 
     // Configure le PasswordEncoder (BCryptPasswordEncoder est recommandé)
@@ -66,39 +71,44 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource((CorsConfigurationSource) corsConfigurationSource())) // Activer CORS
                 .authorizeHttpRequests(authorize -> authorize
                         // Permettre l'accès public à l'enregistrement et au login
-                        .requestMatchers("/clinique/login").permitAll()
-                        .requestMatchers("/clinique/historiqueActions").permitAll()
-                        .requestMatchers("/clinique/historiqueActions/**").permitAll()
-                        .requestMatchers("/clinique/dossierMedical/**").permitAll()
-                        .requestMatchers("/clinique/dossierMedical").permitAll()
-                        .requestMatchers("/clinique/utilisateurs/**").permitAll()
-                        .requestMatchers("/clinique/utilisateurs").permitAll()
-                        .requestMatchers("/clinique/messages/**").permitAll()
-                        .requestMatchers("/clinique/messages").permitAll()
-                        .requestMatchers("/clinique/prescriptions/**").permitAll()
-                        .requestMatchers("/clinique/utilisateurs").permitAll()
-                        .requestMatchers("/clinique/salles/**").permitAll()
-                        .requestMatchers("/clinique/salles").permitAll()
-                        .requestMatchers("/clinique/consultations/**").permitAll()
-                        .requestMatchers("/clinique/consultations").permitAll()
-                        .requestMatchers("/clinique/factures/**").permitAll()
-                        .requestMatchers("/clinique/factures").permitAll()
-                        .requestMatchers("/clinique/patients/**").permitAll()
-                        .requestMatchers("/clinique/patients").permitAll()
-                        .requestMatchers("/clinique/rendezvous/**").permitAll()
-                        .requestMatchers("/clinique/rendezvous").permitAll()
-                        .requestMatchers("/clinique/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/login").permitAll()
+                        .requestMatchers("Api/V1/clinique/historiqueActions").permitAll()
+                        .requestMatchers("Api/V1/clinique/historiqueActions/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/dossierMedical/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/dossierMedical").permitAll()
+                        .requestMatchers("Api/V1/clinique/utilisateurs/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/utilisateurs").permitAll()
+                        .requestMatchers("Api/V1/clinique/messages/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/messages").permitAll()
+                        .requestMatchers("Api/V1/clinique/prescriptions/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/utilisateurs").permitAll()
+                        .requestMatchers("Api/V1/clinique/salles/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/salles").permitAll()
+                        .requestMatchers("Api/V1/clinique/consultations/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/consultations").permitAll()
+                        .requestMatchers("Api/V1/clinique/factures/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/factures").permitAll()
+                        .requestMatchers("Api/V1/clinique/patients/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/patients").permitAll()
+                        .requestMatchers("Api/V1/clinique/rendezvous/**").permitAll()
+                        .requestMatchers("Api/V1/clinique/rendezvous").permitAll()
+                        .requestMatchers("Api/V1/clinique/**").permitAll()
                         // Permettre l'accès aux endpoints Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers(String.valueOf(PathItem.HttpMethod.POST), "/clinique/utilisateur/createUtilisateur").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/clinique/utilisateur/createUtilisateur").hasRole("ADMIN")
+                        .requestMatchers(String.valueOf(PathItem.HttpMethod.POST), "Api/V1/clinique/utilisateur/createUtilisateur").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "Api/V1/clinique/utilisateur/createUtilisateur").hasRole("ADMIN")
                         .anyRequest().authenticated() // Toutes les autres requêtes nécessitent une authentification
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Utilisation de JWTs rend la session STATELESS
                 )
                 .authenticationProvider(authenticationProvider()) // Utilise notre AuthenticationProvider
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Ajoute notre filtre JWT
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)// Ajoute notre filtre JWT
+                .logout(logout -> logout // Configure logout
+                .logoutUrl("Api/V1/clinique/logout") // The URL that triggers logout (same as AuthController)
+                .addLogoutHandler(customLogoutHandler) // Add your custom logout handler
+                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()) // Clears context on successful logout
+        );
 
         return http.build();
     }

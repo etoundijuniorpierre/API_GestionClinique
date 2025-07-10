@@ -1,4 +1,4 @@
-package com.example.GestionClinique.configuration.security;
+package com.example.GestionClinique.service.authService;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,10 +8,10 @@ import java.util.Collection;
 @Getter
 public class MonUserDetailsCustom extends User {
 
-    private final Long id; // This is the ID you want to expose
+    private final Long id;
 
     public MonUserDetailsCustom(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, authorities); // Call the constructor of Spring Security's User class
+        super(username, password, authorities);
         this.id = id;
     }
 
@@ -21,5 +21,4 @@ public class MonUserDetailsCustom extends User {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.id = id;
     }
-
 }

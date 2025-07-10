@@ -1,5 +1,6 @@
 package com.example.GestionClinique.controller;
 
+import com.example.GestionClinique.service.authService.MonUserDetailsCustom;
 import com.example.GestionClinique.dto.RequestDto.ConsultationRequestDto;
 import com.example.GestionClinique.dto.RequestDto.DossierMedicalResponseDto;
 import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
@@ -64,9 +65,9 @@ public class ConsultationController {
     // Helper to get authenticated user ID
     private Long getAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof Utilisateur) {
+        if (authentication != null && authentication.getPrincipal() instanceof MonUserDetailsCustom) {
             // Assuming your Utilisateur is directly stored as the principal
-            return ((Utilisateur) authentication.getPrincipal()).getId();
+            return ((MonUserDetailsCustom) authentication.getPrincipal()).getId();
         }
         // IMPORTANT: Implement robust error handling or a custom UserDetails service
         // that provides the user ID. This is a crucial security and functional point.
