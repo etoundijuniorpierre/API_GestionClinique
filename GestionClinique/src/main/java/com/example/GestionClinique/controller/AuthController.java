@@ -1,4 +1,3 @@
-// src/main/java/com/example/GestionClinique/controller/AuthController.java
 package com.example.GestionClinique.controller;
 
 import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
@@ -7,7 +6,7 @@ import com.example.GestionClinique.service.authService.UserDetailsServiceImpl;
 import com.example.GestionClinique.configuration.security.jwtConfig.JwtUtil;
 import com.example.GestionClinique.dto.dtoConnexion.LoginRequest;
 import com.example.GestionClinique.dto.dtoConnexion.LoginResponse;
-import com.example.GestionClinique.repository.UtilisateurRepository; // Import UtilisateurRepository
+import com.example.GestionClinique.repository.UtilisateurRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest; // For logout to get Authorization header
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,13 +22,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder; // For logout
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime; // For timestamps
+import java.time.LocalDateTime;
 
 import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
@@ -77,7 +76,6 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed: UserDetails is null.");
             }
 
-            // --- Update lastLoginDate and statusConnect ---
             utilisateurRepository.findByEmail(userDetails.getUsername()).ifPresent(utilisateur -> {
                 utilisateur.setLastLoginDate(LocalDateTime.now());
                 utilisateur.setStatusConnect(StatusConnect.CONNECTE); // Set status to CONNECTE
