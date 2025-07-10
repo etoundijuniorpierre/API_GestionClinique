@@ -1,5 +1,6 @@
 package com.example.GestionClinique.service.serviceImpl;
 
+import com.example.GestionClinique.model.entity.DossierMedical;
 import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
@@ -27,7 +28,12 @@ public class PatientServiceImpl implements PatientService {
     @Transactional
     @Override
     public Patient createPatient(Patient patient) {
-
+        DossierMedical dossierMedical = patient.getDossierMedical();
+        if (dossierMedical != null) {
+            dossierMedical.setPatient(patient);
+        } else {
+            throw new IllegalArgumentException("Dossier médical manquant pour la création du patient.");
+        }
         return patientRepository.save(patient);
     }
 
@@ -51,9 +57,9 @@ public class PatientServiceImpl implements PatientService {
         existingPatient.setDateNaissance(patientDetails.getDateNaissance());
         existingPatient.setGenre(patientDetails.getGenre());
 
-
         return patientRepository.save(existingPatient);
     }
+
 
     @Transactional
     @Override

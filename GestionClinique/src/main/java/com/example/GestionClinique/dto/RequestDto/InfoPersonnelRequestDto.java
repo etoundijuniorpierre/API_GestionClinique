@@ -16,12 +16,25 @@ import java.time.LocalDate;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class InfoPersonnelRequestDto {
+    @NotEmpty
     private String nom;
+
+    @NotEmpty
     private String prenom;
+
+    @NotNull
     @Email
     private String email;
+
+    @NotNull
     private LocalDate dateNaissance;
+
+    @NotNull
     private String telephone;
+
+    @NotNull
     private String adresse;
+
+    @NotNull
     private String genre;
 }

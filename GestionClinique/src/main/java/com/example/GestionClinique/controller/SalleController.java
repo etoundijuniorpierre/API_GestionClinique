@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static com.example.GestionClinique.utils.Constants.API_NAME;
+import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
 
 @Tag(name = "Gestion des Salles", description = "API pour la gestion des salles d'hôpital")

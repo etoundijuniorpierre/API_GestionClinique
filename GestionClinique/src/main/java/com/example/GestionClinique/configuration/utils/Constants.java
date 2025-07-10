@@ -1,4 +1,4 @@
-package com.example.GestionClinique.utils;
+package com.example.GestionClinique.configuration.utils;
 
 public interface Constants {
 

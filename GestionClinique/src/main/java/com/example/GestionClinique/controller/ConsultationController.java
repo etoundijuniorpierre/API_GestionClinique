@@ -2,7 +2,7 @@ package com.example.GestionClinique.controller;
 
 import com.example.GestionClinique.service.authService.MonUserDetailsCustom;
 import com.example.GestionClinique.dto.RequestDto.ConsultationRequestDto;
-import com.example.GestionClinique.dto.RequestDto.DossierMedicalResponseDto;
+import com.example.GestionClinique.dto.ResponseDto.DossierMedicalResponseDto;
 import com.example.GestionClinique.dto.RequestDto.PrescriptionRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.ConsultationResponseDto;
 
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
-import static com.example.GestionClinique.utils.Constants.API_NAME;
+import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Consultations", description = "API pour la gestion des consultations médicales")
 @RequestMapping(API_NAME + "/consultations")

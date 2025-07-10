@@ -20,13 +20,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.GestionClinique.dto.RequestDto.HistoriqueActionRequestDto;
 import com.example.GestionClinique.service.HistoriqueActionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.example.GestionClinique.utils.Constants.API_NAME;
+import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Historiques d'Actions", description = "API pour la gestion et le suivi des actions dans le système")
 @RequestMapping(API_NAME + "/historiqueActions")

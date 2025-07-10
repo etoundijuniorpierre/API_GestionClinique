@@ -9,10 +9,9 @@ import com.example.GestionClinique.mapper.RendezVousMapper;
 import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
-import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.service.PatientService;
 import com.example.GestionClinique.service.RendezVousService;
-import com.example.GestionClinique.utils.Constants;
+import com.example.GestionClinique.configuration.utils.Constants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -50,20 +49,27 @@ public class PatientController {
 
 
 
-@PreAuthorize("hasAnyRole('SECRETAIRE')")
+    @PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer un nouveau patient",
-            description = "Enregistre un nouveau patient dans le système avec ses informations personnelles et médicales")
+            description = "Enregistre un nouveau patient dans le système avec ses informations personnelles et un dossier médical complet.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Patient et dossier médical créés avec succès",
+                    content = @Content(schema = @Schema(implementation = PatientResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Requête invalide (données manquantes ou format incorrect)"),
+            @ApiResponse(responseCode = "401", description = "Non autorisé"),
+            @ApiResponse(responseCode = "403", description = "Accès interdit"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
     public ResponseEntity<PatientResponseDto> createPatient(
-            @Parameter(description = "Détails du patient à créer", required = true)
+            @Parameter(description = "Détails du patient et de son dossier médical à créer", required = true)
             @Valid @RequestBody PatientRequestDto patientRequestDto) {
-        // Map DTO to Entity for service layer
         Patient patientToCreate = patientMapper.toEntity(patientRequestDto);
-        // Call service to create entity
+
         Patient createdPatient = patientService.createPatient(patientToCreate);
-        // Map created Entity back to Response DTO
+
         PatientResponseDto responseDto = patientMapper.toDto(createdPatient);
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED); // Return 201 Created
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
 

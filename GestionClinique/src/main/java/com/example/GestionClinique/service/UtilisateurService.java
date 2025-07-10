@@ -23,4 +23,7 @@ public interface UtilisateurService {
     List<RendezVous> findRendezVousForMedecinByStatus(String medecinName, StatutRDV statut);
     List<RendezVous> findRendezVousCONFIRMEThisDay(Long medecinId);
 
+    List<Utilisateur> findUtisateurWithStatusCONNECTActually(Long medecinId);
+    List<Utilisateur> findUtisateurWithStatusDISCONNECTActually(Long medecinId);
+
 }

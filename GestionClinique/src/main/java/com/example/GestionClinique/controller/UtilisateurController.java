@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.example.GestionClinique.utils.Constants.API_NAME;
+import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Utilisateurs", description = "API pour la gestion des utilisateurs du système")
 @RequestMapping(API_NAME + "/utilisateurs") // Changed to plural for common REST convention

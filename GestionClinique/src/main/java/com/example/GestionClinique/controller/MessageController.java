@@ -6,7 +6,6 @@ import com.example.GestionClinique.mapper.MessageMapper;
 import com.example.GestionClinique.model.entity.Message;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 
-import static com.example.GestionClinique.utils.Constants.API_NAME;
+import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Messages", description = "API pour la gestion des messages entre utilisateurs")
 @RequestMapping(API_NAME + "/messages")

@@ -1,8 +1,8 @@
 package com.example.GestionClinique.controller;
 
 
-import com.example.GestionClinique.dto.RequestDto.DossierMedicalResponseDto;
-import com.example.GestionClinique.dto.ResponseDto.DossierMedicalRequestDto;
+import com.example.GestionClinique.dto.ResponseDto.DossierMedicalResponseDto;
+import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.PatientResponseDto;
 import com.example.GestionClinique.mapper.DossierMedicalMapper;
 import com.example.GestionClinique.mapper.PatientMapper;
@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,11 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
-import static com.example.GestionClinique.utils.Constants.API_NAME;
-
-
-import org.springframework.web.bind.annotation.*;
-
+import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
 
 @Tag(name = "Gestion des Dossiers Médicaux", description = "API pour la gestion des dossiers médicaux des patients")

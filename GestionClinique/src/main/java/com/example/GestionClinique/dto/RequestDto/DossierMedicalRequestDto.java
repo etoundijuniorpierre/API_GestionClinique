@@ -1,4 +1,4 @@
-package com.example.GestionClinique.dto.ResponseDto;
+package com.example.GestionClinique.dto.RequestDto;
 
 
 import jakarta.validation.constraints.NotBlank;

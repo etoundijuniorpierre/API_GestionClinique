@@ -88,7 +88,6 @@ public class ConsultationServiceImpl implements ConsultationService {
             System.out.println("No invoice generated for emergency consultation with no linked DossierMedical.");
         }
 
-        historiqueActionService.enregistrerAction("consultation effectué par le medecin : "+Long.valueOf(consultation.getMedecin().getNom()+", service médical : " +Long.valueOf(consultation.getMedecin().getServiceMedical()+", ID du médecin = ", Math.toIntExact(consultation.getMedecin().getId()))));
         return savedConsultation;
     }
 
@@ -154,7 +153,7 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         salle.setStatutSalle(StatutSalle.DISPONIBLE);
         salleRepository.save(salle);
-        historiqueActionService.enregistrerAction("consultation effectué par le medecin : "+Long.valueOf(consultationDetails.getMedecin().getNom()+", service médical : " +Long.valueOf(consultationDetails.getMedecin().getServiceMedical()+", sur le patient : "+rendezVous.getPatient().getNom(), Math.toIntExact(consultationDetails.getMedecin().getId()))));
+
         return newConsultation;
     }
 
@@ -174,10 +173,6 @@ public class ConsultationServiceImpl implements ConsultationService {
         existingConsultation.setTaille(consultationDetails.getTaille());
         existingConsultation.setCompteRendu(consultationDetails.getCompteRendu());
         existingConsultation.setDiagnostic(consultationDetails.getDiagnostic());
-
-        // Handle prescriptions updates if necessary (this method currently just updates basic fields)
-        // You'd need a more complex logic here to add/remove/update prescriptions.
-        // For simplicity, let's assume prescriptions are added/updated via addPrescriptionToConsultation for now.
 
         return consultationRepository.save(existingConsultation);
     }

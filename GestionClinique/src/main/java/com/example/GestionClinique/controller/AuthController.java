@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime; // For timestamps
 
-import static com.example.GestionClinique.utils.Constants.API_NAME;
+import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
 
 @Tag(name = "AUTHENTIFICATION", description = "API pour se login dans notre système")

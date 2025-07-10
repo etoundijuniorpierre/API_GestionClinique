@@ -25,7 +25,7 @@ import org.springframework.http.HttpHeaders;
 
 import java.util.List;
 
-import static com.example.GestionClinique.utils.Constants.API_NAME;
+import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
 
 @Tag(name = "Gestion des Prescriptions", description = "API pour la gestion des prescriptions médicales")
 @RequestMapping(API_NAME + "/prescriptions") // Plural and hyphenated for REST convention

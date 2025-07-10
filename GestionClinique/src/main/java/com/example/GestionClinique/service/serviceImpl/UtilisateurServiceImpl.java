@@ -5,6 +5,7 @@ import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
+import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.RoleRepository;
@@ -159,4 +160,17 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return rendezVousRepository.findRendezVousByMedecinStatusCONFIRMEForThisDay(medecinId, today);
     }
 
+
+    @Override
+    @Transactional
+    public List<Utilisateur> findUtisateurWithStatusCONNECTActually(Long medecinId) {
+        return utilisateurRepository.findByStatusConnect(StatusConnect.CONNECTE);
+    }
+
+
+    @Override
+    @Transactional
+    public List<Utilisateur> findUtisateurWithStatusDISCONNECTActually(Long medecinId) {
+        return utilisateurRepository.findByStatusConnect(StatusConnect.DECONNECTE);
+    }
 }

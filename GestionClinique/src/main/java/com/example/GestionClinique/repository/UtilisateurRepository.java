@@ -2,6 +2,7 @@ package com.example.GestionClinique.repository;
 
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
+import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
@@ -24,5 +25,5 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     List<Utilisateur> findByNom(String nom);
 
-
+    List<Utilisateur> findByStatusConnect(StatusConnect status);
 }
