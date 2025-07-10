@@ -1,0 +1,68 @@
+package com.example.GestionClinique.repository;
+
+
+import com.example.GestionClinique.model.entity.RendezVous;
+import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+
+public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
+
+
+    List<RendezVous> findByJour(LocalDate jour);
+
+    Optional<RendezVous> findByJourAndHeureAndSalleId(LocalDate jour, LocalTime heure, Long salleId);
+
+    Optional<RendezVous> findByJourAndHeureAndMedecinId(LocalDate jour, LocalTime heure, Long medecinId);
+
+    @Query("SELECT r FROM RendezVous r WHERE " +
+            "LOWER(r.patient.nom) LIKE LOWER(CONCAT('%', :patientSearchTerm, '%')) OR " +
+            "LOWER(r.patient.prenom) LIKE LOWER(CONCAT('%', :patientSearchTerm, '%')) OR " +
+            "LOWER(r.patient.email) LIKE LOWER(CONCAT('%', :patientSearchTerm, '%')) OR " +
+            "CAST(r.patient.id AS string) LIKE CONCAT('%', :patientSearchTerm, '%')")
+    List<RendezVous> findRendezVousByPatientSearchTerm(@Param("patientSearchTerm") String patientSearchTerm);
+
+
+
+    @Query("SELECT r FROM RendezVous r WHERE " +
+            "(LOWER(r.patient.nom) LIKE LOWER(CONCAT('%', :patientName, '%')) OR " +
+            "LOWER(r.patient.prenom) LIKE LOWER(CONCAT('%', :patientName, '%'))) AND " +
+            "r.statut = :statut")
+    List<RendezVous> findRendezVousForPatientByStatus(@Param("patientName") String patientName, @Param("statut") StatutRDV statut);
+
+
+
+    @Query("SELECT r FROM RendezVous r WHERE " +
+            "LOWER(r.medecin.nom) LIKE LOWER(CONCAT('%', :medecinSearchTerm, '%')) OR " +
+            "LOWER(r.medecin.prenom) LIKE LOWER(CONCAT('%', :medecinSearchTerm, '%')) OR " +
+            "LOWER(r.medecin.email) LIKE LOWER(CONCAT('%', :medecinSearchTerm, '%')) OR " +
+            "CAST(r.medecin.id AS string) LIKE CONCAT('%', :medecinSearchTerm, '%')")
+    List<RendezVous> findRendezVousByMedecinSearchTerm(@Param("medecinSearchTerm") String medecinSearchTerm);
+
+
+    @Query("SELECT r FROM RendezVous r WHERE " +
+            "(LOWER(r.medecin.nom) LIKE LOWER(CONCAT('%', :medecinName, '%')) OR " +
+            "LOWER(r.medecin.prenom) LIKE LOWER(CONCAT('%', :medecinName, '%'))) AND " +
+            "r.statut = :statut")
+    List<RendezVous> findRendezVousForMedecinByStatus(@Param("medecinName") String medecinName, @Param("statut") StatutRDV statut);
+
+
+    List<RendezVous> findBySalleId(Long salleId);
+
+    List<RendezVous> findByStatut(StatutRDV statut);
+
+
+    @Query("SELECT r FROM RendezVous r WHERE " +
+            "r.medecin.id = :medecinId AND " + // Changement ici: filtre par ID
+            "r.statut = 'CONFIRME' AND r.jour = :today")
+    List<RendezVous> findRendezVousByMedecinStatusCONFIRMEForThisDay(
+            @Param("medecinId") Long medecinId, // Changement ici: type de paramètre
+            @Param("today") LocalDate today);
+}

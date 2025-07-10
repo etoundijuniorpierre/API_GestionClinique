@@ -1,0 +1,29 @@
+package com.example.GestionClinique.repository;
+
+import com.example.GestionClinique.model.entity.Utilisateur;
+import com.example.GestionClinique.model.entity.enumElem.RoleType;
+import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+
+
+import java.util.List;
+import java.util.Optional;
+
+
+public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
+
+
+//    Collection<Utilisateur> findUtilisateurByRole_RoleType(RoleType roleType);
+//
+//    Collection<Utilisateur> findUtilisateurByInfoPersonnel_Nom(String nom);
+
+
+     Optional<Utilisateur> findByEmail(String email);
+
+    List<Utilisateur> findByRole_RoleType(RoleType roleType);
+
+    List<Utilisateur> findByNom(String nom);
+
+    List<Utilisateur> findByStatusConnect(StatusConnect status);
+}
