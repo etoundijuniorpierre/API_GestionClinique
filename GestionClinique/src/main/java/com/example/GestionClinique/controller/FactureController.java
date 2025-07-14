@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public class FactureController {
 
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PostMapping(path = "/generate-for-consultation/{consultationId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Générer une facture pour une consultation",
             description = "Génère une nouvelle facture automatiquement associée à une consultation existante. Le montant est calculé à partir du service médical du médecin.")
@@ -73,7 +74,7 @@ public class FactureController {
 
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PutMapping(path = "/update/{idFacture}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour une facture",
             description = "Met à jour tous les détails modifiables d'une facture existante (montant, date d'émission, etc.).")
@@ -99,7 +100,7 @@ public class FactureController {
 
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(path = "/recherche/allFacture", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Lister toutes les factures",
             description = "Récupère la liste complète des factures avec leurs détails.")
@@ -119,7 +120,7 @@ public class FactureController {
 
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(path = "/statut/{statutPaiement}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Filtrer les factures par statut de paiement",
             description = "Récupère les factures selon leur statut de paiement (PAYE, IMPAYE, EN_RETARD, etc.).")
@@ -142,7 +143,7 @@ public class FactureController {
     }
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(path = "/mode/{modePaiement}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Filtrer les factures par mode de paiement",
             description = "Récupère les factures selon leur mode de paiement (CARTE, ESPECES, VIREMENT, etc.).")
@@ -166,7 +167,7 @@ public class FactureController {
 
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(path = "/recherche/{idFacture}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir une facture par son ID",
             description = "Récupère tous les détails d'une facture spécifique, y compris les éléments facturés.")
@@ -187,7 +188,7 @@ public class FactureController {
 
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @DeleteMapping(path = "/{idFacture}")
     @Operation(summary = "Supprimer une facture",
             description = "Supprime définitivement une facture du système (opération irréversible).")
@@ -206,7 +207,7 @@ public class FactureController {
     }
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(path = "/{idFacture}/patient", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir le patient associé à une facture",
             description = "Récupère les informations du patient lié à une facture spécifique.")
@@ -226,7 +227,7 @@ public class FactureController {
     }
   
     
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PatchMapping(path = "/{idFacture}/statut/{nouveauStatut}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour le statut de paiement",
             description = "Modifie uniquement le statut de paiement d'une facture existante (PAYE, IMPAYE, etc.).")
@@ -249,7 +250,7 @@ public class FactureController {
     }
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PatchMapping(path = "/payer/{factureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Marquer une facture comme payée",
             description = "Met à jour le statut d'une facture IMPAYEE à PAYEE.")
@@ -268,7 +269,7 @@ public class FactureController {
     }
 
 
-//    @PreAuthorize("hasAnyRole('SECRETAIRE', 'COMPTABLE')") // Or other roles who need to print
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'COMPTABLE')") // Or other roles who need to print
     @GetMapping(path = "/download-pdf/{factureId}", produces = MediaType.APPLICATION_PDF_VALUE)
     @Operation(summary = "Télécharger la facture au format PDF",
             description = "Génère et télécharge la facture spécifiée au format PDF.")

@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -73,7 +74,7 @@ public class ConsultationController {
         throw new IllegalStateException("Authenticated user (Medecin) ID not found in security context or not an Utilisateur instance.");
     }
 
-
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @PostMapping(path = "/emergency", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer une nouvelle consultation d'urgence (sans rendez-vous)",
             description = "Enregistre une nouvelle consultation médicale d'urgence non liée à un rendez-vous existant.")
@@ -91,20 +92,13 @@ public class ConsultationController {
 
         Long medecinId = getAuthenticatedUserId();
         Consultation consultationToCreate = consultationMapper.toEntity(consultationRequestDto);
-
-        // As per the new requirement, DossierMedical will be handled inside the service.
-        // We only pass the ID from the DTO if it exists, otherwise, leave it to the service to handle null.
-            consultationToCreate.setDossierMedical(null); // Explicitly set to null if not provided
-
-
-
-        // The service layer will now handle the logic for `dossierMedical` being null.
-        // Also, the service now checks for rendezVousId presence for emergency consultations.
+            consultationToCreate.setDossierMedical(null);
         Consultation createdConsultation = consultationService.createConsultation(consultationToCreate, medecinId);
         return new ResponseEntity<>(consultationMapper.toDto(createdConsultation), HttpStatus.CREATED);
     }
 
 
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @PostMapping(path = "/start/{idRendezVous}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Démarrer une consultation à partir d'un rendez-vous",
             description = "Crée et démarre une consultation liée à un rendez-vous existant")
@@ -125,18 +119,12 @@ public class ConsultationController {
         Long medecinId = getAuthenticatedUserId();
         Consultation consultationDetails = consultationMapper.toEntity(consultationRequestDto);
 
-        // No need to set tempRendezVous on consultationDetails if service takes rendezVousId directly.
-        // The service will fetch the RendezVous by idRendezVous and link it.
-        // If your mapper maps rendezVousId from DTO to Consultation.rendezVous,
-        // then the tempRendezVous line might be needed for the mapper to work.
-        // Assuming service uses the idRendezVous parameter directly:
-        // consultationDetails.setRendezVous(null); // Ensure it's not set from DTO accidentally if you don't want it
-
         Consultation startedConsultation = consultationService.startConsultation(idRendezVous, consultationDetails, medecinId);
         return new ResponseEntity<>(consultationMapper.toDto(startedConsultation), HttpStatus.CREATED);
     }
 
 
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour une consultation",
             description = "Modifie les informations d'une consultation existante")
@@ -161,6 +149,7 @@ public class ConsultationController {
     }
 
 
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir une consultation par son ID",
             description = "Récupère les détails complets d'une consultation spécifique")
@@ -180,6 +169,7 @@ public class ConsultationController {
     }
 
 
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Lister toutes les consultations",
             description = "Récupère la liste complète des consultations enregistrées")
@@ -198,6 +188,7 @@ public class ConsultationController {
     }
 
 
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @GetMapping(path = "/{idConsultation}/dossier-medical", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir le dossier médical lié",
             description = "Récupère le dossier médical associé à une consultation spécifique")
@@ -217,6 +208,8 @@ public class ConsultationController {
     }
 
 
+
+    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     @GetMapping(path = "/{idConsultation}/rendez-vous", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir le rendez-vous lié",
             description = "Récupère le rendez-vous associé à une consultation spécifique")
@@ -236,6 +229,7 @@ public class ConsultationController {
     }
 
 
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Supprimer une consultation",
             description = "Supprime définitivement une consultation du système")
@@ -254,6 +248,8 @@ public class ConsultationController {
     }
 
 
+
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @PostMapping(path = "/{idConsultation}/prescriptions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Ajouter une prescription",
             description = "Ajoute une prescription médicale à une consultation existante")
@@ -277,6 +273,8 @@ public class ConsultationController {
     }
 
 
+
+    @PreAuthorize("hasAnyRole('MEDECIN')")
     @GetMapping(path = "/{idConsultation}/prescriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir les prescriptions d'une consultation",
             description = "Récupère toutes les prescriptions associées à une consultation")

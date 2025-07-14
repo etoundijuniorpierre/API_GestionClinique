@@ -179,6 +179,7 @@ public class PatientController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
     @GetMapping("/rendezvous/search")
     @Operation(summary = "Rechercher les rendez-vous d'un patient par terme",
             description = "Recherche les rendez-vous d'un patient en utilisant un terme qui peut correspondre à son nom, prénom, email ou ID.")
@@ -201,6 +202,8 @@ public class PatientController {
         return ResponseEntity.ok(rendezVousDtos);
     }
 
+
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
     @GetMapping("/rendezvous/status")
     @Operation(summary = "Récupérer les rendez-vous d'un patient par son nom et statut",
             description = "Permet de filtrer les rendez-vous d'un patient en spécifiant une partie de son nom (nom ou prénom) et un statut de rendez-vous.")

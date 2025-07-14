@@ -72,7 +72,7 @@ public class UtilisateurController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE')")
     @GetMapping(path = "/{idUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /{id}
     @Operation(summary = "Obtenir un utilisateur par son ID",
             description = "Récupère les informations détaillées d'un utilisateur spécifique par son identifiant unique")
@@ -92,7 +92,7 @@ public class UtilisateurController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE')")
     @GetMapping(path = "/nom/{nomUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /nom/{nom}
     @Operation(summary = "Rechercher des utilisateurs par nom",
             description = "Récupère tous les utilisateurs correspondant au nom spécifié (recherche partielle)")
@@ -116,7 +116,7 @@ public class UtilisateurController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE')")
     @GetMapping(path = "/email/{emailUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /email/{email}
     @Operation(summary = "Rechercher un utilisateur par email",
             description = "Récupère un seul utilisateur par son adresse email unique")
@@ -244,7 +244,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping("/rendezvous/medecin/search")
     @Operation(summary = "Rechercher les rendez-vous d'un médecin par terme de recherche",
             description = "Recherche les rendez-vous d'un médecin en utilisant un terme qui peut correspondre à son nom, prénom, email ou ID. Accessible par ADMIN et MEDECIN.")
@@ -265,7 +265,7 @@ public class UtilisateurController {
         return ResponseEntity.ok(rendezVousDtos);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping("/rendezvous/medecin/status")
     @Operation(summary = "Récupérer les rendez-vous d'un médecin par son nom et statut",
             description = "Permet de filtrer les rendez-vous d'un médecin en spécifiant une partie de son nom (nom ou prénom) et un statut de rendez-vous. Accessible par ADMIN et MEDECIN.")
@@ -291,7 +291,7 @@ public class UtilisateurController {
 
 
 
-//    @PreAuthorize("hasAnyRole('MEDECIN')") // Seulement accessible par les médecins eux-mêmes
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // Seulement accessible par les médecins eux-mêmes
     @GetMapping("/rendezvous/medecin/{medecinId}/confirmed/today")
     @Operation(summary = "Récupérer les rendez-vous confirmés d'un médecin pour aujourd'hui",
             description = "Recherche les rendez-vous confirmés d'un médecin spécifique (par son ID) pour la date d'aujourd'hui. Accessible uniquement par les MEDECINS.")
@@ -306,8 +306,6 @@ public class UtilisateurController {
     public ResponseEntity<List<RendezVousResponseDto>> getConfirmedRendezVousForThisDayForMedecin(
             @Parameter(description = "ID du médecin dont on veut les rendez-vous d'aujourd'hui", required = true, example = "2")
             @PathVariable Long medecinId) {
-        // Dans un cas réel, vous vérifieriez ici que medecinId correspond à l'ID de l'utilisateur connecté.
-        // Pour l'exemple, nous nous basons sur le @PreAuthorize.
         List<RendezVous> rendezVousEntities = utilisateurService.findRendezVousCONFIRMEThisDay(medecinId);
         List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
 

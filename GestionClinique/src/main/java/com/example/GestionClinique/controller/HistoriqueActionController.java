@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.GestionClinique.dto.RequestDto.HistoriqueActionRequestDto;
@@ -66,7 +67,7 @@ public class HistoriqueActionController {
             return new ResponseEntity<>(historiqueActionMapper.toDto(savedAction), HttpStatus.CREATED);
     }
 
-//@PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/recherche/allHistorique" for root GET
     @Operation(summary = "Lister tout l'historique des actions",
             description = "Récupère la liste complète et chronologique de toutes les actions enregistrées dans le système")
@@ -84,7 +85,7 @@ public class HistoriqueActionController {
         return ResponseEntity.ok(historiqueActionMapper.toDtoList(actions)); // Map to Response DTO list
     }
 
-//@PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/{idHistorique}", produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/recherche"
     @Operation(summary = "Récupérer une action spécifique par ID",
             description = "Trouve et retourne les détails complets d'une action particulière dans l'historique")
@@ -102,7 +103,7 @@ public class HistoriqueActionController {
             return ResponseEntity.ok(historiqueActionMapper.toDto(action));
     }
 
-//@PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/utilisateur/{utilisateurId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Historique des actions par utilisateur",
             description = "Récupère la liste chronologique de toutes les actions effectuées par un utilisateur spécifique")
@@ -124,7 +125,7 @@ public class HistoriqueActionController {
             return ResponseEntity.ok(historiqueActionMapper.toDtoList(actions));
     }
 
-//@PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/utilisateur/nom/{utilisateurName}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Historique des actions par nom d'utilisateur",
             description = "Récupère la liste chronologique de toutes les actions effectuées par un utilisateur dont le nom contient la chaîne spécifiée.")
@@ -145,7 +146,7 @@ public class HistoriqueActionController {
             return ResponseEntity.ok(historiqueActionMapper.toDtoList(actions));
     }
 
-//@PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(path = "/periode", produces = MediaType.APPLICATION_JSON_VALUE) // Use request parameters for date range
     @Operation(summary = "Filtrer l'historique par période temporelle",
             description = "Récupère toutes les actions enregistrées entre deux dates spécifiées (inclusives).")

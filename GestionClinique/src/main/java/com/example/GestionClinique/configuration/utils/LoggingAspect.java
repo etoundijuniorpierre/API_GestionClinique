@@ -45,7 +45,7 @@ public class LoggingAspect {
               "execution(* com.example.GestionClinique.service.*.delete*(..)) || " +
               "execution(* com.example.GestionClinique.service.RendezVousServiceImpl.cancelRendezVous(..)) || " +
               "execution(* com.example.GestionClinique.service.ConsultationServiceImpl.startConsultation(..)) || " +
-              "execution(* com.example.GestionClinique.service.ConsultationServiceImpl.addPrescriptionToConsultation(..)) || " +
+              "execution(* com.example.GestionClinique.service.ConsultationServiceImpl.createConsultation(..)) || " +
               "execution(* com.example.GestionClinique.service.UtilisateurServiceImpl.updateUtilisateurStatus(..)) || " +
               "execution(* com.example.GestionClinique.service.ConsultationServiceImpl.deleteById(..)) || " +
               "execution(* com.example.GestionClinique.service.FactureServiceImpl.generateInvoiceForConsultation(..)) || " +

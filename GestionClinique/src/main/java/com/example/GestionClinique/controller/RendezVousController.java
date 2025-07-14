@@ -21,6 +21,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -45,7 +46,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PostMapping(path = "/createRendezVous", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer un nouveau rendez-vous médical",
             description = "Permet de programmer un nouveau rendez-vous entre un patient et un professionnel de santé")
@@ -67,7 +68,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(path = "/{idRendezVous}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path
     @Operation(summary = "Obtenir un rendez-vous par son ID",
             description = "Récupère les informations détaillées d'un rendez-vous spécifique")
@@ -87,7 +88,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PutMapping(path = "/{idRendezVous}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path
     @Operation(summary = "Mettre à jour un rendez-vous existant",
             description = "Modifie les détails d'un rendez-vous programmé")
@@ -112,7 +113,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @DeleteMapping(path = "/{idRendezVous}") // Simplified path
     @Operation(summary = "Supprimer un rendez-vous",
             description = "Annule et supprime définitivement un rendez-vous du système")
@@ -132,7 +133,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT', 'ADMIN')") // Adjust roles as needed
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT', 'ADMIN')") // Adjust roles as needed
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path for all rendezvous
     @Operation(summary = "Lister tous les rendez-vous",
             description = "Récupère la liste complète de tous les rendez-vous programmés")
@@ -152,7 +153,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT')")
     @GetMapping(path = "/statut/{statut}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher des rendez-vous par statut",
             description = "Filtre les rendez-vous selon leur statut (confirmé, annulé, etc.)")
@@ -175,7 +176,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN')")
     @GetMapping(path = "/salle/{idSalle}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher des rendez-vous par salle",
             description = "Liste tous les rendez-vous programmés dans une salle spécifique")
@@ -199,7 +200,7 @@ public class RendezVousController {
 
 
     // The 'isRendezVousAvailable' endpoint signature needs to change to pass IDs, not full objects
-//@PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(path = "/available", produces = MediaType.APPLICATION_JSON_VALUE) // Changed path for a query endpoint
     @Operation(summary = "Vérifier la disponibilité d'un créneau",
             description = "Vérifie si un créneau horaire est disponible pour un médecin et une salle spécifiques.")
@@ -227,7 +228,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT')") // Patient can view their own
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT')") // Patient can view their own
     @GetMapping(path = "/jour/{jour}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher des rendez-vous par jour",
             description = "Récupère une liste de tous les rendez-vous programmés pour une date spécifique.")
@@ -250,7 +251,7 @@ public class RendezVousController {
 
 
 
-//@PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE')")
     @PutMapping(path = "/{idRendezVous}/cancel", produces = MediaType.APPLICATION_JSON_VALUE) // Changed to PATCH or PUT /id/status for clarity
     @Operation(summary = "Annuler un rendez-vous",
             description = "Change le statut d'un rendez-vous existant à 'annulé'")

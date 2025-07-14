@@ -164,6 +164,7 @@ public class FactureServiceImpl implements FactureService {
         if (facture.getStatutPaiement() == StatutPaiement.PAYE) {
             throw new IllegalArgumentException("Facture with ID: " + factureId + " is already marked as PAID.");
         }
+        facture.setModePaiement(ModePaiement.ESPECES);
 
         facture.setStatutPaiement(StatutPaiement.PAYE);
         return factureRepository.save(facture);

@@ -44,7 +44,7 @@ public class MessageController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // Adjust roles as needed
+//@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // Adjust roles as needed
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Envoyer un nouveau message",
             description = "Crée et envoie un message d'un utilisateur à un autre.")
@@ -69,7 +69,7 @@ public class MessageController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')") // Only admin can update any message for content/lu
+//@PreAuthorize("hasAnyRole('ADMIN')") // Only admin can update any message for content/lu
     @PutMapping(path = "/{idMessage}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour un message",
             description = "Met à jour le contenu ou le statut 'lu' d'un message existant.")
@@ -96,7 +96,7 @@ public class MessageController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
+//@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping(path = "/{idMessage}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir un message par son ID",
             description = "Récupère les détails d'un message spécifique.")
@@ -117,7 +117,7 @@ public class MessageController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')") // Usually only admin or specific user can see all messages
+//@PreAuthorize("hasAnyRole('ADMIN')") // Usually only admin or specific user can see all messages
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Lister tous les messages",
             description = "Récupère une liste de tous les messages enregistrés dans le système.")
@@ -137,7 +137,7 @@ public class MessageController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // User can see messages sent by them
+//@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // User can see messages sent by them
     @GetMapping(path = "/sender/{senderId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir les messages envoyés par un utilisateur",
             description = "Récupère tous les messages dont l'utilisateur spécifié est l'expéditeur.")
@@ -162,7 +162,7 @@ public class MessageController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // User can see messages received by them
+//@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // User can see messages received by them
     @GetMapping(path = "/receiver/{receiverId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtenir les messages reçus par un utilisateur",
             description = "Récupère tous les messages dont l'utilisateur spécifié est le destinataire.")
@@ -187,7 +187,7 @@ public class MessageController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // Any user can mark their message as read
+//@PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // Any user can mark their message as read
     @PatchMapping(path = "/mark-as-read/{messageId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Marquer un message comme lu",
             description = "Met à jour le statut 'lu' d'un message spécifique à 'true'.")
@@ -208,7 +208,7 @@ public class MessageController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')") // Only admin can delete messages
+//@PreAuthorize("hasAnyRole('ADMIN')") // Only admin can delete messages
     @DeleteMapping(path = "/{idMessage}")
     @Operation(summary = "Supprimer un message",
             description = "Supprime définitivement un message du système.")

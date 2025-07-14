@@ -106,7 +106,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
     public ResponseEntity<String> logout(HttpServletRequest request) {
-
+        SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Déconnexion réussie.");
     }
 }
