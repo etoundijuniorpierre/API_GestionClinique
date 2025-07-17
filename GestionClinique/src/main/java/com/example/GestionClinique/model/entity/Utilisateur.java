@@ -47,7 +47,7 @@ public class Utilisateur extends InfoPersonnel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ServiceMedical")
-    private ServiceMedical serviceMedical;
+    private ServiceMedical serviceMedical = ServiceMedical.MEDECINE_GENERALE;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_connect", nullable = false)

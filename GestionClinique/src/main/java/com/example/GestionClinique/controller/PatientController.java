@@ -49,7 +49,7 @@ public class PatientController {
 
 
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Créer un nouveau patient",
             description = "Enregistre un nouveau patient dans le système avec ses informations personnelles et un dossier médical complet.")
@@ -74,7 +74,7 @@ public class PatientController {
 
 
 
-@PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN')")
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour un patient",
             description = "Modifie les informations d'un patient existant identifié par son ID")

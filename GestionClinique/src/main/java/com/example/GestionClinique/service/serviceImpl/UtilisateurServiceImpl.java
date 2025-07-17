@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
 
+import static com.example.GestionClinique.model.entity.enumElem.RoleType.*;
+
 
 @Service
 @Transactional // Ensures atomicity for database operations
@@ -62,6 +64,14 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         Role role = roleRepository.findFirstByRoleType(utilisateur.getRole().getRoleType())
                 .orElseThrow(() -> new IllegalArgumentException("Role not found in database"));
+
+        if(role.getRoleType()==SECRETAIRE || role.getRoleType()==ADMIN){
+            utilisateur.setServiceMedical(null);
+        }
+
+        if(role.getRoleType()==MEDECIN) {
+            utilisateur.setServiceMedical(utilisateur.getServiceMedical());
+        }
 
         utilisateur.setRole(role); // Fixe le rôle final
 
