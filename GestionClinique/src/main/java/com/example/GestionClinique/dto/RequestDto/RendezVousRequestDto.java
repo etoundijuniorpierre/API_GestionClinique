@@ -26,18 +26,18 @@ public class RendezVousRequestDto {
     @NotNull(message = "Le statut du rendez-vous est requis.")
     private StatutRDV statut;
 
-    private String notes; // Optional field
+    private String notes;
 
     @NotNull(message = "Le service médical est requis.")
-    private ServiceMedical serviceMedical; // Renamed from serviceMedicalId for clarity
+    private ServiceMedical serviceMedical;
 
     @NotNull(message = "L'ID du patient est requis.")
-    private Long patientId; // Use Long as IDs are typically Long in your entities
+    private Long patientId;
 
     @NotNull(message = "L'ID du médecin est requis.")
-    private Long medecinId; // Use Long
+    private Long medecinId;
 
     @NotNull(message = "L'ID de la salle est requise.")
-    private Long salleId; // Use Long
+    private Long salleId;
 
 }

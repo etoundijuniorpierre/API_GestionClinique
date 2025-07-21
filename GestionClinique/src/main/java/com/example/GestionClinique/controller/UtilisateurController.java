@@ -1,6 +1,7 @@
 package com.example.GestionClinique.controller;
 
 
+import com.example.GestionClinique.dto.RequestDto.UpdatePasswordRequestDto;
 import com.example.GestionClinique.dto.RequestDto.UtilisateurRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.RendezVousResponseDto;
 import com.example.GestionClinique.dto.ResponseDto.UtilisateurResponseDto;
@@ -13,6 +14,7 @@ import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.service.UtilisateurService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -313,5 +315,104 @@ public class UtilisateurController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(rendezVousDtos);
+    }
+
+
+
+    @GetMapping("/search")
+    @Operation(summary = "Rechercher des utilisateurs",
+            description = "Recherche des utilisateurs par nom, prénom, email, téléphone, rôle ou statut de connexion. Requiert un terme de recherche d'au moins 2 caractères.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des utilisateurs trouvés"),
+            @ApiResponse(responseCode = "400", description = "Terme de recherche invalide (moins de 2 caractères)"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<?> searchUsers(
+            @RequestParam @Parameter(description = "Terme à rechercher (nom, prénom, email, téléphone, rôle, ou statut de connexion). Minimum 2 caractères.") String searchTerm) {
+
+            List<Utilisateur> utilisateurs = utilisateurService.searchUsers(searchTerm);
+            if (utilisateurs.isEmpty() && (searchTerm == null || searchTerm.trim().length() < 2)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Le terme de recherche doit contenir au moins 2 caractères.");
+            }
+            return ResponseEntity.ok(utilisateurs);
+        }
+
+
+
+    @GetMapping("/connected")
+    @Operation(summary = "Lister les utilisateurs actuellement connectés",
+            description = "Récupère la liste de tous les utilisateurs dont le statut de connexion est 'CONNECTE'.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des utilisateurs connectés",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Utilisateur.class)))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<Utilisateur>> getConnectedUsers() {
+            List<Utilisateur> connectedUsers = utilisateurService.findUsersWithStatusConnected();
+            return ResponseEntity.ok(connectedUsers);
+    }
+
+
+
+    @GetMapping("/disconnected")
+    @Operation(summary = "Lister les utilisateurs actuellement déconnectés",
+            description = "Récupère la liste de tous les utilisateurs dont le statut de connexion est 'DECONNECTE'.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des utilisateurs déconnectés",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Utilisateur.class)))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<Utilisateur>> getDisconnectedUsers() {
+            List<Utilisateur> disconnectedUsers = utilisateurService.findUsersWithStatusDisconnected();
+            return ResponseEntity.ok(disconnectedUsers);
+    }
+
+
+
+    @PutMapping("/{id}/password")
+    @Operation(summary = "Mettre à jour le mot de passe d'un utilisateur",
+            description = "Permet de changer le mot de passe d'un utilisateur spécifique. Les deux mots de passe fournis doivent correspondre.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Mot de passe mis à jour avec succès",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UtilisateurResponseDto.class))), // DTO
+            @ApiResponse(responseCode = "400", description = "Requête invalide (mots de passe ne correspondent pas, trop courts, etc.)",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<?> updatePassword(
+            @PathVariable @Parameter(description = "ID de l'utilisateur à mettre à jour") Long id,
+            @RequestBody UpdatePasswordRequestDto passwordDto) { // Use DTO
+            Utilisateur updatedUtilisateur = utilisateurService.updatePassword(
+                    id, passwordDto.getNewPassword(), passwordDto.getConfirmPassword());
+            return ResponseEntity.ok(utilisateurMapper.toDto(updatedUtilisateur));
+    }
+
+
+    @GetMapping("/connected/last-activity")
+    @Operation(summary = "Lister les utilisateurs connectés triés par dernière activité",
+            description = "Récupère la liste des utilisateurs actuellement connectés, triés par leur date de dernière connexion (les plus récents en premier).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des utilisateurs connectés triés",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UtilisateurResponseDto.class)))), // DTO
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<UtilisateurResponseDto>> getConnectedUsersByLastActivity() {
+            List<Utilisateur> users = utilisateurService.findUsersWithStatusConnectedByOrderLastConnected();
+            return ResponseEntity.ok(utilisateurMapper.toDtoList(users)); // MAP TO DTO LIST
+    }
+
+
+    @GetMapping("/disconnected/last-activity")
+    @Operation(summary = "Lister les utilisateurs déconnectés triés par dernière déconnexion",
+            description = "Récupère la liste des utilisateurs actuellement déconnectés, triés par leur date de dernière déconnexion (les plus récents en premier).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des utilisateurs déconnectés triés",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UtilisateurResponseDto.class)))), // DTO
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<UtilisateurResponseDto>> getDisconnectedUsersByLastActivity() {
+            List<Utilisateur> users = utilisateurService.findUsersWithStatusDisconnectedByOrderLastDeConnected();
+            return ResponseEntity.ok(utilisateurMapper.toDtoList(users));
     }
 }

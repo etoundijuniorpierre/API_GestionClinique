@@ -42,16 +42,12 @@ public class RendezVousServiceImpl implements RendezVousService {
     @Override
 @Transactional
     public RendezVous createRendezVous(RendezVous rendezVous) {
-        // Patient, Medecin, Salle are already set by the mapper if Option 1 is chosen
-        // The availability check still needs the IDs from the already set entities
         if (!isRendezVousAvailable(rendezVous.getJour(), rendezVous.getHeure(), rendezVous.getMedecin().getId(), rendezVous.getSalle().getId())) {
             throw new RuntimeException("Le créneau horaire est déjà pris pour ce médecin ou cette salle.");
         }
-
         if (rendezVous.getStatut() == null) {
-            rendezVous.setStatut(StatutRDV.CONFIRME);
+            rendezVous.setStatut(StatutRDV.EN_ATTENTE);
         }
-
         return rendezVousRepository.save(rendezVous);
     }
 

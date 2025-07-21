@@ -11,16 +11,16 @@ import java.time.LocalTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RendezVousResponseDto extends BaseResponseDto { // Assuming BaseResponseDto has 'id'
+public class RendezVousResponseDto extends BaseResponseDto {
     private LocalDate jour;
     private LocalTime heure;
     private StatutRDV statut;
     private String notes;
-    private ServiceMedical serviceMedical; // Renamed
-    private Long patientId; // Just the ID
+    private ServiceMedical serviceMedical;
+    private Long patientId;
     private String patientNomComplet;
-    private Long medecinId; // Just the ID
-    private String medecinNomComplet; // Or full name for display
-    private Long salleId; // Just the ID
-    private String nomSalle; // Or room name for display
+    private Long medecinId;
+    private String medecinNomComplet;
+    private Long salleId;
+    private String nomSalle;
 }

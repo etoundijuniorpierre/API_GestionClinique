@@ -5,6 +5,7 @@ import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -22,8 +23,14 @@ public interface UtilisateurService {
     List<RendezVous> findRendezVousByMedecinSearchTerm(String medecinSearchTerm);
     List<RendezVous> findRendezVousForMedecinByStatus(String medecinName, StatutRDV statut);
     List<RendezVous> findRendezVousCONFIRMEThisDay(Long medecinId);
+    List<Utilisateur> searchUsers(String searchTerm);
+    List<Utilisateur> findUsersWithStatusConnected();
+    List<Utilisateur> findUsersWithStatusDisconnected();
 
-    List<Utilisateur> findUtisateurWithStatusCONNECTActually(Long medecinId);
-    List<Utilisateur> findUtisateurWithStatusDISCONNECTActually(Long medecinId);
-
+// ajout
+    List<RendezVous> findAllRendezVousCONFIRMEInBeginByToday(Long medecinId); //afficher tous les rendezVous d'un medecin en commençant par aujourd'hui
+    List<RendezVous> findAllRendezVousCONFIRMEByMedecin(Long medecinId);
+    Utilisateur updatePassword(Long utilisateurId, String newPassword, String confirmPassword);
+    List<Utilisateur> findUsersWithStatusConnectedByOrderLastConnected();
+    List<Utilisateur> findUsersWithStatusDisconnectedByOrderLastDeConnected();
 }

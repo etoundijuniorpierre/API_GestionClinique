@@ -37,6 +37,21 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
             "r.statut = :statut")
     List<RendezVous> findRendezVousForPatientByStatus(@Param("patientName") String patientName, @Param("statut") StatutRDV statut);
 
+    @Query("SELECT r FROM RendezVous r WHERE r.medecin.id = :medecinId AND r.statut = :statut " +
+            "AND r.jour >= :currentDate ORDER BY r.jour ASC")
+    List<RendezVous> findConfirmedRendezVousFromTodayByMedecin(
+            @Param("medecinId") Long medecinId,
+            @Param("statut") StatutRDV statut,
+            @Param("currentDateTime") LocalDate currentDate
+    );
+
+    @Query("SELECT r FROM RendezVous r WHERE r.medecin.id = :medecinId AND r.statut = :statut " +
+            "ORDER BY r.jour ASC")
+    List<RendezVous> findAllConfirmedRendezVousByMedecin(
+            @Param("medecinId") Long medecinId,
+            @Param("statut") StatutRDV statut
+    );
+
 
 
     @Query("SELECT r FROM RendezVous r WHERE " +

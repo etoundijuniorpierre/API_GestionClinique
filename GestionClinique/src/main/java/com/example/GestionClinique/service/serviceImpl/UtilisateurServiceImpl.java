@@ -1,6 +1,7 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
+import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.model.entity.Utilisateur;
@@ -51,6 +52,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         if (utilisateur.getPassword() == null || utilisateur.getPassword().isBlank()) {
             throw new IllegalArgumentException("Le mot de passe ne peut pas être vide.");
+        }
+        if (utilisateur.getPassword().length() < 8) {
+            throw new IllegalArgumentException("Le nouveau mot de passe doit contenir au moins 8 caractères.");
         }
         utilisateur.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
 
@@ -170,17 +174,65 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return rendezVousRepository.findRendezVousByMedecinStatusCONFIRMEForThisDay(medecinId, today);
     }
 
+    @Transactional
+    @Override
+    public List<Utilisateur> searchUsers(String searchTerm) {
+        if (searchTerm == null || searchTerm.trim().length() < 2) {
+            return List.of();
+        }
+        return utilisateurRepository.searchByTerm(searchTerm);
+    }
+
 
     @Override
     @Transactional
-    public List<Utilisateur> findUtisateurWithStatusCONNECTActually(Long medecinId) {
+    public List<Utilisateur> findUsersWithStatusConnected() {
         return utilisateurRepository.findByStatusConnect(StatusConnect.CONNECTE);
     }
 
 
     @Override
     @Transactional
-    public List<Utilisateur> findUtisateurWithStatusDISCONNECTActually(Long medecinId) {
+    public List<Utilisateur> findUsersWithStatusDisconnected() {
         return utilisateurRepository.findByStatusConnect(StatusConnect.DECONNECTE);
+    }
+
+
+    @Override
+    public List<RendezVous> findAllRendezVousCONFIRMEInBeginByToday(Long medecinId) {
+        return rendezVousRepository.findConfirmedRendezVousFromTodayByMedecin(
+                medecinId, StatutRDV.CONFIRME, LocalDate.now());
+    }
+
+    @Override
+    public List<RendezVous> findAllRendezVousCONFIRMEByMedecin(Long medecinId) {
+        return rendezVousRepository.findAllConfirmedRendezVousByMedecin(medecinId, StatutRDV.CONFIRME);
+    }
+
+    @Override
+    @Transactional
+    public Utilisateur updatePassword(Long utilisateurId, String newPassword, String confirmPassword) {
+        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'id: " + utilisateurId));
+
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Les nouveaux mots de passe ne correspondent pas.");
+        }
+
+        if (newPassword.length() < 8) {
+            throw new IllegalArgumentException("Le nouveau mot de passe doit contenir au moins 8 caractères.");
+        }
+        utilisateur.setPassword(passwordEncoder.encode(newPassword));
+        return utilisateurRepository.save(utilisateur);
+    }
+
+    @Override
+    public List<Utilisateur> findUsersWithStatusConnectedByOrderLastConnected() {
+        return utilisateurRepository.findByStatusConnectOrderByLastLoginDateDesc(StatusConnect.CONNECTE);
+    }
+
+    @Override
+    public List<Utilisateur> findUsersWithStatusDisconnectedByOrderLastDeConnected() {
+        return utilisateurRepository.findByStatusConnectOrderByLastLogoutDateDesc(StatusConnect.DECONNECTE);
     }
 }

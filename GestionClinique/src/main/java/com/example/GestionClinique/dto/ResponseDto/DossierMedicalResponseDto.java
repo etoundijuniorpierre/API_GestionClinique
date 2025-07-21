@@ -18,5 +18,4 @@ public class DossierMedicalResponseDto extends BaseResponseDto {
     private String traitementsEnCours;
     private String observations;
     private List<ConsultationResponseDto> consultations;
-    private List<PrescriptionResponseDto> prescriptions;
 }

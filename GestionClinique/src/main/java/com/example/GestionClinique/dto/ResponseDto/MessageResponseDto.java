@@ -8,8 +8,8 @@ public class MessageResponseDto extends BaseResponseDto { // Assuming BaseRespon
 
     private String contenu;
 
-    private boolean lu; // Lombok generates isLu()
+    private boolean lu;
 
-    private UtilisateurResponseDto expediteur; // Include full DTO for sender
-    private UtilisateurResponseDto destinataire; // Include full DTO for receiver
+    private UtilisateurResponseDto expediteur;
+    private UtilisateurResponseDto destinataire;
 }

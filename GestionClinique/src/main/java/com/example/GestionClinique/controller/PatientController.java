@@ -83,13 +83,10 @@ public class PatientController {
             @PathVariable("id") Long id,
             @Parameter(description = "Nouvelles informations du patient", required = true)
             @Valid @RequestBody PatientRequestDto patientRequestDto) {
-        // Fetch existing entity to update
+
         Patient existingPatient = patientService.findById(id);
-        // Update existing entity from DTO (MapStruct handles null checks for fields not in DTO)
         patientMapper.updateEntityFromDto(patientRequestDto, existingPatient);
-        // Pass the updated entity to the service
         Patient updatedPatient = patientService.updatePatient(id, existingPatient);
-        // Map updated Entity back to Response DTO
         return ResponseEntity.ok(patientMapper.toDto(updatedPatient)); // Return 200 OK
     }
 
@@ -122,7 +119,7 @@ public class PatientController {
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN')")
     @DeleteMapping(path = "/{id}")
     @Operation(summary = "Supprimer un patient",
             description = "Supprime définitivement un patient du système (archivage selon politique de rétention)")

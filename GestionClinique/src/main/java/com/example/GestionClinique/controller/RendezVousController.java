@@ -7,6 +7,7 @@ import com.example.GestionClinique.mapper.RendezVousMapper;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.service.RendezVousService;
+import com.example.GestionClinique.service.UtilisateurService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -37,11 +38,13 @@ public class RendezVousController {
 
     private final RendezVousService rendezVousService;
     private final RendezVousMapper rendezVousMapper;
+    private final UtilisateurService utilisateurService;
 
     @Autowired
-    public RendezVousController(RendezVousService rendezVousService, RendezVousMapper rendezVousMapper) {
+    public RendezVousController(RendezVousService rendezVousService, RendezVousMapper rendezVousMapper, UtilisateurService utilisateurService) {
         this.rendezVousService = rendezVousService;
         this.rendezVousMapper = rendezVousMapper;
+        this.utilisateurService = utilisateurService;
     }
 
 
@@ -271,4 +274,36 @@ public class RendezVousController {
 
     }
 
+
+    @GetMapping("/medecin/{medecinId}/confirmed/from-today")
+    @Operation(summary = "Lister les rendez-vous confirmés d'un médecin à partir d'aujourd'hui",
+            description = "Récupère tous les rendez-vous confirmés pour un médecin donné, à partir du jour actuel (sans tenir compte de l'heure passée du jour), triés chronologiquement par jour.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous trouvés",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = RendezVousResponseDto.class)))), // DTO
+            @ApiResponse(responseCode = "404", description = "Médecin non trouvé (si le service vérifie l'existence du médecin)",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getConfirmedRendezVousFromTodayForMedecin(
+    @PathVariable @Parameter(description = "ID du médecin") Long medecinId) {
+            List<RendezVous> rendezVousList = utilisateurService.findAllRendezVousCONFIRMEInBeginByToday(medecinId);
+            return ResponseEntity.ok(rendezVousMapper.toDtoList(rendezVousList));
+    }
+
+    @GetMapping("/medecin/{medecinId}/confirmed/all")
+    @Operation(summary = "Lister tous les rendez-vous confirmés d'un médecin",
+            description = "Récupère tous les rendez-vous confirmés pour un médecin donné, sans filtre de date, triés chronologiquement par jour.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous trouvés",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = RendezVousResponseDto.class)))), // DTO
+            @ApiResponse(responseCode = "404", description = "Médecin non trouvé (si le service vérifie l'existence du médecin)",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getAllConfirmedRendezVousForMedecin(
+            @PathVariable @Parameter(description = "ID du médecin") Long medecinId) {
+            List<RendezVous> rendezVousList = utilisateurService.findAllRendezVousCONFIRMEByMedecin(medecinId);
+            return ResponseEntity.ok(rendezVousMapper.toDtoList(rendezVousList));
+    }
 }

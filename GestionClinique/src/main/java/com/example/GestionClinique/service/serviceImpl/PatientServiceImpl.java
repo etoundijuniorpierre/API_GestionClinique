@@ -48,7 +48,6 @@ public class PatientServiceImpl implements PatientService {
                 throw new IllegalArgumentException("Email " + patientDetails.getEmail() + " is already taken by another patient.");
             }
         }
-
         existingPatient.setNom(patientDetails.getNom());
         existingPatient.setPrenom(patientDetails.getPrenom());
         existingPatient.setEmail(patientDetails.getEmail());
@@ -85,7 +84,7 @@ public class PatientServiceImpl implements PatientService {
     @Transactional
     @Override
     public List<Patient> searchPatients(String searchTerm) {
-        if (searchTerm == null || searchTerm.trim().length() < 3) {
+        if (searchTerm == null || searchTerm.trim().length() < 2) {
             return List.of();
         }
         return patientRepository.searchByTerm(searchTerm);

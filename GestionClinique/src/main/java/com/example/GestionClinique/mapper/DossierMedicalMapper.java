@@ -3,14 +3,12 @@ package com.example.GestionClinique.mapper;
 import com.example.GestionClinique.dto.RequestDto.DossierMedicalRequestDto;
 import com.example.GestionClinique.dto.ResponseDto.DossierMedicalResponseDto;
 import com.example.GestionClinique.model.entity.DossierMedical;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface DossierMedicalMapper {
 
 
@@ -27,11 +25,8 @@ public interface DossierMedicalMapper {
     DossierMedicalResponseDto toDto(DossierMedical entity);
 
 
-//    @Mapping(target = "patient", ignore = true)
-//    @Mapping(target = "id", ignore = true)
-//    @Mapping(target = "creationDate", ignore = true)
-//    @Mapping(target = "lastModifiedDate", ignore = true)
     void updateEntityFromDto(DossierMedicalRequestDto dto, @MappingTarget DossierMedical entity);
+
 
     List<DossierMedicalResponseDto> toDtoList(List<DossierMedical> entities);
 

@@ -42,26 +42,24 @@ public class ConsultationServiceImpl implements ConsultationService {
         Utilisateur medecin = utilisateurRepository.findById(medecinId)
                 .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + medecinId));
         consultation.setMedecin(medecin);
-
-        // --- SCENARIO 2: Patient and Dossier Medical Null for now ---
         consultation.setDossierMedical(null);
         consultation.getDossierMedical().setPatient(null);
-        // --- Handle Prescriptions (only if DossierMedical is present and has a patient) ---
+
         List<Prescription> savedPrescriptions = new ArrayList<>();
         if (consultation.getPrescriptions() != null && !consultation.getPrescriptions().isEmpty()) {
             if (consultation.getDossierMedical() != null && consultation.getDossierMedical().getPatient() != null) {
                 for (Prescription prescription : consultation.getPrescriptions()) {
-                    prescription.setConsultation(consultation); // Link prescription to this consultation
+                    prescription.setConsultation(consultation);
                     prescription.setMedecin(medecin);
                     prescription.setPatient(consultation.getDossierMedical().getPatient());
                     prescription.setDossierMedical(consultation.getDossierMedical());
                     savedPrescriptions.add(prescriptionRepository.save(prescription));
                 }
-                consultation.setPrescriptions(savedPrescriptions); // Update list with persisted entities
+                consultation.setPrescriptions(savedPrescriptions);
             } else {
-                // Log a warning or throw if prescriptions are mandatory even for null patients
+
                 System.out.println("Warning: Prescriptions provided for emergency consultation without a linked DossierMedical/Patient. Prescriptions will not be saved.");
-                consultation.setPrescriptions(new ArrayList<>()); // Clear if not saving
+                consultation.setPrescriptions(new ArrayList<>());
             }
         }
 
@@ -73,7 +71,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     }
 
 
-    // This is for SCHEDULED consultations (linked to a RendezVous)
+
     @Override
     @Transactional
     public Consultation startConsultation(Long rendezVousId, Consultation consultationDetails, Long medecinId) {
@@ -84,38 +82,37 @@ public class ConsultationServiceImpl implements ConsultationService {
             throw new RuntimeException("RendezVous with ID " + rendezVousId + " is already linked to a consultation.");
         }
 
-        // --- SCENARIO 1: Physician is the logged-in user ---
+        rendezVous.setStatut(StatutRDV.ENCOURS);
+        rendezVousRepository.save(rendezVous);
+
         Utilisateur medecin = utilisateurRepository.findById(medecinId)
                 .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + medecinId));
         consultationDetails.setMedecin(medecin);
-
-        // --- SCENARIO 1: Mark the room as OCCUPEE ---
         Salle salle = rendezVous.getSalle();
+
         if (salle != null) {
             salle.setStatutSalle(StatutSalle.OCCUPEE);
-            salleRepository.save(salle); // Save the updated room status
+            salleRepository.save(salle);
         } else {
             throw new IllegalStateException("RendezVous does not have an associated room to mark as occupied.");
         }
 
         consultationDetails.setRendezVous(rendezVous);
 
-        // Inherit DossierMedical from the Patient associated with the RendezVous
         if (rendezVous.getPatient() != null && rendezVous.getPatient().getDossierMedical() != null) {
             consultationDetails.setDossierMedical(rendezVous.getPatient().getDossierMedical());
         } else {
             throw new RuntimeException("RendezVous patient does not have an associated medical record.");
         }
 
-        // Iterate through incoming prescriptions and establish bidirectional links
+
         if (consultationDetails.getPrescriptions() != null && !consultationDetails.getPrescriptions().isEmpty()) {
             for (Prescription prescription : consultationDetails.getPrescriptions()) {
-                prescription.setConsultation(consultationDetails); // Link prescription to this consultation
-                prescription.setMedecin(medecin); // Associate with the current doctor
-                prescription.setPatient(rendezVous.getPatient()); // Link to patient from RendezVous
+                prescription.setConsultation(consultationDetails);
+                prescription.setMedecin(medecin);
+                prescription.setPatient(rendezVous.getPatient());
                 prescription.setDossierMedical(rendezVous.getPatient().getDossierMedical()); // Link to dossier from RendezVous
-                // DO NOT call prescriptionRepository.save(prescription) here!
-                // It will be cascaded when consultationRepository.save(consultationDetails) is called.
+
             }
         }
 
