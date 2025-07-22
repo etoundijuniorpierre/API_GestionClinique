@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class FactureResponseDto extends BaseResponseDto {
     private Double montant;
     private String patientNomComplet;
-//    private LocalDateTime consultationDateTime;
+    private LocalDateTime dateEmission;
     private String serviceMedicalNom;
     private StatutPaiement statutPaiement;
     private ModePaiement modePaiement;

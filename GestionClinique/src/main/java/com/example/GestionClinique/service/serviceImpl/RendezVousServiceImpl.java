@@ -9,13 +9,16 @@ import com.example.GestionClinique.repository.PatientRepository;
 import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.SalleRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
+import com.example.GestionClinique.service.FactureService;
 import com.example.GestionClinique.service.RendezVousService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,28 +30,39 @@ public class RendezVousServiceImpl implements RendezVousService {
     private final PatientRepository patientRepository;
     private final UtilisateurRepository utilisateurRepository; // For doctors
     private final SalleRepository salleRepository;
+    private final FactureService factureService;
 
     @Autowired
     public RendezVousServiceImpl(RendezVousRepository rendezVousRepository,
                                  PatientRepository patientRepository,
                                  UtilisateurRepository utilisateurRepository,
-                                 SalleRepository salleRepository) {
+                                 SalleRepository salleRepository, FactureService factureService) {
         this.rendezVousRepository = rendezVousRepository;
         this.patientRepository = patientRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.salleRepository = salleRepository;
+        this.factureService = factureService;
     }
 
     @Override
-@Transactional
+    @Transactional
     public RendezVous createRendezVous(RendezVous rendezVous) {
         if (!isRendezVousAvailable(rendezVous.getJour(), rendezVous.getHeure(), rendezVous.getMedecin().getId(), rendezVous.getSalle().getId())) {
             throw new RuntimeException("Le créneau horaire est déjà pris pour ce médecin ou cette salle.");
         }
+
+        if (rendezVous.getServiceMedical()!=null) {
+            Salle salle = salleRepository.findByServiceMedical(rendezVous.getServiceMedical());
+            rendezVous.setSalle(salle);
+        }
+
         if (rendezVous.getStatut() == null) {
             rendezVous.setStatut(StatutRDV.EN_ATTENTE);
         }
-        return rendezVousRepository.save(rendezVous);
+
+        RendezVous saveRendezVous = rendezVousRepository.save(rendezVous);
+        factureService.generateInvoiceForRendesVous(saveRendezVous.getId());
+        return saveRendezVous;
     }
 
 
@@ -60,37 +74,48 @@ public class RendezVousServiceImpl implements RendezVousService {
     }
 
     @Override
-    public RendezVous updateRendezVous(Long id, RendezVous rendezVousDetails) {
+    public RendezVous updateRendezVous(Long id, RendezVous rendezVous) {
         RendezVous existingRendezVous = rendezVousRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("RendezVous not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Rendez-vous non trouvé avec l'ID: " + id));
 
-        // Update basic fields
-        existingRendezVous.setJour(rendezVousDetails.getJour());
-        existingRendezVous.setHeure(rendezVousDetails.getHeure());
-        existingRendezVous.setStatut(rendezVousDetails.getStatut());
-        existingRendezVous.setNotes(rendezVousDetails.getNotes());
-        existingRendezVous.setServiceMedical(rendezVousDetails.getServiceMedical());
-
-        // Update associated entities if provided and changed
-        if (rendezVousDetails.getPatient() != null && !rendezVousDetails.getPatient().getId().equals(existingRendezVous.getPatient().getId())) {
-            Patient newPatient = patientRepository.findById(rendezVousDetails.getPatient().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + rendezVousDetails.getPatient().getId()));
-            existingRendezVous.setPatient(newPatient);
+        // Valider que le rendez-vous peut être modifié
+        if (existingRendezVous.getStatut() == StatutRDV.TERMINE || existingRendezVous.getStatut() == StatutRDV.ANNULE) {
+            throw new IllegalStateException("Impossible de modifier un rendez-vous " + existingRendezVous.getStatut().name().toLowerCase());
         }
-        if (rendezVousDetails.getMedecin() != null && !rendezVousDetails.getMedecin().getId().equals(existingRendezVous.getMedecin().getId())) {
-            Utilisateur newMedecin = utilisateurRepository.findById(rendezVousDetails.getMedecin().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + rendezVousDetails.getMedecin().getId()));
+
+        // Mise à jour des champs modifiables
+        if (rendezVous.getHeure() != null) {
+            existingRendezVous.setHeure(rendezVous.getHeure());
+        }
+        if (rendezVous.getJour() != null) {
+            existingRendezVous.setJour(rendezVous.getJour());
+        }
+        if (rendezVous.getNotes() != null) {
+            existingRendezVous.setNotes(rendezVous.getNotes());
+        }
+
+        // Mise à jour du médecin si nécessaire
+        if (rendezVous.getMedecin() != null && !rendezVous.getMedecin().equals(existingRendezVous.getMedecin().getId())) {
+            Utilisateur newMedecin = utilisateurRepository.findById(rendezVous.getMedecin().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Médecin non trouvé avec l'ID: " + rendezVous.getMedecin()));
             existingRendezVous.setMedecin(newMedecin);
         }
-        if (rendezVousDetails.getSalle() != null && !rendezVousDetails.getSalle().getId().equals(existingRendezVous.getSalle().getId())) {
-            Salle newSalle = salleRepository.findById(rendezVousDetails.getSalle().getId())
-                    .orElseThrow(() -> new RuntimeException("Salle not found with ID: " + rendezVousDetails.getSalle().getId()));
-            existingRendezVous.setSalle(newSalle);
+
+        // Mise à jour du service médical et de la salle associée
+        if (rendezVous.getServiceMedical() != null && !rendezVous.getServiceMedical().equals(existingRendezVous.getServiceMedical())) {
+            existingRendezVous.setServiceMedical(rendezVous.getServiceMedical());
+            Salle nouvelleSalle = salleRepository.findByServiceMedical(rendezVous.getServiceMedical());
+            existingRendezVous.setSalle(nouvelleSalle);
         }
 
-        if (!isRendezVousAvailableForUpdate(existingRendezVous.getId(), existingRendezVous.getJour(), existingRendezVous.getHeure(),
-                existingRendezVous.getMedecin().getId(), existingRendezVous.getSalle().getId())) {
-            throw new RuntimeException("Le créneau horaire est déjà pris pour ce médecin ou cette salle.");
+        // Vérification des conflits de planning
+        if (!isRendezVousAvailableForUpdate(
+                existingRendezVous.getId(),
+                existingRendezVous.getJour(),
+                existingRendezVous.getHeure(),
+                existingRendezVous.getMedecin().getId(),
+                existingRendezVous.getSalle().getId())) {
+            throw new ConcurrentModificationException("Le créneau horaire est déjà pris pour ce médecin ou cette salle");
         }
 
         return rendezVousRepository.save(existingRendezVous);

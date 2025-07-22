@@ -24,5 +24,5 @@ public interface SalleService {
     
 //    List<Salle> findAvailableSalles(LocalDateTime dateHeureDebut, Long dureeMinutes);
 
-    List<Salle> findSallesByServiceMedical(ServiceMedical serviceMedical);
+    Salle findSallesByServiceMedical(ServiceMedical serviceMedical);
 }

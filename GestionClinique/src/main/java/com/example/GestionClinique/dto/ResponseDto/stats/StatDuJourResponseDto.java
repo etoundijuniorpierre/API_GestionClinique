@@ -1,25 +1,17 @@
-package com.example.GestionClinique.model.entity.statistiques;
+package com.example.GestionClinique.dto.ResponseDto.stats;
 
-import com.example.GestionClinique.model.BaseEntity;
-import jakarta.persistence.Entity;
+import com.example.GestionClinique.dto.ResponseDto.BaseResponseDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 
 @EqualsAndHashCode(callSuper = true)
-@Entity
 @Data
-public class StatMoisEncours extends BaseEntity {
-
-    private String moisEncours;
-
+public class StatDuJourResponseDto extends BaseResponseDto {
+    private String jour;
     private Long nbrRendezVousCONFIRME;
-
     private Long nbrRendezANNULE;
-
     private Long nbrPatientEnrg;
-
     private Long nbrConsultation;
-
     private Double revenu;
 }

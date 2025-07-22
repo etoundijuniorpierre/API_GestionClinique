@@ -93,7 +93,7 @@ public class SalleServiceImpl implements SalleService {
 
     @Override
     @Transactional
-    public List<Salle> findSallesByServiceMedical(ServiceMedical serviceMedical) {
+    public Salle findSallesByServiceMedical(ServiceMedical serviceMedical) {
         return salleRepository.findByServiceMedical(serviceMedical);
     }
 

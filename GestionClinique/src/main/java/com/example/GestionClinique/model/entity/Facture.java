@@ -8,6 +8,7 @@ import lombok.*;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 // Facture.java
 @EqualsAndHashCode(callSuper = true)
@@ -22,7 +23,7 @@ public class Facture extends BaseEntity {
     private Double montant;
 
     @Column(name = "date_emission", nullable = false)
-    private LocalDate dateEmission;
+    private LocalDateTime dateEmission;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut_paiement", nullable = false)
@@ -37,6 +38,10 @@ public class Facture extends BaseEntity {
     private Patient patient;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consultation_id", nullable = false, unique = true)
+    @JoinColumn(name = "consultation_id")
     private Consultation consultation;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rendezVous_id")
+    private RendezVous rendezVous;
 }

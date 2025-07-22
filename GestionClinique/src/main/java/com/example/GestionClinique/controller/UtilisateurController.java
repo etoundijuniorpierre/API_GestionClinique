@@ -20,13 +20,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
@@ -53,7 +56,7 @@ public class UtilisateurController {
 
 
 @PreAuthorize("hasAnyRole('ADMIN')")
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/createUtilisateur" from path, POST to base URL is common for creation
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/createUtilisateur" from path, POST to base URL is common for creation
     @Operation(summary = "Créer un nouvel utilisateur",
             description = "Enregistre un nouvel utilisateur dans le système avec les détails fournis")
     @ApiResponses(value = {
@@ -63,16 +66,32 @@ public class UtilisateurController {
             @ApiResponse(responseCode = "404", description = "Ressource requise non trouvée (ex: rôle non existant)"), // Clarified 404 cause
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
-    public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
-            @Parameter(description = "Détails de l'utilisateur à créer", required = true)
-            @Valid @RequestBody UtilisateurRequestDto utilisateurRequestDto) { 
-        Utilisateur utilisateurToCreate = utilisateurMapper.toEntity(utilisateurRequestDto); // Map DTO to Entity
-        Utilisateur createdUtilisateur = utilisateurService.createUtilisateur(utilisateurToCreate); // Call service with Entity
-        UtilisateurResponseDto responseDto = utilisateurMapper.toDto(createdUtilisateur); // Map Entity to Response DTO
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED); // Return 201 Created status
+public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
+        @RequestPart("utilisateur") UtilisateurRequestDto utilisateurDto,
+        @RequestPart(value = "photoProfil", required = false) MultipartFile photoProfil) {
+
+    Utilisateur utilisateur = utilisateurMapper.toEntity(utilisateurDto);
+    Utilisateur savedUtilisateur = utilisateurService.createUtilisateur(utilisateur, photoProfil);
+    return ResponseEntity.ok(utilisateurMapper.toDto(savedUtilisateur));
+}
+
+    @PutMapping("/{userId}/photo")
+    public ResponseEntity<UtilisateurResponseDto> updatePhotoProfil(
+            @PathVariable Long userId,
+            @RequestParam("photoProfil") MultipartFile photoProfil) {
+
+        Utilisateur updatedUtilisateur = utilisateurService.updatePhotoProfil(userId, photoProfil);
+        return ResponseEntity.ok(utilisateurMapper.toDto(updatedUtilisateur));
     }
 
+    @GetMapping("/{userId}/photo")
+    public ResponseEntity<Resource> getPhotoProfil(@PathVariable Long userId) {
+        Resource photo = utilisateurService.getPhotoProfil(userId);
 
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(photo);
+    }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE')")
     @GetMapping(path = "/{idUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /{id}
@@ -293,7 +312,7 @@ public class UtilisateurController {
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')") // Seulement accessible par les médecins eux-mêmes
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping("/rendezvous/medecin/{medecinId}/confirmed/today")
     @Operation(summary = "Récupérer les rendez-vous confirmés d'un médecin pour aujourd'hui",
             description = "Recherche les rendez-vous confirmés d'un médecin spécifique (par son ID) pour la date d'aujourd'hui. Accessible uniquement par les MEDECINS.")
@@ -319,6 +338,7 @@ public class UtilisateurController {
 
 
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping("/search")
     @Operation(summary = "Rechercher des utilisateurs",
             description = "Recherche des utilisateurs par nom, prénom, email, téléphone, rôle ou statut de connexion. Requiert un terme de recherche d'au moins 2 caractères.")
@@ -338,7 +358,7 @@ public class UtilisateurController {
         }
 
 
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/connected")
     @Operation(summary = "Lister les utilisateurs actuellement connectés",
             description = "Récupère la liste de tous les utilisateurs dont le statut de connexion est 'CONNECTE'.")
@@ -353,7 +373,7 @@ public class UtilisateurController {
     }
 
 
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/disconnected")
     @Operation(summary = "Lister les utilisateurs actuellement déconnectés",
             description = "Récupère la liste de tous les utilisateurs dont le statut de connexion est 'DECONNECTE'.")
@@ -368,7 +388,7 @@ public class UtilisateurController {
     }
 
 
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @PutMapping("/{id}/password")
     @Operation(summary = "Mettre à jour le mot de passe d'un utilisateur",
             description = "Permet de changer le mot de passe d'un utilisateur spécifique. Les deux mots de passe fournis doivent correspondre.")
@@ -389,6 +409,7 @@ public class UtilisateurController {
     }
 
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/connected/last-activity")
     @Operation(summary = "Lister les utilisateurs connectés triés par dernière activité",
             description = "Récupère la liste des utilisateurs actuellement connectés, triés par leur date de dernière connexion (les plus récents en premier).")
@@ -403,6 +424,7 @@ public class UtilisateurController {
     }
 
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/disconnected/last-activity")
     @Operation(summary = "Lister les utilisateurs déconnectés triés par dernière déconnexion",
             description = "Récupère la liste des utilisateurs actuellement déconnectés, triés par leur date de dernière déconnexion (les plus récents en premier).")
@@ -414,5 +436,42 @@ public class UtilisateurController {
     public ResponseEntity<List<UtilisateurResponseDto>> getDisconnectedUsersByLastActivity() {
             List<Utilisateur> users = utilisateurService.findUsersWithStatusDisconnectedByOrderLastDeConnected();
             return ResponseEntity.ok(utilisateurMapper.toDtoList(users));
+    }
+
+
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
+    @GetMapping("/{medecinId}/confirmed/from-today")
+    @Operation(summary = "Lister les rendez-vous confirmés d'un médecin à partir d'aujourd'hui",
+            description = "Récupère tous les rendez-vous confirmés pour un médecin donné, à partir du jour actuel (sans tenir compte de l'heure passée du jour), triés chronologiquement par jour.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous trouvés",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = RendezVousResponseDto.class)))), // DTO
+            @ApiResponse(responseCode = "404", description = "Médecin non trouvé (si le service vérifie l'existence du médecin)",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getConfirmedRendezVousFromTodayForMedecin(
+            @PathVariable @Parameter(description = "ID du médecin") Long medecinId) {
+        List<RendezVous> rendezVousList = utilisateurService.findAllRendezVousCONFIRMEInBeginByToday(medecinId);
+        return ResponseEntity.ok(rendezVousMapper.toDtoList(rendezVousList));
+    }
+
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
+    @GetMapping("/{medecinId}/confirmed/all")
+    @Operation(summary = "Lister tous les rendez-vous confirmés d'un médecin",
+            description = "Récupère tous les rendez-vous confirmés pour un médecin donné, sans filtre de date, triés chronologiquement par jour.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des rendez-vous trouvés",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = RendezVousResponseDto.class)))), // DTO
+            @ApiResponse(responseCode = "404", description = "Médecin non trouvé (si le service vérifie l'existence du médecin)",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<RendezVousResponseDto>> getAllConfirmedRendezVousForMedecin(
+            @PathVariable @Parameter(description = "ID du médecin") Long medecinId) {
+        List<RendezVous> rendezVousList = utilisateurService.findAllRendezVousCONFIRMEByMedecin(medecinId);
+        return ResponseEntity.ok(rendezVousMapper.toDtoList(rendezVousList));
     }
 }

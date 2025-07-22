@@ -11,17 +11,20 @@ import java.util.List;
 
 public interface FactureService {
     // This method is now called from ConsultationService
-    Facture generateInvoiceForConsultation(Long consultationId, ModePaiement modePaiement);
+    void generateInvoiceForRendesVous(Long rendezVousId);
 
-    Facture payerFacture(Long factureId);
+    Facture payerFacture(Long factureId, ModePaiement modePaiement);
     byte[] generateFacturePdf(Long factureId);
+
+    void generateInvoiceForConsultation(Long consultationId);
 
     Facture updateFacture(Long id, Facture factureDetails);
     List<Facture> findAllFactures();
     List<Facture> findFacturesByStatut(StatutPaiement statutPaiement);
     List<Facture> findFacturesByModePaiement(ModePaiement modePaiement);
+    List<Facture> findAllFacturesIMPAYE();
     Facture findById(Long id);
     void deleteFacture(Long id);
     Patient findPatientByFactureId(Long id);
-    Facture updateStatutPaiement(Long factureId, StatutPaiement nouveauStatut);
+//    Facture updateStatutPaiement(Long factureId, StatutPaiement nouveauStatut);
 }

@@ -79,9 +79,8 @@ public class LoggingAspect {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getSignature().getDeclaringTypeName();
 
-        // Récupérer l'ID de l'utilisateur pour le login/logout
+
         if ("login".equals(methodName) && result instanceof org.springframework.http.ResponseEntity<?> responseEntity) {
-            // Pour le login, l'ID est dans le corps de la réponse si la connexion est réussie
             if (responseEntity.getBody() instanceof com.example.GestionClinique.dto.dtoConnexion.LoginResponse loginResponse) {
                 userId = loginResponse.getId();
             }

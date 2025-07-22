@@ -32,12 +32,16 @@ public class Utilisateur extends InfoPersonnel {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Column(name = "photo_profil")
+    private String photoProfilPath;
+
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == null) {
             return Collections.emptyList();
         }
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.getRoleType().name()));
     }
+
 
     @Column(name = "last_login_date")
     private LocalDateTime lastLoginDate;

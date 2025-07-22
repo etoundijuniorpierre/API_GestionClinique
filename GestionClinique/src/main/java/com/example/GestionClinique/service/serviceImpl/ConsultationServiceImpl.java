@@ -2,7 +2,6 @@ package com.example.GestionClinique.service.serviceImpl;
 
 
 import com.example.GestionClinique.model.entity.*;
-import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import com.example.GestionClinique.repository.*;
@@ -11,13 +10,12 @@ import com.example.GestionClinique.service.FactureService;
 import com.example.GestionClinique.service.HistoriqueActionService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.GestionClinique.model.entity.enumElem.StatutPaiement.PAYEE;
 
 
 @Service
@@ -64,9 +62,7 @@ public class ConsultationServiceImpl implements ConsultationService {
         }
 
         Consultation savedConsultation = consultationRepository.save(consultation);
-
-        factureService.generateInvoiceForConsultation(savedConsultation.getId(), ModePaiement.ESPECES);
-
+        factureService.generateInvoiceForConsultation(savedConsultation.getId());
         return savedConsultation;
     }
 
@@ -79,6 +75,10 @@ public class ConsultationServiceImpl implements ConsultationService {
                 .orElseThrow(() -> new IllegalArgumentException("RendezVous not found with ID: " + rendezVousId));
 
         if (rendezVous.getConsultation() != null) {
+            throw new RuntimeException("RendezVous with ID " + rendezVousId + " is already linked to a consultation.");
+        }
+
+        if (rendezVous.getFacture().getStatutPaiement() != PAYEE) {
             throw new RuntimeException("RendezVous with ID " + rendezVousId + " is already linked to a consultation.");
         }
 
@@ -120,8 +120,6 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         rendezVous.setConsultation(newConsultation);
         rendezVousRepository.save(rendezVous);
-
-        factureService.generateInvoiceForConsultation(newConsultation.getId(), ModePaiement.ESPECES);
 
         salle.setStatutSalle(StatutSalle.DISPONIBLE);
         rendezVous.setStatut(StatutRDV.TERMINE);

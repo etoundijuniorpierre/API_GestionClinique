@@ -4,14 +4,25 @@ import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
+import jakarta.transaction.Transactional;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+
 import java.util.List;
 
 
 public interface UtilisateurService {
 
-    Utilisateur createUtilisateur(Utilisateur utilisateur);
+    @Transactional
+    Utilisateur createUtilisateur(Utilisateur utilisateur, MultipartFile photoProfil);
+
+    @Transactional
+    Utilisateur updatePhotoProfil(Long userId, MultipartFile photoProfil);
+
+    @Transactional
+    Resource getPhotoProfil(Long userId);
+
     Utilisateur findUtilisateurById(Long id);
     List<Utilisateur> findAllUtilisateur();
     Utilisateur updateUtilisateur(Long id, Utilisateur utilisateur);

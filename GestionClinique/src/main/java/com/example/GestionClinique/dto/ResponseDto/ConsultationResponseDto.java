@@ -22,6 +22,5 @@ public class  ConsultationResponseDto extends BaseResponseDto {
     private String medecinNomComplet;
     private String patientNomComplet;
     private String serviceMedecin;
-//    private Long factureId;
     private List<PrescriptionResponseDto> prescriptions;
 }

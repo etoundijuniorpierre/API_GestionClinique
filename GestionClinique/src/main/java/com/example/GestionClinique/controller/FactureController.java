@@ -47,31 +47,45 @@ public class FactureController {
         this.patientMapper = patientMapper;
     }
 
-
-
-@PreAuthorize("hasAnyRole('SECRETAIRE')")
-    @PostMapping(path = "/generate-for-consultation/{consultationId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Générer une facture pour une consultation",
-            description = "Génère une nouvelle facture automatiquement associée à une consultation existante. Le montant est calculé à partir du service médical du médecin.")
-    @ApiResponses(value = {
-            @ApiResponse(description = "Facture générée avec succès",
-                    content = @Content(schema = @Schema(implementation = FactureResponseDto.class))),
-            @ApiResponse(description = "Données invalides ou incomplètes (ex: mode de paiement manquant)"),
-            @ApiResponse(description = "Consultation non trouvée avec l'ID spécifié"),
-            @ApiResponse(description = "Conflit: Une facture existe déjà pour cette consultation."),
-            @ApiResponse(description = "Erreur interne du serveur lors de la génération")
-    })
-    public ResponseEntity<FactureResponseDto> generateFactureForConsultation(
-            @Parameter(description = "ID de la consultation pour laquelle générer la facture", required = true, example = "1")
-            @PathVariable("consultationId") Long consultationId,
-            @Parameter(description = "Mode de paiement pour la facture (ex: ESPECES, CARTE_BANCAIRE)", required = true, schema = @Schema(implementation = ModePaiement.class))
-            @RequestParam ModePaiement modePaiement) { // Use @RequestParam for modePaiement
-
-        // Call the new service method that handles amount calculation and patient linking
-        Facture generatedFacture = factureService.generateInvoiceForConsultation(consultationId, modePaiement);
-        return new ResponseEntity<>(factureMapper.toDto(generatedFacture), HttpStatus.CREATED);
-    }
-
+//
+//@PreAuthorize("hasAnyRole('SECRETAIRE')")
+//    @PostMapping(path = "/generate-for-consultation/{consultationId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @Operation(summary = "Générer une facture pour une consultation",
+//            description = "Génère une nouvelle facture automatiquement associée à une consultation existante. Le montant est calculé à partir du service médical du médecin.")
+//    @ApiResponses(value = {
+//            @ApiResponse(description = "Facture générée avec succès",
+//                    content = @Content(schema = @Schema(implementation = FactureResponseDto.class))),
+//            @ApiResponse(description = "Données invalides ou incomplètes (ex: mode de paiement manquant)"),
+//            @ApiResponse(description = "Consultation non trouvée avec l'ID spécifié"),
+//            @ApiResponse(description = "Conflit: Une facture existe déjà pour cette consultation."),
+//            @ApiResponse(description = "Erreur interne du serveur lors de la génération")
+//    })
+//    public ResponseEntity<FactureResponseDto> generateFactureForConsultation(
+//            @Parameter(description = "ID de la consultation pour laquelle générer la facture", required = true, example = "1")
+//            @PathVariable("consultationId") Long consultationId) {
+//        Facture generatedFacture = factureService.generateInvoiceForRendesVous(consultationId);
+//        return new ResponseEntity<>(factureMapper.toDto(generatedFacture), HttpStatus.CREATED);
+//    }
+//
+//
+//    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+//    @PostMapping(path = "/generate-for-rendezVous/{rendezVousId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @Operation(summary = "Générer une facture pour un rendezVous",
+//            description = "Génère une nouvelle facture automatiquement associée à une consultation existante. Le montant est calculé à partir du service médical du médecin.")
+//    @ApiResponses(value = {
+//            @ApiResponse(description = "Facture générée avec succès",
+//                    content = @Content(schema = @Schema(implementation = FactureResponseDto.class))),
+//            @ApiResponse(description = "Données invalides ou incomplètes (ex: mode de paiement manquant)"),
+//            @ApiResponse(description = "rendezVous non trouvée avec l'ID spécifié"),
+//            @ApiResponse(description = "Conflit: Une facture existe déjà pour ce RendezVous."),
+//            @ApiResponse(description = "Erreur interne du serveur lors de la génération")
+//    })
+//    public ResponseEntity<FactureResponseDto> generateInvoiceForRendesVous(
+//            @Parameter(description = "ID du rendezVous pour laquelle générer la facture", required = true, example = "1")
+//            @PathVariable("rendezVousId") Long rendezVousId) {
+//        Facture generatedFacture = factureService.generateInvoiceForRendesVous(rendezVousId);
+//        return new ResponseEntity<>(factureMapper.toDto(generatedFacture), HttpStatus.CREATED);
+//    }
 
 
 @PreAuthorize("hasAnyRole('SECRETAIRE')")
@@ -136,6 +150,26 @@ public class FactureController {
                     schema = @Schema(implementation = StatutPaiement.class), example = "PAYE")
             @PathVariable("statutPaiement") StatutPaiement statutPaiement) {
         List<Facture> factures = factureService.findFacturesByStatut(statutPaiement);
+        if (factures.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(factureMapper.toDtoList(factures));
+    }
+
+
+    @PreAuthorize("hasAnyRole('SECRETAIRE')")
+    @GetMapping(path = "/statut/impayee", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Filtrer les factures par statut de paiement",
+            description = "Récupère les factures selon leur statut de paiement (PAYE, IMPAYE, EN_RETARD, etc.).")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Factures filtrées récupérées avec succès",
+                    content = @Content(schema = @Schema(implementation = FactureResponseDto.class))),
+            @ApiResponse(description = "Aucune facture trouvée pour ce statut"),
+            @ApiResponse(description = "Statut de paiement invalide ou inconnu"),
+            @ApiResponse(description = "Erreur interne du serveur lors du filtrage")
+    })
+    public ResponseEntity<List<FactureResponseDto>> findAllFacturesIMPAYE(){
+        List<Facture> factures = factureService.findAllFacturesIMPAYE();
         if (factures.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -227,27 +261,27 @@ public class FactureController {
     }
   
     
-@PreAuthorize("hasAnyRole('SECRETAIRE')")
-    @PatchMapping(path = "/{idFacture}/statut/{nouveauStatut}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Mettre à jour le statut de paiement",
-            description = "Modifie uniquement le statut de paiement d'une facture existante (PAYE, IMPAYE, etc.).")
-    @ApiResponses(value = {
-            @ApiResponse(description = "Statut mis à jour avec succès",
-                    content = @Content(schema = @Schema(implementation = FactureResponseDto.class))),
-            @ApiResponse(description = "ID de facture ou statut invalide"),
-            @ApiResponse(description = "Facture non trouvée avec l'ID spécifié"),
-            @ApiResponse(description = "Erreur interne du serveur lors de la mise à jour")
-    })
-    public ResponseEntity<FactureResponseDto> updateStatutPaiement(
-            @Parameter(description = "ID de la facture à mettre à jour", required = true, example = "1")
-            @PathVariable("idFacture") Long id,
-            @Parameter(description = "Nouveau statut de paiement", required = true,
-                    schema = @Schema(implementation = StatutPaiement.class), example = "PAYE")
-            @PathVariable("nouveauStatut") StatutPaiement nouveauStatut) {
-
-        Facture updatedFacture = factureService.updateStatutPaiement(id, nouveauStatut);
-        return ResponseEntity.ok(factureMapper.toDto(updatedFacture));
-    }
+//@PreAuthorize("hasAnyRole('SECRETAIRE')")
+//    @PatchMapping(path = "/{idFacture}/statut/{nouveauStatut}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    @Operation(summary = "Mettre à jour le statut de paiement",
+//            description = "Modifie uniquement le statut de paiement d'une facture existante (PAYE, IMPAYE, etc.).")
+//    @ApiResponses(value = {
+//            @ApiResponse(description = "Statut mis à jour avec succès",
+//                    content = @Content(schema = @Schema(implementation = FactureResponseDto.class))),
+//            @ApiResponse(description = "ID de facture ou statut invalide"),
+//            @ApiResponse(description = "Facture non trouvée avec l'ID spécifié"),
+//            @ApiResponse(description = "Erreur interne du serveur lors de la mise à jour")
+//    })
+//    public ResponseEntity<FactureResponseDto> updateStatutPaiement(
+//            @Parameter(description = "ID de la facture à mettre à jour", required = true, example = "1")
+//            @PathVariable("idFacture") Long id,
+//            @Parameter(description = "Nouveau statut de paiement", required = true,
+//                    schema = @Schema(implementation = StatutPaiement.class), example = "PAYE")
+//            @PathVariable("nouveauStatut") StatutPaiement nouveauStatut) {
+//
+//        Facture updatedFacture = factureService.updateStatutPaiement(id, nouveauStatut);
+//        return ResponseEntity.ok(factureMapper.toDto(updatedFacture));
+//    }
 
 
 @PreAuthorize("hasAnyRole('SECRETAIRE')")
@@ -263,8 +297,8 @@ public class FactureController {
     })
     public ResponseEntity<FactureResponseDto> payerFacture(
             @Parameter(description = "ID de la facture à marquer comme payée", required = true, example = "1")
-            @PathVariable("factureId") Long factureId) {
-        Facture updatedFacture = factureService.payerFacture(factureId);
+            @PathVariable("factureId") Long factureId, @PathVariable("modePaiement") ModePaiement modePaiement) {
+        Facture updatedFacture = factureService.payerFacture(factureId, modePaiement);
         return ResponseEntity.ok(factureMapper.toDto(updatedFacture));
     }
 

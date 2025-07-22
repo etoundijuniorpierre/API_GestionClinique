@@ -83,7 +83,19 @@ public class AuthController {
             });
 
             String jwt = jwtUtil.generateToken(userDetails);
-            return ResponseEntity.ok(new LoginResponse(userDetails.getId(), jwt, userDetails.getUsername(), userDetails.getAuthorities()));
+
+            // Construire l'URL complète de la photo
+            String photoUrl = userDetails.getPhotoProfilPath() != null ?
+                    "/api/utilisateurs/" + userDetails.getId() + "/photo" :
+                    null;
+
+            return ResponseEntity.ok(new LoginResponse(
+                    userDetails.getId(),
+                    jwt,
+                    userDetails.getUsername(),
+                    photoUrl, // Ajout de l'URL de la photo
+                    userDetails.getAuthorities()
+            ));
 
         } catch (org.springframework.security.core.AuthenticationException e) {
             System.err.println("Authentication failed for user " + loginRequest.getEmail() + ": " + e.getMessage());

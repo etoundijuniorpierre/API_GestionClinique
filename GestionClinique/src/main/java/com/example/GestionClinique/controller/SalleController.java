@@ -219,18 +219,14 @@ public class SalleController {
             @ApiResponse(responseCode = "400", description = "Nom de service médical invalide"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
-    public ResponseEntity<List<SalleResponseDto>> findSallesByServiceMedical(
+    public ResponseEntity<SalleResponseDto> findSallesByServiceMedical(
             @Parameter(description = "Nom du service médical (ex: MEDECINE_GENERALE, PEDIATRIE)", required = true, example = "CARDIOLOGIE")
             @PathVariable("serviceMedical") ServiceMedical serviceMedical) { 
-        try {
-            List<Salle> salles = salleService.findSallesByServiceMedical(serviceMedical);
-            if (salles.isEmpty()) {
+
+            Salle salles = salleService.findSallesByServiceMedical(serviceMedical);
+            if (salles==null) {
                 return ResponseEntity.noContent().build();
             }
-            return ResponseEntity.ok(salleMapper.toDtoList(salles));
-        } catch (Exception e) {
-           
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+            return ResponseEntity.ok(salleMapper.toDto(salles));
     }
 }

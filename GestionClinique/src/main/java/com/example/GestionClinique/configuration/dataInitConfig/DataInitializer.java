@@ -92,7 +92,7 @@ public class DataInitializer {
                 serviceMedicalNumber++ ;
                 ServiceMedical serviceMedicalEnum = ServiceMedical.valueOf(serviceMedical.name());
 
-                if (salleRepository.findByServiceMedical(serviceMedicalEnum).isEmpty()) {
+                if (salleRepository.findByServiceMedical(serviceMedicalEnum)==null) {
                     Salle salle = new Salle();
                     salle.setNumeroSalle("Salle" + serviceMedicalNumber);
                     salle.setServiceMedical(serviceMedicalEnum);

@@ -19,7 +19,7 @@ public interface SalleRepository extends JpaRepository<Salle, Long> {
 
     Optional<Salle> findByNumeroSalle(String numeroSalle);
 
-    List<Salle> findByServiceMedical(ServiceMedical serviceMedical);
+    Salle findByServiceMedical(ServiceMedical serviceMedical);
 
 //    @Query("SELECT s FROM Salle s WHERE s.id NOT IN (" +
 //            "  SELECT r.salle.id FROM RendezVous r " +

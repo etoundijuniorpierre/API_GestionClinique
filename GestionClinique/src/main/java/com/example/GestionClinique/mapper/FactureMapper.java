@@ -21,15 +21,19 @@ public interface FactureMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "creationDate", ignore = true)
     @Mapping(target = "modificationDate", ignore = true)
-    @Mapping(target = "patient", ignore = true)     // Set by service during creation
-    @Mapping(target = "consultation", ignore = true) // Set by service during creation
+    @Mapping(target = "patient", ignore = true)
+    @Mapping(target = "rendezVous", ignore = true)
+    @Mapping(target = "consultation", ignore = true)
     Facture toEntity(FactureRequestDto dto);
 
 
-    @Mapping(target = "patientNomComplet", expression = "java(entity.getPatient() != null ? entity.getPatient().getNom() + \" \" + entity.getPatient().getPrenom() : null)")
-//    @Mapping(target = "consultationDateTime", source = "consultation.dateHeureDebut") // Keep this commented if you don't have consultationDateTime in FactureResponseDto
-    @Mapping(target = "serviceMedicalNom", expression = "java(entity.getConsultation() != null && entity.getConsultation().getMedecin() != null && entity.getConsultation().getMedecin().getServiceMedical() != null ? entity.getConsultation().getMedecin().getServiceMedical().name() : null)") // <-- FIX IS HERE
+
+    @Mapping(target = "patientNomComplet",
+            expression = "java(entity.getPatient() != null ? entity.getPatient().getNom() + \" \" + entity.getPatient().getPrenom() : null)")
+    @Mapping(target = "serviceMedicalNom",
+            expression = "java(getServiceMedicalName(entity))")
     FactureResponseDto toDto(Facture entity);
+
 
 
     List<FactureResponseDto> toDtoList(List<Facture> entities);
@@ -39,6 +43,25 @@ public interface FactureMapper {
     @Mapping(target = "creationDate", ignore = true)
     @Mapping(target = "modificationDate", ignore = true)
     @Mapping(target = "patient", ignore = true)
+    @Mapping(target = "rendezVous", ignore = true)
     @Mapping(target = "consultation", ignore = true)
     void updateEntityFromDto(FactureRequestDto dto, @MappingTarget Facture entity);
+
+
+    default String getServiceMedicalName(Facture facture) {
+        // Priorité à la consultation si elle existe
+        if (facture.getConsultation() != null
+                && facture.getConsultation().getMedecin() != null
+                && facture.getConsultation().getMedecin().getServiceMedical() != null) {
+            return facture.getConsultation().getMedecin().getServiceMedical().name();
+        }
+
+        // Sinon, vérifier le rendez-vous
+        if (facture.getRendezVous() != null
+                && facture.getRendezVous().getServiceMedical() != null) {
+            return facture.getRendezVous().getServiceMedical().name();
+        }
+
+        return null;
+    }
 }

@@ -1,17 +1,18 @@
-package com.example.GestionClinique.model.entity.statistiques;
+package com.example.GestionClinique.model.entity.stats;
 
 import com.example.GestionClinique.model.BaseEntity;
 import jakarta.persistence.Entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-public class statMoisDernier extends BaseEntity {
+public class StatDuJour extends BaseEntity {
 
-    private String moisDernier;
+    private String jour = LocalDate.now().toString();
 
     private Long nbrRendezVousCONFIRME;
 
@@ -21,6 +22,5 @@ public class statMoisDernier extends BaseEntity {
 
     private Long nbrConsultation;
 
-    private Long revenu;
-
+    private Double revenu;
 }

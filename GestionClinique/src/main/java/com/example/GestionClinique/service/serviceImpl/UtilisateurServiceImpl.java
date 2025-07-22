@@ -1,7 +1,6 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
-import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.model.entity.Utilisateur;
@@ -12,9 +11,15 @@ import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.RoleRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.UtilisateurService;
+import com.example.GestionClinique.service.photoService.FileStorageService;
+import jakarta.annotation.PostConstruct;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDate;
@@ -31,21 +36,27 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final RoleRepository roleRepository; // Inject RoleRepository
     private final PasswordEncoder passwordEncoder; // Inject PasswordEncoder
     private final RendezVousRepository rendezVousRepository;
-
+    private final FileStorageService fileStorageService;
 
     public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository,
                                   RoleRepository roleRepository,
-                                  PasswordEncoder passwordEncoder, RendezVousRepository rendezVousRepository) {
+                                  PasswordEncoder passwordEncoder, RendezVousRepository rendezVousRepository, FileStorageService fileStorageService) {
         this.utilisateurRepository = utilisateurRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.rendezVousRepository = rendezVousRepository;
+        this.fileStorageService = fileStorageService;
     }
 
-    @Override
-    @Transactional
-    public Utilisateur createUtilisateur(Utilisateur utilisateur) {
 
+    @PostConstruct
+    public void init() {
+        fileStorageService.init();
+    }
+
+    @Transactional
+    @Override
+    public Utilisateur createUtilisateur(Utilisateur utilisateur, MultipartFile photoProfil) {
         if (findUtilisateurByEmail(utilisateur.getEmail()) != null) {
             throw new IllegalArgumentException("A user with this email address already exists.");
         }
@@ -54,7 +65,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             throw new IllegalArgumentException("Le mot de passe ne peut pas être vide.");
         }
         if (utilisateur.getPassword().length() < 8) {
-            throw new IllegalArgumentException("Le nouveau mot de passe doit contenir au moins 8 caractères.");
+            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 8 caractères.");
         }
         utilisateur.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
 
@@ -77,10 +88,44 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             utilisateur.setServiceMedical(utilisateur.getServiceMedical());
         }
 
-        utilisateur.setRole(role); // Fixe le rôle final
+        if (photoProfil != null && !photoProfil.isEmpty()) {
+            String photoPath = fileStorageService.store(photoProfil, utilisateur.getId());
+            utilisateur.setPhotoProfilPath(photoPath);
+        }
 
+        utilisateur.setRole(role);
+        return utilisateurRepository.save(utilisateur);
+    }
+
+
+    @Override
+    @Transactional
+    public Utilisateur updatePhotoProfil(Long userId, MultipartFile photoProfil) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
+
+        if (photoProfil != null && !photoProfil.isEmpty()) {
+            if (utilisateur.getPhotoProfilPath() != null) {
+                fileStorageService.delete(utilisateur.getPhotoProfilPath());
+            }
+            String newPhotoPath = fileStorageService.store(photoProfil, userId);
+            utilisateur.setPhotoProfilPath(newPhotoPath);
+        }
 
         return utilisateurRepository.save(utilisateur);
+    }
+
+
+    @Transactional
+    @Override
+    public Resource getPhotoProfil(Long userId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
+
+        if (utilisateur.getPhotoProfilPath() == null) {
+            throw new RuntimeException("Aucune photo de profil pour cet utilisateur");
+        }
+        return fileStorageService.load(utilisateur.getPhotoProfilPath());
     }
 
 

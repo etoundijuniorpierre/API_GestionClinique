@@ -35,13 +35,13 @@ public class RendezVous extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false)
-    private StatutRDV statut;
+    private StatutRDV statut = StatutRDV.EN_ATTENTE;
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "service_medical", nullable = false) // Added column name
+    @Column(name = "service_medical", nullable = false)
     private ServiceMedical serviceMedical;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,12 +49,15 @@ public class RendezVous extends BaseEntity {
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medecin_id", nullable = false) // Changed from utilisateur_id for clarity
+    @JoinColumn(name = "medecin_id", nullable = false)
     private Utilisateur medecin;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "salle_id", nullable = false)
     private Salle salle;
+
+    @OneToOne(mappedBy = "rendezVous", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Facture facture;
 
     @OneToOne(mappedBy = "rendezVous", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Consultation consultation;

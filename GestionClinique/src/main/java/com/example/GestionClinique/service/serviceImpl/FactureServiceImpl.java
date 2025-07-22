@@ -4,9 +4,11 @@ package com.example.GestionClinique.service.serviceImpl;
 import com.example.GestionClinique.model.entity.Consultation;
 import com.example.GestionClinique.model.entity.Facture;
 import com.example.GestionClinique.model.entity.Patient; // Need to import Patient entity
+import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.enumElem.ModePaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import com.example.GestionClinique.repository.ConsultationRepository;
+import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.FactureRepository;
 import com.example.GestionClinique.service.FactureService;
 import com.itextpdf.io.source.ByteArrayOutputStream;
@@ -23,7 +25,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -32,27 +34,51 @@ import java.util.List;
 public class FactureServiceImpl implements FactureService {
 
     private final FactureRepository factureRepository;
-    private final ConsultationRepository consultationRepository; // To fetch Consultation
+    private final RendezVousRepository rendezVousRepository; // To fetch rendezVous
+    private final ConsultationRepository consultationRepository;
 
     @Autowired
-    public FactureServiceImpl(FactureRepository factureRepository, ConsultationRepository consultationRepository) {
+    public FactureServiceImpl(FactureRepository factureRepository, RendezVousRepository rendezVousRepository, ConsultationRepository consultationRepository) {
         this.factureRepository = factureRepository;
+        this.rendezVousRepository = rendezVousRepository;
         this.consultationRepository = consultationRepository;
     }
 
-    /**
-     * Generates and saves a new invoice for a given consultation.
-     * This is the method intended to be called by ConsultationService.
-     *
-     * @param consultationId The ID of the consultation for which to generate the invoice.
-     * @param modePaiement   The mode of payment for the invoice.
-     */
+
+    public void generateInvoiceForRendesVous(Long rendezVousId) {
+        RendezVous rendezVous = rendezVousRepository.findById(rendezVousId)
+                .orElseThrow(() -> new IllegalArgumentException("rendezVous not found with ID: " + rendezVousId));
+
+        if (factureRepository.findByRendezVousId(rendezVousId).isPresent()) {
+            throw new RuntimeException("A facture already exists for Consultation with ID: " + rendezVousId);
+        }
+
+        Facture facture = new Facture();
+        facture.setRendezVous(rendezVous);
+        if (rendezVous.getPatient()  != null) {
+            facture.setPatient(rendezVous.getPatient());
+        } else {
+            System.out.println("Warning: Creating invoice for rendezVous ID " + rendezVousId + " without an associated patient.");
+            facture.setPatient(null);
+        }
+
+        facture.setDateEmission(LocalDateTime.now());
+        facture.setStatutPaiement(StatutPaiement.IMPAYEE);
+        facture.setModePaiement(ModePaiement.ESPECES);
+        facture.setMontant(rendezVous.getMedecin().getServiceMedical().getMontant());
+
+        Facture savedFacture = factureRepository.save(facture);
+
+        rendezVous.setFacture(savedFacture);
+        rendezVousRepository.save(rendezVous);
+
+    }
+
     @Override
-    public Facture generateInvoiceForConsultation(Long consultationId, ModePaiement modePaiement) {
+    public void generateInvoiceForConsultation(Long consultationId) {
         Consultation consultation = consultationRepository.findById(consultationId)
                 .orElseThrow(() -> new IllegalArgumentException("Consultation not found with ID: " + consultationId));
 
-        // Check if a facture already exists for this consultation to prevent duplicates
         if (factureRepository.findByConsultationId(consultationId).isPresent()) {
             throw new RuntimeException("A facture already exists for Consultation with ID: " + consultationId);
         }
@@ -67,9 +93,9 @@ public class FactureServiceImpl implements FactureService {
             facture.setPatient(null); // Explicitly set to null if no patient
         }
 
-        facture.setDateEmission(LocalDate.now());
-        facture.setStatutPaiement(StatutPaiement.IMPAYE);
-        facture.setModePaiement(modePaiement);
+        facture.setDateEmission(LocalDateTime.now());
+        facture.setStatutPaiement(StatutPaiement.IMPAYEE);
+        facture.setModePaiement(ModePaiement.ESPECES);
         facture.setMontant(consultation.getMedecin().getServiceMedical().getMontant());
 
         Facture savedFacture = factureRepository.save(facture);
@@ -77,7 +103,6 @@ public class FactureServiceImpl implements FactureService {
         consultation.setFacture(savedFacture);
         consultationRepository.save(consultation);
 
-        return savedFacture;
     }
 
 
@@ -113,6 +138,11 @@ public class FactureServiceImpl implements FactureService {
     }
 
     @Override
+    public List<Facture> findAllFacturesIMPAYE() {
+        return findFacturesByStatut(StatutPaiement.IMPAYEE);
+    }
+
+    @Override
     @Transactional
     public Facture findById(Long id) {
         return factureRepository.findById(id)
@@ -124,12 +154,11 @@ public class FactureServiceImpl implements FactureService {
     public void deleteFacture(Long id) {
         Facture facture = factureRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + id));
-
-        // Disassociate facture from consultation before deleting (bi-directional link)
-        if (facture.getConsultation() != null) {
-            Consultation consultation = facture.getConsultation();
-            consultation.setFacture(null);
-            consultationRepository.save(consultation);
+        // Disassociate facture from rendezVous before deleting (bi-directional link)
+        if (facture.getRendezVous() != null) {
+            RendezVous rendezVous = facture.getRendezVous();
+            rendezVous.setFacture(null);
+            rendezVousRepository.save(rendezVous);
         }
 
         factureRepository.delete(facture);
@@ -146,27 +175,27 @@ public class FactureServiceImpl implements FactureService {
         return facture.getPatient();
     }
 
-    @Override
-    public Facture updateStatutPaiement(Long factureId, StatutPaiement nouveauStatut) {
-        Facture facture = factureRepository.findById(factureId)
-                .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + factureId));
-        facture.setStatutPaiement(nouveauStatut);
-        return factureRepository.save(facture);
-    }
+//    @Override
+//    public Facture updateStatutPaiement(Long factureId, StatutPaiement nouveauStatut) {
+//        Facture facture = factureRepository.findById(factureId)
+//                .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + factureId));
+//        facture.setStatutPaiement(nouveauStatut);
+//        return factureRepository.save(facture);
+//    }
 
 
 
     @Override
-    public Facture payerFacture(Long factureId) {
+    public Facture payerFacture(Long factureId, ModePaiement modePaiement) {
         Facture facture = factureRepository.findById(factureId)
                 .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + factureId));
 
-        if (facture.getStatutPaiement() == StatutPaiement.PAYE) {
+        if (facture.getStatutPaiement() == StatutPaiement.PAYEE) {
             throw new IllegalArgumentException("Facture with ID: " + factureId + " is already marked as PAID.");
         }
-        facture.setModePaiement(ModePaiement.ESPECES);
-
-        facture.setStatutPaiement(StatutPaiement.PAYE);
+        facture.setModePaiement(modePaiement);
+        facture.setStatutPaiement(StatutPaiement.PAYEE);
+        facture.setDateEmission(LocalDateTime.now());
         return factureRepository.save(facture);
     }
 
@@ -207,13 +236,13 @@ public class FactureServiceImpl implements FactureService {
                 document.add(new Paragraph("Patient: ").add(new Text("Non spécifié (Urgence)")));
             }
 
-            if (facture.getConsultation() != null) {
-                document.add(new Paragraph("Consultation ID: ").add(new Text(facture.getConsultation().getId().toString())));
-                if (facture.getConsultation().getMedecin() != null) {
-                    document.add(new Paragraph("Médecin: ").add(new Text(facture.getConsultation().getMedecin().getNom() + " " + facture.getConsultation().getMedecin().getPrenom())));
+            if (facture.getRendezVous() != null) {
+                document.add(new Paragraph("rendezVous ID: ").add(new Text(facture.getRendezVous().getId().toString())));
+                if (facture.getRendezVous().getMedecin() != null) {
+                    document.add(new Paragraph("Médecin: ").add(new Text(facture.getRendezVous().getMedecin().getNom() + " " + facture.getRendezVous().getMedecin().getPrenom())));
                 }
-                if (facture.getConsultation().getMotifs() != null) {
-                    document.add(new Paragraph("Motif Consultation: ").add(new Text(facture.getConsultation().getMotifs())));
+                if (facture.getRendezVous().getConsultation().getMotifs() != null) {
+                    document.add(new Paragraph("Motif rendezVous: ").add(new Text(facture.getRendezVous().getConsultation().getMotifs())));
                 }
             }
 

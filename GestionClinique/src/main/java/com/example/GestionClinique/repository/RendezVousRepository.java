@@ -80,4 +80,14 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
     List<RendezVous> findRendezVousByMedecinStatusCONFIRMEForThisDay(
             @Param("medecinId") Long medecinId, // Changement ici: type de paramètre
             @Param("today") LocalDate today);
+
+
+    @Query("SELECT COUNT(r) FROM RendezVous r WHERE r.jour = :date AND r.statut = :statut")
+    Long countByJourAndStatut(@Param("date") LocalDate date, @Param("statut") StatutRDV statut);
+
+    @Query("SELECT COUNT(r) FROM RendezVous r WHERE YEAR(r.jour) = :year AND MONTH(r.jour) = :month AND r.statut = :statut")
+    Long countByMoisAndStatut(@Param("year") int year, @Param("month") int month, @Param("statut") StatutRDV statut);
+
+    @Query("SELECT COUNT(r) FROM RendezVous r WHERE YEAR(r.jour) = :year AND r.statut = :statut")
+    Long countByAnneeAndStatut(@Param("year") int year, @Param("statut") StatutRDV statut);
 }

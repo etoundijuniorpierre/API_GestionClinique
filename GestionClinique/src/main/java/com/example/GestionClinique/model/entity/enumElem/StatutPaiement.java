@@ -1,8 +1,8 @@
 package com.example.GestionClinique.model.entity.enumElem;
 
 public enum StatutPaiement {
-    PAYE,
-    IMPAYE,
+    PAYEE,
+    IMPAYEE,
     EN_RETARD,
-    ANNULE
+    ANNULEE
 }

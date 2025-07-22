@@ -12,13 +12,13 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RendezVousResponseDto extends BaseResponseDto {
+    private Long patientId;
+    private String patientNomComplet;
     private LocalDate jour;
     private LocalTime heure;
     private StatutRDV statut;
     private String notes;
     private ServiceMedical serviceMedical;
-    private Long patientId;
-    private String patientNomComplet;
     private Long medecinId;
     private String medecinNomComplet;
     private Long salleId;
