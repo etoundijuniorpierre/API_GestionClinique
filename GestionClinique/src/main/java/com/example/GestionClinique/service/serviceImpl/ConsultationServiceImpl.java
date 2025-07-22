@@ -1,6 +1,7 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.*;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
@@ -30,6 +31,8 @@ public class ConsultationServiceImpl implements ConsultationService {
     private final SalleRepository salleRepository;
     private final FactureService factureService;
     private final HistoriqueActionService historiqueActionService;
+    private final LoggingAspect loggingAspect;
+
 
 
     // This is for EMERGENCY consultations (no RendezVous)
@@ -62,7 +65,13 @@ public class ConsultationServiceImpl implements ConsultationService {
         }
 
         Consultation savedConsultation = consultationRepository.save(consultation);
+        historiqueActionService.enregistrerAction(
+                String.format("Création consultation d'urgence ID: %d par médecin ID: %d",
+                        savedConsultation.getId(), medecinId),
+                loggingAspect.currentUserId()
+        );
         factureService.generateInvoiceForConsultation(savedConsultation.getId());
+
         return savedConsultation;
     }
 
@@ -126,6 +135,12 @@ public class ConsultationServiceImpl implements ConsultationService {
         salleRepository.save(salle);
         rendezVousRepository.save(rendezVous);
 
+        historiqueActionService.enregistrerAction(
+                String.format("Début consultation ID: %d pour rendez-vous ID: %d",
+                        newConsultation.getId(), rendezVousId),
+                loggingAspect.currentUserId()
+        );
+
         return newConsultation;
     }
 
@@ -145,6 +160,11 @@ public class ConsultationServiceImpl implements ConsultationService {
         existingConsultation.setTaille(consultationDetails.getTaille());
         existingConsultation.setCompteRendu(consultationDetails.getCompteRendu());
         existingConsultation.setDiagnostic(consultationDetails.getDiagnostic());
+
+        historiqueActionService.enregistrerAction(
+                String.format("Mise à jour consultation ID: %d", id),
+                loggingAspect.currentUserId()
+        );
 
         return consultationRepository.save(existingConsultation);
     }
@@ -199,6 +219,12 @@ public class ConsultationServiceImpl implements ConsultationService {
             rendezVous.setConsultation(null); // Unlink
             rendezVousRepository.save(rendezVous);
         }
+
+        historiqueActionService.enregistrerAction(
+                String.format("Suppression consultation ID: %d", id),
+                loggingAspect.currentUserId()
+        );
+
         consultationRepository.delete(consultation);
     }
 
@@ -217,6 +243,11 @@ public class ConsultationServiceImpl implements ConsultationService {
         prescription.setMedecin(consultation.getMedecin()); // Doctor who made the consultation
         prescription.setPatient(consultation.getDossierMedical().getPatient());
         prescription.setDossierMedical(consultation.getDossierMedical());
+
+        historiqueActionService.enregistrerAction(
+                String.format("ajout prescription à la consultation avec l' ID: %d", consultationId),
+                loggingAspect.currentUserId()
+        );
 
         return prescriptionRepository.save(prescription);
     }

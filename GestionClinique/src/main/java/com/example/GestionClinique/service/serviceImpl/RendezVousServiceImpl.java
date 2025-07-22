@@ -1,6 +1,6 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.model.entity.Patient;
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;
@@ -10,9 +10,10 @@ import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.SalleRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.FactureService;
+import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.RendezVousService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
+@AllArgsConstructor
 public class RendezVousServiceImpl implements RendezVousService {
 
     private final RendezVousRepository rendezVousRepository;
@@ -31,18 +32,9 @@ public class RendezVousServiceImpl implements RendezVousService {
     private final UtilisateurRepository utilisateurRepository; // For doctors
     private final SalleRepository salleRepository;
     private final FactureService factureService;
+    private final HistoriqueActionService historiqueActionService;
+    private final LoggingAspect loggingAspect;
 
-    @Autowired
-    public RendezVousServiceImpl(RendezVousRepository rendezVousRepository,
-                                 PatientRepository patientRepository,
-                                 UtilisateurRepository utilisateurRepository,
-                                 SalleRepository salleRepository, FactureService factureService) {
-        this.rendezVousRepository = rendezVousRepository;
-        this.patientRepository = patientRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.salleRepository = salleRepository;
-        this.factureService = factureService;
-    }
 
     @Override
     @Transactional
@@ -62,6 +54,13 @@ public class RendezVousServiceImpl implements RendezVousService {
 
         RendezVous saveRendezVous = rendezVousRepository.save(rendezVous);
         factureService.generateInvoiceForRendesVous(saveRendezVous.getId());
+
+        historiqueActionService.enregistrerAction(
+                String.format("Création RDV ID: %d pour patient ID: %d",
+                        saveRendezVous.getId(), saveRendezVous.getPatient().getId()),
+                loggingAspect.currentUserId()
+        );
+
         return saveRendezVous;
     }
 
@@ -118,6 +117,11 @@ public class RendezVousServiceImpl implements RendezVousService {
             throw new ConcurrentModificationException("Le créneau horaire est déjà pris pour ce médecin ou cette salle");
         }
 
+        historiqueActionService.enregistrerAction(
+                String.format("Mise à jour prescription ID: %d", id),
+                loggingAspect.currentUserId()
+        );
+
         return rendezVousRepository.save(existingRendezVous);
     }
 
@@ -134,6 +138,10 @@ public class RendezVousServiceImpl implements RendezVousService {
         if (rendezVous.getJour().isBefore(LocalDate.now())) {
             throw new IllegalStateException("Cannot delete a past rendez-vous. Consider cancelling or archiving instead.");
         }
+        historiqueActionService.enregistrerAction(
+                String.format("Suppression rendezVous ID: %d", id),
+                loggingAspect.currentUserId()
+        );
         rendezVousRepository.delete(rendezVous);
     }
 
@@ -205,7 +213,14 @@ public class RendezVousServiceImpl implements RendezVousService {
         }
 
         rendezVous.setStatut(StatutRDV.ANNULE);
-        return rendezVousRepository.save(rendezVous);
+        RendezVous updatedRendezVous = rendezVousRepository.save(rendezVous);
+
+        historiqueActionService.enregistrerAction(
+                String.format("Annulation RDV ID: %d", rendezVousId),
+                loggingAspect.currentUserId()
+        );
+
+        return updatedRendezVous;
     }
 
 

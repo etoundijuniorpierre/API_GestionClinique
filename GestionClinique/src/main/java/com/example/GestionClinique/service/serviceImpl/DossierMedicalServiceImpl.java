@@ -1,6 +1,7 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.DossierMedical;
 import com.example.GestionClinique.model.entity.Patient;
 
@@ -9,26 +10,24 @@ import com.example.GestionClinique.repository.PatientRepository;
 
 import com.example.GestionClinique.service.DossierMedicalService;
 
+import com.example.GestionClinique.service.HistoriqueActionService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 
 @Service
-@Transactional
+@AllArgsConstructor
 public class DossierMedicalServiceImpl implements DossierMedicalService {
 
     private final DossierMedicalRepository dossierMedicalRepository;
     private final PatientRepository patientRepository;
-    // Inject PatientRepository
+    private final HistoriqueActionService historiqueActionService;
+    private final LoggingAspect loggingAspect;
 
-    @Autowired
-    public DossierMedicalServiceImpl(DossierMedicalRepository dossierMedicalRepository, PatientRepository patientRepository) {
-        this.dossierMedicalRepository = dossierMedicalRepository;
-        this.patientRepository = patientRepository;
-    }
+
 
     @Override
     public DossierMedical createDossierMedicalForPatient(Long patientId, DossierMedical dossierMedical) {
@@ -49,7 +48,11 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         patient.setDossierMedical(savedDossier);
         patientRepository.save(patient); // Save updated patient
 
-
+        historiqueActionService.enregistrerAction(
+                String.format("Création dossier médical ID: %d pour patient ID: %d",
+                        savedDossier.getId(), patientId),
+                loggingAspect.currentUserId()
+        );
 
         return savedDossier;
     }
@@ -66,6 +69,10 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         existingDossier.setTraitementsEnCours(dossierMedicalDetails.getTraitementsEnCours());
         existingDossier.setObservations(dossierMedicalDetails.getObservations());
 
+        historiqueActionService.enregistrerAction(
+                String.format("Mise à jour dossier médical ID: %d", id),
+                loggingAspect.currentUserId()
+        );
 
         return dossierMedicalRepository.save(existingDossier);
     }
@@ -101,6 +108,12 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
             patient.setDossierMedical(null); // Unlink the dossier from the patient
             patientRepository.save(patient); // Save the updated patient
         }
+
+        historiqueActionService.enregistrerAction(
+                String.format("Suppression dossier médical ID: %d", id),
+                loggingAspect.currentUserId()
+        );
+
         dossierMedicalRepository.delete(dossierMedical);
     }
 

@@ -6,8 +6,10 @@ import com.example.GestionClinique.model.entity.stats.StatMoisEncours;
 import com.example.GestionClinique.model.entity.stats.StatsSurLannee;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.*;
+import com.example.GestionClinique.service.HistoriqueActionService;
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.service.StatService;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,35 +20,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class StatServiceImpl implements StatService {
 
     private final StatDuJourRepository statDuJourRepository;
     private final StatMoisDernierRepository statMoisDernierRepository;
     private final StatMoisEncoursRepository statMoisEncoursRepository;
     private final StatsSurLanneeRepository statsSurLanneeRepository;
-
+    private final HistoriqueActionService historiqueActionService;
     private final RendezVousRepository rendezVousRepository;
     private final PatientRepository patientRepository;
     private final ConsultationRepository consultationRepository;
     private final FactureRepository factureRepository;
-
-    public StatServiceImpl(StatDuJourRepository statDuJourRepository,
-                           StatMoisDernierRepository statMoisDernierRepository,
-                           StatMoisEncoursRepository statMoisEncoursRepository,
-                           StatsSurLanneeRepository statsSurLanneeRepository,
-                           RendezVousRepository rendezVousRepository,
-                           PatientRepository patientRepository,
-                           ConsultationRepository consultationRepository,
-                           FactureRepository factureRepository) {
-        this.statDuJourRepository = statDuJourRepository;
-        this.statMoisDernierRepository = statMoisDernierRepository;
-        this.statMoisEncoursRepository = statMoisEncoursRepository;
-        this.statsSurLanneeRepository = statsSurLanneeRepository;
-        this.rendezVousRepository = rendezVousRepository;
-        this.patientRepository = patientRepository;
-        this.consultationRepository = consultationRepository;
-        this.factureRepository = factureRepository;
-    }
+    private final LoggingAspect loggingAspect;
 
     @Override
     @Transactional

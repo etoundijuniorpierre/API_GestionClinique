@@ -1,6 +1,7 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.Consultation;
 import com.example.GestionClinique.model.entity.Facture;
 import com.example.GestionClinique.model.entity.Patient; // Need to import Patient entity
@@ -11,6 +12,7 @@ import com.example.GestionClinique.repository.ConsultationRepository;
 import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.FactureRepository;
 import com.example.GestionClinique.service.FactureService;
+import com.example.GestionClinique.service.HistoriqueActionService;
 import com.itextpdf.io.source.ByteArrayOutputStream;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -22,7 +24,7 @@ import com.itextpdf.layout.element.Text;
 
 import com.itextpdf.layout.property.TextAlignment;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,19 +32,14 @@ import java.util.List;
 
 
 @Service
-@Transactional
+@AllArgsConstructor
 public class FactureServiceImpl implements FactureService {
 
     private final FactureRepository factureRepository;
     private final RendezVousRepository rendezVousRepository; // To fetch rendezVous
     private final ConsultationRepository consultationRepository;
-
-    @Autowired
-    public FactureServiceImpl(FactureRepository factureRepository, RendezVousRepository rendezVousRepository, ConsultationRepository consultationRepository) {
-        this.factureRepository = factureRepository;
-        this.rendezVousRepository = rendezVousRepository;
-        this.consultationRepository = consultationRepository;
-    }
+    private final LoggingAspect loggingAspect;
+    private final HistoriqueActionService historiqueActionService;
 
 
     public void generateInvoiceForRendesVous(Long rendezVousId) {
@@ -71,6 +68,12 @@ public class FactureServiceImpl implements FactureService {
 
         rendezVous.setFacture(savedFacture);
         rendezVousRepository.save(rendezVous);
+
+        historiqueActionService.enregistrerAction(
+                String.format("Génération facture ID: %d pour rendez-vous ID: %d",
+                        savedFacture.getId(), rendezVousId),
+                loggingAspect.currentUserId()
+        );
 
     }
 
@@ -103,6 +106,11 @@ public class FactureServiceImpl implements FactureService {
         consultation.setFacture(savedFacture);
         consultationRepository.save(consultation);
 
+        historiqueActionService.enregistrerAction(
+                String.format("Génération facture ID: %d pour rendez-vous ID: %d",
+                        savedFacture.getId(), consultationId),
+                loggingAspect.currentUserId()
+        );
     }
 
 
@@ -115,6 +123,11 @@ public class FactureServiceImpl implements FactureService {
         existingFacture.setDateEmission(factureDetails.getDateEmission());
         existingFacture.setStatutPaiement(factureDetails.getStatutPaiement());
         existingFacture.setModePaiement(factureDetails.getModePaiement());
+
+        historiqueActionService.enregistrerAction(
+                String.format("Mise à jour facture ID: %d", id),
+                loggingAspect.currentUserId()
+        );
 
         return factureRepository.save(existingFacture);
     }
@@ -161,6 +174,11 @@ public class FactureServiceImpl implements FactureService {
             rendezVousRepository.save(rendezVous);
         }
 
+        historiqueActionService.enregistrerAction(
+                String.format("Suppression facture ID: %d", id),
+                loggingAspect.currentUserId()
+        );
+
         factureRepository.delete(facture);
     }
 
@@ -196,6 +214,12 @@ public class FactureServiceImpl implements FactureService {
         facture.setModePaiement(modePaiement);
         facture.setStatutPaiement(StatutPaiement.PAYEE);
         facture.setDateEmission(LocalDateTime.now());
+        historiqueActionService.enregistrerAction(
+                String.format("Paiement facture ID: %d via %s",
+                        factureId, modePaiement.toString()),
+                loggingAspect.currentUserId()
+        );
+
         return factureRepository.save(facture);
     }
 
@@ -257,6 +281,12 @@ public class FactureServiceImpl implements FactureService {
                 document.close();
             }
         }
+
+        historiqueActionService.enregistrerAction(
+                String.format("gènèration PDF de la facture ID: %d", factureId),
+                loggingAspect.currentUserId()
+        );
+
         return baos.toByteArray();
     }
 }

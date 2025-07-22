@@ -1,12 +1,14 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.*;
 import com.example.GestionClinique.repository.*;
+import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.PrescriptionService;
 import com.itextpdf.layout.property.TextAlignment;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.itextpdf.io.source.ByteArrayOutputStream;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -19,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
-@Transactional
+@AllArgsConstructor
 public class PrescriptionServiceImpl implements PrescriptionService {
 
     private final PrescriptionRepository prescriptionRepository;
@@ -27,20 +29,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final UtilisateurRepository utilisateurRepository;
     private final PatientRepository patientRepository;
     private final DossierMedicalRepository dossierMedicalRepository;
-
-    @Autowired
-    public PrescriptionServiceImpl(PrescriptionRepository prescriptionRepository,
-                                   ConsultationRepository consultationRepository,
-                                   UtilisateurRepository utilisateurRepository,
-                                   PatientRepository patientRepository,
-                                   DossierMedicalRepository dossierMedicalRepository) {
-        this.prescriptionRepository = prescriptionRepository;
-        this.consultationRepository = consultationRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.patientRepository = patientRepository;
-        this.dossierMedicalRepository = dossierMedicalRepository;
-    }
-
+    private final HistoriqueActionService historiqueActionService;
+    private final LoggingAspect loggingAspect;
 
         @Override
         public Prescription addPrescription(Long consultationId, Prescription prescription) {
@@ -57,7 +47,15 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             prescription.setDossierMedical(consultation.getDossierMedical());
             prescription.setPatient(consultation.getDossierMedical().getPatient());
 
-        return prescriptionRepository.save(prescription);
+            Prescription savedPrescription = prescriptionRepository.save(prescription);
+
+            historiqueActionService.enregistrerAction(
+                    String.format("Ajout prescription ID: %d pour consultation ID: %d",
+                            savedPrescription.getId(), consultationId),
+                    loggingAspect.currentUserId()
+            );
+
+            return savedPrescription;
     }
 
     @Override
@@ -94,6 +92,11 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             existingPrescription.setDossierMedical(newDossierMedical);
         }
 
+        historiqueActionService.enregistrerAction(
+                String.format("Mise à jour prescription ID: %d", id),
+                loggingAspect.currentUserId()
+        );
+
         return prescriptionRepository.save(existingPrescription);
     }
 
@@ -114,7 +117,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     public void deletePrescription(Long id) {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found with ID: " + id));
-        // Add business logic checks if necessary, e.g., cannot delete if consultation is finalized.
+
+        historiqueActionService.enregistrerAction(
+                String.format("Suppression prescription ID: %d", id),
+                loggingAspect.currentUserId()
+        );
+
         prescriptionRepository.delete(prescription);
     }
 
@@ -229,6 +237,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 document.close();
             }
         }
+
+        historiqueActionService.enregistrerAction(
+                String.format("gènèration PDF de la facture ID: %d", prescriptionId),
+                loggingAspect.currentUserId()
+        );
+
         return baos.toByteArray();
     }
 }

@@ -2,6 +2,7 @@ package com.example.GestionClinique.service.authService;
 
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.repository.UtilisateurRepository;
+import com.example.GestionClinique.service.HistoriqueActionService;
 import jakarta.transaction.Transactional; // Use jakarta.transaction for @Transactional
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,9 +13,11 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final HistoriqueActionService historiqueActionService;
 
-    public UserDetailsServiceImpl(UtilisateurRepository utilisateurRepository) {
+    public UserDetailsServiceImpl(UtilisateurRepository utilisateurRepository, HistoriqueActionService historiqueActionService) {
         this.utilisateurRepository = utilisateurRepository;
+        this.historiqueActionService = historiqueActionService;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("Utilisateur avec l'email : " + email + " est désactivé.");
         }
 
-        return new MonUserDetailsCustom(
+        UserDetails userDetails = new MonUserDetailsCustom(
                 utilisateur.getId(),
                 utilisateur.getEmail(),
                 utilisateur.getPassword(),
@@ -38,5 +41,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 true, // accountNonLocked
                 utilisateur.getAuthorities()
         );
+
+        historiqueActionService.enregistrerAction(
+                "connexion avec l'Email : " + email, utilisateur.getId());
+
+        return userDetails;
     }
 }

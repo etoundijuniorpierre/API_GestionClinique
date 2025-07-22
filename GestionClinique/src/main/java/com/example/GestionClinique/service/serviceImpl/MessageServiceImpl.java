@@ -1,35 +1,28 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.Message;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.repository.MessageRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.MessageService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.List;
 
 @Service
-@Transactional
+@AllArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final HistoriqueActionService historiqueActionService;
+    private final LoggingAspect loggingAspect;
 
-    @Autowired
-    public MessageServiceImpl(MessageRepository messageRepository, UtilisateurRepository utilisateurRepository) {
-        this.messageRepository = messageRepository;
-        this.utilisateurRepository = utilisateurRepository;
-    }
 
     @Override
     public Message saveMessage(Message message, Long expediteurId, Long destinataireId) {
@@ -46,7 +39,18 @@ public class MessageServiceImpl implements MessageService {
         // Ensure 'lu' is false on creation by default unless specified otherwise in request
         message.setLu(false); // New messages are unread by default
 
-        return messageRepository.save(message);
+        Message savedMessage = messageRepository.save(message);
+
+        historiqueActionService.enregistrerAction(
+                String.format("Envoi message ID: %d à %s %s (ID: %d)",
+                        savedMessage.getId(),
+                        destinataire.getNom(),
+                        destinataire.getPrenom(),
+                        destinataireId),
+                loggingAspect.currentUserId()
+        );
+
+        return savedMessage;
     }
     // ... rest of the service methods remain the same as before ...
 
@@ -57,6 +61,11 @@ public class MessageServiceImpl implements MessageService {
 
         existingMessage.setContenu(messageDetails.getContenu());
         existingMessage.setLu(messageDetails.isLu());
+
+        historiqueActionService.enregistrerAction(
+                String.format("Suppression message ID: %d", id),
+                loggingAspect.currentUserId()
+        );
 
         return messageRepository.save(existingMessage);
     }

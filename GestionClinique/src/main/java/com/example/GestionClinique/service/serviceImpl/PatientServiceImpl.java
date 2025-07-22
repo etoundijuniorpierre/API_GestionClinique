@@ -1,29 +1,29 @@
 package com.example.GestionClinique.service.serviceImpl;
 
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.DossierMedical;
 import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.PatientRepository;
 import com.example.GestionClinique.repository.RendezVousRepository;
+import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.PatientService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
     private final RendezVousRepository rendezVousRepository;
+    private final HistoriqueActionService historiqueActionService;
+    private final LoggingAspect loggingAspect;
 
-    @Autowired
-    public PatientServiceImpl(PatientRepository patientRepository, RendezVousRepository rendezVousRepository) {
-        this.patientRepository = patientRepository;
-        this.rendezVousRepository = rendezVousRepository;
-    }
 
     @Transactional
     @Override
@@ -34,7 +34,15 @@ public class PatientServiceImpl implements PatientService {
         } else {
             throw new IllegalArgumentException("Dossier médical manquant pour la création du patient.");
         }
-        return patientRepository.save(patient);
+        Patient savedPatient = patientRepository.save(patient);
+
+        historiqueActionService.enregistrerAction(
+                String.format("Création patient ID: %d - %s %s",
+                        savedPatient.getId(), savedPatient.getNom(), savedPatient.getPrenom()),
+                loggingAspect.currentUserId()
+        );
+
+        return savedPatient;
     }
 
     @Transactional
@@ -55,6 +63,11 @@ public class PatientServiceImpl implements PatientService {
         existingPatient.setTelephone(patientDetails.getTelephone());
         existingPatient.setDateNaissance(patientDetails.getDateNaissance());
         existingPatient.setGenre(patientDetails.getGenre());
+
+        historiqueActionService.enregistrerAction(
+                String.format("Mise à jour patient ID: %d", id),
+                loggingAspect.currentUserId()
+        );
 
         return patientRepository.save(existingPatient);
     }
@@ -78,6 +91,13 @@ public class PatientServiceImpl implements PatientService {
     public void deletePatient(Long id) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + id));
+
+        historiqueActionService.enregistrerAction(
+                String.format("Suppression patient ID: %d - %s %s",
+                        patient.getId(), patient.getNom(), patient.getPrenom()),
+                loggingAspect.currentUserId()
+        );
+
         patientRepository.delete(patient);
     }
 

@@ -10,10 +10,11 @@ import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.RoleRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
+import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.UtilisateurService;
+import com.example.GestionClinique.service.authService.SecurityUtil;
 import com.example.GestionClinique.service.photoService.FileStorageService;
 import jakarta.annotation.PostConstruct;
-
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.core.io.Resource;
@@ -29,7 +30,6 @@ import static com.example.GestionClinique.model.entity.enumElem.RoleType.*;
 
 
 @Service
-@Transactional // Ensures atomicity for database operations
 public class UtilisateurServiceImpl implements UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
@@ -37,17 +37,21 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final PasswordEncoder passwordEncoder; // Inject PasswordEncoder
     private final RendezVousRepository rendezVousRepository;
     private final FileStorageService fileStorageService;
+    private final HistoriqueActionService historiqueActionService;
 
     public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository,
                                   RoleRepository roleRepository,
-                                  PasswordEncoder passwordEncoder, RendezVousRepository rendezVousRepository, FileStorageService fileStorageService) {
+                                  PasswordEncoder passwordEncoder, RendezVousRepository rendezVousRepository, FileStorageService fileStorageService, HistoriqueActionService historiqueActionService, SecurityUtil securityUtil) {
         this.utilisateurRepository = utilisateurRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.rendezVousRepository = rendezVousRepository;
         this.fileStorageService = fileStorageService;
+        this.historiqueActionService = historiqueActionService;
+        currentUserId = securityUtil.getCurrentAuthenticatedUserId();
     }
 
+    Long currentUserId;
 
     @PostConstruct
     public void init() {
@@ -94,7 +98,15 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         }
 
         utilisateur.setRole(role);
-        return utilisateurRepository.save(utilisateur);
+        Utilisateur savedUser = utilisateurRepository.save(utilisateur);
+
+        historiqueActionService.enregistrerAction(
+                String.format("Création d'un nouvel utilisateur: %s %s (ID: %d, Rôle: %s)",
+                        savedUser.getNom(), savedUser.getPrenom(), savedUser.getId(), savedUser.getRole().getRoleType()),
+                currentUserId
+        );
+
+        return savedUser;
     }
 
 
@@ -110,8 +122,12 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             }
             String newPhotoPath = fileStorageService.store(photoProfil, userId);
             utilisateur.setPhotoProfilPath(newPhotoPath);
-        }
 
+            historiqueActionService.enregistrerAction(
+                    String.format("Mise à jour de la photo de profil de l'utilisateur ID: %d", userId),
+                    currentUserId
+            );
+        }
         return utilisateurRepository.save(utilisateur);
     }
 
@@ -167,6 +183,12 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
             throw new IllegalArgumentException("Role cannot be null for a user.");
         }
+
+        historiqueActionService.enregistrerAction(
+                String.format("Mise à jour des informations de l'utilisateur ID: %d", id),
+                currentUserId
+        );
+
         return utilisateurRepository.save(existingUtilisateur);
     }
 
@@ -174,6 +196,13 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public void deleteUtilisateur(Long id) {
         Utilisateur utilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
+
+        historiqueActionService.enregistrerAction(
+                String.format("Suppression de l'utilisateur %s %s (ID: %d)",
+                        utilisateur.getNom(), utilisateur.getPrenom(), utilisateur.getId()),
+                currentUserId
+        );
+
         utilisateurRepository.delete(utilisateur);
     }
 
@@ -199,6 +228,13 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         Utilisateur existingUtilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
         existingUtilisateur.setActif(isActive);
+
+        historiqueActionService.enregistrerAction(
+                String.format("Changement de statut de l'utilisateur ID: %d à %s",
+                        id, isActive ? "ACTIF" : "INACTIF"),
+                currentUserId
+        );
+
         return utilisateurRepository.save(existingUtilisateur);
     }
 
@@ -267,6 +303,12 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         if (newPassword.length() < 8) {
             throw new IllegalArgumentException("Le nouveau mot de passe doit contenir au moins 8 caractères.");
         }
+
+        historiqueActionService.enregistrerAction(
+                "Changement de mot de passe effectué",
+                currentUserId
+        );
+
         utilisateur.setPassword(passwordEncoder.encode(newPassword));
         return utilisateurRepository.save(utilisateur);
     }
