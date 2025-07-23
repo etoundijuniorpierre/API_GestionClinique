@@ -77,18 +77,18 @@ public class SecurityConfig {
                         .requestMatchers("Api/V1/clinique/messages/**").permitAll()
                         // Permettre l'accès aux endpoints Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers(String.valueOf(PathItem.HttpMethod.POST), "Api/V1/clinique/utilisateur/createUtilisateur").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "Api/V1/clinique/utilisateur/createUtilisateur").hasRole("ADMIN")
-                        .anyRequest().authenticated() // Toutes les autres requêtes nécessitent une authentification
+                        .requestMatchers(String.valueOf(PathItem.HttpMethod.POST), "Api/V1/clinique/utilisateurs").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "Api/V1/clinique/utilisateurs").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Utilisation de JWTs rend la session STATELESS
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authenticationProvider(authenticationProvider()) // Utilise notre AuthenticationProvider
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)// Ajoute notre filtre JWT
-                .logout(logout -> logout // Configure logout
-                .logoutUrl("Api/V1/clinique/logout") // The URL that triggers logout (same as AuthController)
-                .addLogoutHandler(customLogoutHandler) // Add your custom logout handler
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                .logoutUrl("Api/V1/clinique/logout")
+                .addLogoutHandler(customLogoutHandler)
                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()) // Clears context on successful logout
         );
 

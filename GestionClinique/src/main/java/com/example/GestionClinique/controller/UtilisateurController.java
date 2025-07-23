@@ -67,7 +67,7 @@ public class UtilisateurController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
 public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
-        @RequestPart("utilisateur") UtilisateurRequestDto utilisateurDto,
+        @RequestPart("utilisateurs") UtilisateurRequestDto utilisateurDto,
         @RequestPart(value = "photoProfil", required = false) MultipartFile photoProfil) {
 
     Utilisateur utilisateur = utilisateurMapper.toEntity(utilisateurDto);
