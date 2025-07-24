@@ -103,7 +103,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true); // Permet les credentials (cookies, headers d'autorisation)
         config.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "http://127.0.0.1:*")); // Ou votre domaine frontend exact
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Les headers autorisés
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Les méthodes HTTP autorisées
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // Les méthodes HTTP autorisées
         source.registerCorsConfiguration("/**", config); // Applique cette configuration à tous les chemins
         return source;
     }
