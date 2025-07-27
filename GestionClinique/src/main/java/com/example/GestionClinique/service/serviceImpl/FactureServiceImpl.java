@@ -1,6 +1,7 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
+import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.Consultation;
 import com.example.GestionClinique.model.entity.Facture;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.example.GestionClinique.model.entity.enumElem.StatutPaiement.PAYEE;
 
 
 @Service
@@ -208,19 +211,28 @@ public class FactureServiceImpl implements FactureService {
         Facture facture = factureRepository.findById(factureId)
                 .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + factureId));
 
-        if (facture.getStatutPaiement() == StatutPaiement.PAYEE) {
+        if (facture.getStatutPaiement() == PAYEE) {
             throw new IllegalArgumentException("Facture with ID: " + factureId + " is already marked as PAID.");
         }
         facture.setModePaiement(modePaiement);
-        facture.setStatutPaiement(StatutPaiement.PAYEE);
+        facture.setStatutPaiement(PAYEE);
         facture.setDateEmission(LocalDateTime.now());
+        factureRepository.save(facture);
+
+        if (facture.getRendezVous() != null) {
+            RendezVous rendezVous = rendezVousRepository.findById(facture.getRendezVous().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("rendezVous not found with ID: " + facture.getRendezVous().getId()));
+            rendezVous.setStatut(StatutRDV.CONFIRME);
+            rendezVousRepository.save(rendezVous);
+        }
+
         historiqueActionService.enregistrerAction(
                 String.format("Paiement facture ID: %d via %s",
                         factureId, modePaiement.toString()),
                 loggingAspect.currentUserId()
         );
 
-        return factureRepository.save(facture);
+        return facture;
     }
 
 

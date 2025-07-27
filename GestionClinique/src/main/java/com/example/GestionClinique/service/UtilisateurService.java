@@ -3,12 +3,14 @@ package com.example.GestionClinique.service;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import com.example.GestionClinique.model.entity.RendezVous;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
-import jakarta.transaction.Transactional;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 
@@ -30,7 +32,7 @@ public interface UtilisateurService {
     Utilisateur updateUtilisateurStatus(Long id, boolean isActive);
     List<RendezVous> findRendezVousByMedecinSearchTerm(String medecinSearchTerm);
     List<RendezVous> findRendezVousForMedecinByStatus(String medecinName, StatutRDV statut);
-    List<RendezVous> findRendezVousCONFIRMEThisDay(Long medecinId);
+    List<RendezVous> findConfirmedRendezVousForMedecinAndDate(Long medecinId, LocalDate date);
     List<Utilisateur> searchUsers(String searchTerm);
     List<Utilisateur> findUsersWithStatusConnected();
     List<Utilisateur> findUsersWithStatusDisconnected();
@@ -41,4 +43,7 @@ public interface UtilisateurService {
     Utilisateur updatePassword(Long utilisateurId, String newPassword, String confirmPassword);
     List<Utilisateur> findUsersWithStatusConnectedByOrderLastConnected();
     List<Utilisateur> findUsersWithStatusDisconnectedByOrderLastDeConnected();
+
+    List<Utilisateur> getMedecinsByServiceMedical(ServiceMedical serviceMedical);
+    List<Utilisateur> getAvailableMedecinsByServiceAndTime(ServiceMedical serviceMedical, LocalDate date, LocalTime heure);
 }

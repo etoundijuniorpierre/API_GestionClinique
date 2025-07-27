@@ -5,6 +5,7 @@ import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Role;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.RendezVousRepository;
@@ -19,8 +20,6 @@ import com.example.GestionClinique.service.photoService.FileStorageServiceImpl;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 import static com.example.GestionClinique.model.entity.enumElem.RoleType.*;
@@ -250,9 +250,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public List<RendezVous> findRendezVousCONFIRMEThisDay(Long medecinId) {
-        LocalDate today = LocalDate.now();
-        return rendezVousRepository.findRendezVousByMedecinStatusCONFIRMEForThisDay(medecinId, today);
+    public List<RendezVous> findConfirmedRendezVousForMedecinAndDate(Long medecinId, LocalDate date) {
+        LocalDate PresentDate = LocalDate.now();
+        return rendezVousRepository.findConfirmedRendezVousForMedecinAndDate(medecinId, PresentDate);
     }
 
     @Transactional
@@ -321,5 +321,19 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public List<Utilisateur> findUsersWithStatusDisconnectedByOrderLastDeConnected() {
         return utilisateurRepository.findByStatusConnectOrderByLastLogoutDateDesc(StatusConnect.DECONNECTE);
+    }
+
+
+    public List<Utilisateur> getMedecinsByServiceMedical(ServiceMedical serviceMedical) {
+        return utilisateurRepository.findByServiceMedical(serviceMedical);
+    }
+
+    // 2. Liste des médecins disponibles par service à une heure précise
+    public List<Utilisateur> getAvailableMedecinsByServiceAndTime(
+            ServiceMedical serviceMedical,
+            LocalDate date,
+            LocalTime heure) {
+        return utilisateurRepository.findMedecinsByServiceMedicalWithoutRendezVousAt(
+                serviceMedical, date, heure);
     }
 }

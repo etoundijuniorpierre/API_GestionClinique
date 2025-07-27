@@ -38,7 +38,7 @@ public class Facture extends BaseEntity {
     private Patient patient;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consultation_id")
+    @JoinColumn(name = "consultation_id", nullable = true)
     private Consultation consultation;
 
     @OneToOne(fetch = FetchType.LAZY)

@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Console;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ConcurrentModificationException;
@@ -39,13 +40,24 @@ public class RendezVousServiceImpl implements RendezVousService {
     @Override
     @Transactional
     public RendezVous createRendezVous(RendezVous rendezVous) {
-        if (!isRendezVousAvailable(rendezVous.getJour(), rendezVous.getHeure(), rendezVous.getMedecin().getId(), rendezVous.getSalle().getId())) {
-            throw new RuntimeException("Le créneau horaire est déjà pris pour ce médecin ou cette salle.");
-        }
-
-        if (rendezVous.getServiceMedical()!=null) {
+        // Définir la salle en premier si serviceMedical est spécifié
+        if (rendezVous.getServiceMedical() != null) {
             Salle salle = salleRepository.findByServiceMedical(rendezVous.getServiceMedical());
             rendezVous.setSalle(salle);
+        }
+
+        // Vérifier que la salle est bien définie
+        if (rendezVous.getSalle() == null) {
+            throw new IllegalArgumentException("La salle doit être spécifiée directement ou via le service médical");
+        }
+
+        // Maintenant vérifier la disponibilité
+        if (!isRendezVousAvailable(
+                rendezVous.getJour(),
+                rendezVous.getHeure(),
+                rendezVous.getMedecin().getId(),
+                rendezVous.getSalle().getId())) {
+            throw new RuntimeException("Le créneau horaire est déjà pris pour ce médecin ou cette salle.");
         }
 
         if (rendezVous.getStatut() == null) {

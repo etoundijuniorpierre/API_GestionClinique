@@ -10,6 +10,7 @@ import com.example.GestionClinique.mapper.UtilisateurMapper;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.service.UtilisateurService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
@@ -74,23 +78,6 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 
 }
 
-    @PutMapping(value = "/{userId}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UtilisateurResponseDto> updatePhotoProfil(
-            @PathVariable Long userId,
-            @RequestParam("photoProfil") MultipartFile photoProfil) {
-
-        Utilisateur updatedUtilisateur = utilisateurService.updatePhotoProfil(userId, photoProfil);
-        return ResponseEntity.ok(utilisateurMapper.toDto(updatedUtilisateur));
-    }
-
-    @GetMapping("/{userId}/photo")
-    public ResponseEntity<Resource> getPhotoProfil(@PathVariable Long userId) {
-        Resource photo = utilisateurService.getPhotoProfil(userId);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(photo);
-    }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE')")
     @GetMapping(path = "/{idUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /{id}
@@ -312,7 +299,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
-    @GetMapping("/rendezvous/medecin/{medecinId}/confirmed/today")
+    @GetMapping("/{medecinId}/rendez-vous/confirmed/{date}")
     @Operation(summary = "Récupérer les rendez-vous confirmés d'un médecin pour aujourd'hui",
             description = "Recherche les rendez-vous confirmés d'un médecin spécifique (par son ID) pour la date d'aujourd'hui. Accessible uniquement par les MEDECINS.")
     @ApiResponses(value = {
@@ -323,16 +310,19 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
             @ApiResponse(responseCode = "400", description = "ID du médecin invalide"),
             @ApiResponse(responseCode = "403", description = "Accès non autorisé (seul le médecin concerné ou un ADMIN peut accéder à ces informations)")
     })
-    public ResponseEntity<List<RendezVousResponseDto>> getConfirmedRendezVousForThisDayForMedecin(
-            @Parameter(description = "ID du médecin dont on veut les rendez-vous d'aujourd'hui", required = true, example = "2")
-            @PathVariable Long medecinId) {
-        List<RendezVous> rendezVousEntities = utilisateurService.findRendezVousCONFIRMEThisDay(medecinId);
-        List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
+    public ResponseEntity<List<RendezVousResponseDto>> getConfirmedRendezVousForMedecinAndDate(
+            @Parameter(description = "ID du médecin", required = true)
+            @PathVariable Long medecinId,
+            @Parameter(description = "Date au format YYYY-MM-DD", required = true, example = "2023-12-31")
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
-        if (rendezVousDtos.isEmpty()) {
+        List<RendezVous> rendezVous = utilisateurService.findConfirmedRendezVousForMedecinAndDate(medecinId, date);
+
+        if (rendezVous.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(rendezVousDtos);
+
+        return ResponseEntity.ok(rendezVousMapper.toDtoList(rendezVous));
     }
 
 
@@ -472,5 +462,88 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
             @PathVariable @Parameter(description = "ID du médecin") Long medecinId) {
         List<RendezVous> rendezVousList = utilisateurService.findAllRendezVousCONFIRMEByMedecin(medecinId);
         return ResponseEntity.ok(rendezVousMapper.toDtoList(rendezVousList));
+    }
+
+
+    @PutMapping(value = "/{userId}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Mettre à jour la photo de profil",
+            description = "Permet de mettre à jour la photo de profil d'un utilisateur")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Photo de profil mise à jour avec succès",
+                    content = @Content(schema = @Schema(implementation = UtilisateurResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Fichier photo invalide ou manquant"),
+            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé"),
+            @ApiResponse(responseCode = "500", description = "Erreur lors du traitement de l'image")
+    })
+    public ResponseEntity<UtilisateurResponseDto> updatePhotoProfil(
+            @Parameter(description = "ID de l'utilisateur", required = true)
+            @PathVariable Long userId,
+            @Parameter(description = "Fichier image de profil", required = true)
+            @RequestParam("photoProfil") MultipartFile photoProfil) {
+
+        Utilisateur updatedUtilisateur = utilisateurService.updatePhotoProfil(userId, photoProfil);
+        return ResponseEntity.ok(utilisateurMapper.toDto(updatedUtilisateur));
+    }
+
+    @GetMapping("/{userId}/photo")
+    @Operation(summary = "Récupérer la photo de profil",
+            description = "Récupère la photo de profil d'un utilisateur")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Photo de profil récupérée avec succès",
+                    content = @Content(mediaType = "image/jpeg")),
+            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé ou photo inexistante"),
+            @ApiResponse(responseCode = "500", description = "Erreur lors de la récupération de l'image")
+    })
+    public ResponseEntity<Resource> getPhotoProfil(
+            @Parameter(description = "ID de l'utilisateur", required = true)
+            @PathVariable Long userId) {
+        Resource photo = utilisateurService.getPhotoProfil(userId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(photo);
+    }
+
+
+    @GetMapping("/by-service/{serviceMedical}")
+    @Operation(summary = "Récupérer les médecins par service médical",
+            description = "Retourne la liste des médecins appartenant à un service médical spécifique")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des médecins récupérée avec succès",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = UtilisateurResponseDto.class)))),
+            @ApiResponse(responseCode = "204", description = "Aucun médecin trouvé pour ce service"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<UtilisateurResponseDto>> getMedecinsByService(
+            @Parameter(description = "Service médical à filtrer", required = true)
+            @PathVariable ServiceMedical serviceMedical) {
+        List<Utilisateur> medecins = utilisateurService.getMedecinsByServiceMedical(serviceMedical);
+        return ResponseEntity.ok(utilisateurMapper.toDtoList(medecins));
+    }
+
+
+    @GetMapping("/available/{serviceMedical}")
+    @Operation(summary = "Rechercher des médecins disponibles",
+            description = "Retourne la liste des médecins disponibles pour un service, date et heure donnés")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des médecins disponibles",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = UtilisateurResponseDto.class)))),
+            @ApiResponse(responseCode = "204", description = "Aucun médecin disponible pour ces critères"),
+            @ApiResponse(responseCode = "400", description = "Paramètres de date/heure invalides"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    public ResponseEntity<List<UtilisateurResponseDto>> getAvailableMedecins(
+            @Parameter(description = "Service médical recherché", required = true)
+            @PathVariable ServiceMedical serviceMedical,
+            @Parameter(description = "Date du rendez-vous (format ISO: yyyy-MM-dd)", required = true,
+                    example = "2025-06-28", schema = @Schema(type = "string", format = "date"))
+            @RequestParam("jour") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @Parameter(description = "Heure du rendez-vous (format ISO: HH:mm:ss)", required = true,
+                    example = "14:30:00", schema = @Schema(type = "string", format = "time"))
+            @RequestParam("heure") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heure) {
+
+        List<Utilisateur> medecins = utilisateurService.getAvailableMedecinsByServiceAndTime(
+                serviceMedical, date, heure);
+
+        return ResponseEntity.ok(utilisateurMapper.toDtoList(medecins));
     }
 }

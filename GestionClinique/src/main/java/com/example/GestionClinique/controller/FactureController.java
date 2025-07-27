@@ -159,8 +159,8 @@ public class FactureController {
 
     @PreAuthorize("hasAnyRole('SECRETAIRE')")
     @GetMapping(path = "/statut/impayee", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Filtrer les factures par statut de paiement",
-            description = "Récupère les factures selon leur statut de paiement (PAYE, IMPAYE, EN_RETARD, etc.).")
+    @Operation(summary = "afficher les factures impayées",
+            description = "Récupère les factures si impayées.")
     @ApiResponses(value = {
             @ApiResponse(description = "Factures filtrées récupérées avec succès",
                     content = @Content(schema = @Schema(implementation = FactureResponseDto.class))),
@@ -285,7 +285,7 @@ public class FactureController {
 
 
 @PreAuthorize("hasAnyRole('SECRETAIRE')")
-    @PatchMapping(path = "/payer/{factureId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(path = "/payer/{factureId}/{modePaiement}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Marquer une facture comme payée",
             description = "Met à jour le statut d'une facture IMPAYEE à PAYEE.")
     @ApiResponses(value = {

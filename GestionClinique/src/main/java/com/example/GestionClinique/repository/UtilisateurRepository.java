@@ -2,12 +2,15 @@ package com.example.GestionClinique.repository;
 
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,4 +36,17 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     List<Utilisateur> findByStatusConnectOrderByLastLoginDateDesc(StatusConnect status);
     List<Utilisateur> findByStatusConnectOrderByLastLogoutDateDesc(StatusConnect status);
+
+    List<Utilisateur> findByServiceMedical(ServiceMedical serviceMedical);
+
+    @Query("SELECT u FROM Utilisateur u WHERE " +
+            "u.serviceMedical = :serviceMedical " +
+            "AND u.role.roleType = com.example.GestionClinique.model.entity.enumElem.RoleType.MEDECIN " +
+            "AND NOT EXISTS (SELECT r FROM RendezVous r " +
+            "WHERE r.medecin = u AND r.statut = com.example.GestionClinique.model.entity.enumElem.StatutRDV.CONFIRME " +
+            "AND r.jour = :date AND r.heure = :heure)")
+    List<Utilisateur> findMedecinsByServiceMedicalWithoutRendezVousAt(
+            @Param("serviceMedical") ServiceMedical serviceMedical,
+            @Param("date") LocalDate date,
+            @Param("heure") LocalTime heure);
 }
