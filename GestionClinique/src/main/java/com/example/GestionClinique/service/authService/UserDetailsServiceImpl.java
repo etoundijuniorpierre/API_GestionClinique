@@ -34,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 utilisateur.getId(),
                 utilisateur.getEmail(),
                 utilisateur.getPassword(),
-                utilisateur.getPhotoProfilPath(), // Passer le chemin de la photo
+                utilisateur.getPhotoProfil(), // Passer le chemin de la photo
                 true,
                 true, // accountNonExpired
                 true, // credentialsNonExpired

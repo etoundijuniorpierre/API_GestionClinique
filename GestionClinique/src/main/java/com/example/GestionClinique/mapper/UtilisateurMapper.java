@@ -14,7 +14,7 @@ import java.util.List;
         uses = {RoleMapper.class})
 public interface UtilisateurMapper {
 
-    @Mapping(target = "photoProfilPath", ignore = true)
+    @Mapping(target = "photoProfil", ignore = true)
     @Mapping(target = "role", source = "role", qualifiedByName = "mapRoleIdToRole")
     @Mapping(target = "serviceMedical", source = "serviceMedicalName")
     @Mapping(target = "id", ignore = true)
@@ -26,7 +26,7 @@ public interface UtilisateurMapper {
     @Mapping(target = "serviceMedicalName", source = "serviceMedical")
     UtilisateurResponseDto toDto(Utilisateur utilisateur);
 
-    @Mapping(target = "photoProfilUrl", expression = "java(getPhotoUrl(entity))")
+
     List<UtilisateurResponseDto> toDtoList(List<Utilisateur> utilisateurs);
 
     @Mapping(target = "role", source = "role", qualifiedByName = "mapRoleIdToRole")
@@ -48,11 +48,6 @@ public interface UtilisateurMapper {
         return role;
     }
 
-    default String getPhotoUrl(Utilisateur utilisateur) {
-        if (utilisateur.getPhotoProfilPath() == null) {
-            return null;
-        }
-        return "/api/utilisateurs/" + utilisateur.getId() + "/photo";
-    }
+
 }
 

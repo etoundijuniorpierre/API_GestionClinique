@@ -11,12 +11,16 @@ import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.RoleRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.HistoriqueActionService;
+import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.service.UtilisateurService;
 import com.example.GestionClinique.service.authService.SecurityUtil;
 import com.example.GestionClinique.service.photoService.FileStorageService;
+import com.example.GestionClinique.service.photoService.FileStorageServiceImpl;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,22 +40,23 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final RoleRepository roleRepository; // Inject RoleRepository
     private final PasswordEncoder passwordEncoder; // Inject PasswordEncoder
     private final RendezVousRepository rendezVousRepository;
-    private final FileStorageService fileStorageService;
+    private final FileStorageServiceImpl fileStorageService;
     private final HistoriqueActionService historiqueActionService;
+    private final LoggingAspect loggingAspect;
 
     public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository,
                                   RoleRepository roleRepository,
-                                  PasswordEncoder passwordEncoder, RendezVousRepository rendezVousRepository, FileStorageService fileStorageService, HistoriqueActionService historiqueActionService, SecurityUtil securityUtil) {
+                                  PasswordEncoder passwordEncoder, RendezVousRepository rendezVousRepository, FileStorageService fileStorageService, FileStorageServiceImpl fileStorageService1, HistoriqueActionService historiqueActionService, SecurityUtil securityUtil, LoggingAspect loggingAspect) {
         this.utilisateurRepository = utilisateurRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.rendezVousRepository = rendezVousRepository;
-        this.fileStorageService = fileStorageService;
+        this.fileStorageService = fileStorageService1;
         this.historiqueActionService = historiqueActionService;
-        currentUserId = securityUtil.getCurrentAuthenticatedUserId();
+        this.loggingAspect = loggingAspect;
     }
 
-    Long currentUserId;
+    
 
     @PostConstruct
     public void init() {
@@ -60,7 +65,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     @Transactional
     @Override
-    public Utilisateur createUtilisateur(Utilisateur utilisateur, MultipartFile photoProfil) {
+    public Utilisateur createUtilisateur(Utilisateur utilisateur) {
         if (findUtilisateurByEmail(utilisateur.getEmail()) != null) {
             throw new IllegalArgumentException("A user with this email address already exists.");
         }
@@ -92,18 +97,13 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             utilisateur.setServiceMedical(utilisateur.getServiceMedical());
         }
 
-        if (photoProfil != null && !photoProfil.isEmpty()) {
-            String photoPath = fileStorageService.store(photoProfil, utilisateur.getId());
-            utilisateur.setPhotoProfilPath(photoPath);
-        }
-
         utilisateur.setRole(role);
         Utilisateur savedUser = utilisateurRepository.save(utilisateur);
 
         historiqueActionService.enregistrerAction(
                 String.format("Création d'un nouvel utilisateur: %s %s (ID: %d, Rôle: %s)",
                         savedUser.getNom(), savedUser.getPrenom(), savedUser.getId(), savedUser.getRole().getRoleType()),
-                currentUserId
+                loggingAspect.currentUserId()
         );
 
         return savedUser;
@@ -117,15 +117,15 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
 
         if (photoProfil != null && !photoProfil.isEmpty()) {
-            if (utilisateur.getPhotoProfilPath() != null) {
-                fileStorageService.delete(utilisateur.getPhotoProfilPath());
+            if (utilisateur.getPhotoProfil() != null) {
+                fileStorageService.delete(utilisateur.getPhotoProfil());
             }
-            String newPhotoPath = fileStorageService.store(photoProfil, userId);
-            utilisateur.setPhotoProfilPath(newPhotoPath);
+            String newPhotoPath = fileStorageService.save(photoProfil, userId);
+            utilisateur.setPhotoProfil(newPhotoPath);
 
             historiqueActionService.enregistrerAction(
                     String.format("Mise à jour de la photo de profil de l'utilisateur ID: %d", userId),
-                    currentUserId
+                    loggingAspect.currentUserId()
             );
         }
         return utilisateurRepository.save(utilisateur);
@@ -138,10 +138,10 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         Utilisateur utilisateur = utilisateurRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
 
-        if (utilisateur.getPhotoProfilPath() == null) {
+        if (utilisateur.getPhotoProfil() == null) {
             throw new RuntimeException("Aucune photo de profil pour cet utilisateur");
         }
-        return fileStorageService.load(utilisateur.getPhotoProfilPath());
+        return fileStorageService.load(utilisateur.getPhotoProfil());
     }
 
 
@@ -186,7 +186,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         historiqueActionService.enregistrerAction(
                 String.format("Mise à jour des informations de l'utilisateur ID: %d", id),
-                currentUserId
+                loggingAspect.currentUserId()
         );
 
         return utilisateurRepository.save(existingUtilisateur);
@@ -200,7 +200,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         historiqueActionService.enregistrerAction(
                 String.format("Suppression de l'utilisateur %s %s (ID: %d)",
                         utilisateur.getNom(), utilisateur.getPrenom(), utilisateur.getId()),
-                currentUserId
+                loggingAspect.currentUserId()
         );
 
         utilisateurRepository.delete(utilisateur);
@@ -232,7 +232,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         historiqueActionService.enregistrerAction(
                 String.format("Changement de statut de l'utilisateur ID: %d à %s",
                         id, isActive ? "ACTIF" : "INACTIF"),
-                currentUserId
+                loggingAspect.currentUserId()
         );
 
         return utilisateurRepository.save(existingUtilisateur);
@@ -306,7 +306,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         historiqueActionService.enregistrerAction(
                 "Changement de mot de passe effectué",
-                currentUserId
+                loggingAspect.currentUserId()
         );
 
         utilisateur.setPassword(passwordEncoder.encode(newPassword));

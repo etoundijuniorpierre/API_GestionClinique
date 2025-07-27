@@ -11,5 +11,6 @@ public class UtilisateurResponseDto extends InfoPersonnelResponseDto {
     private String email;
     private ServiceMedical serviceMedicalName;
     private Boolean actif;
+    private String photoProfil;
     private RoleResponseDto role;
 }

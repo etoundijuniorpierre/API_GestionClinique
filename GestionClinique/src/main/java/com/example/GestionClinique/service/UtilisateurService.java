@@ -14,13 +14,10 @@ import java.util.List;
 
 public interface UtilisateurService {
 
-    @Transactional
-    Utilisateur createUtilisateur(Utilisateur utilisateur, MultipartFile photoProfil);
+    Utilisateur createUtilisateur(Utilisateur utilisateur);
 
-    @Transactional
     Utilisateur updatePhotoProfil(Long userId, MultipartFile photoProfil);
 
-    @Transactional
     Resource getPhotoProfil(Long userId);
 
     Utilisateur findUtilisateurById(Long id);

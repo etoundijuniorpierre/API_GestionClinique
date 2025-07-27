@@ -21,8 +21,6 @@ public class UtilisateurRequestDto extends InfoPersonnelRequestDto {
 
     private Boolean actif;
 
-    private MultipartFile photoProfil;
-
     @NotNull
     private String role;
 }

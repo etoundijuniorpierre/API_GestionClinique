@@ -33,7 +33,7 @@ public class Utilisateur extends InfoPersonnel {
     private Role role;
 
     @Column(name = "photo_profil")
-    private String photoProfilPath;
+    private String photoProfil;
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == null) {

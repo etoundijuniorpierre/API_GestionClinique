@@ -56,7 +56,7 @@ public class UtilisateurController {
 
 
 @PreAuthorize("hasAnyRole('ADMIN')")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/createUtilisateur" from path, POST to base URL is common for creation
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Removed "/createUtilisateur" from path, POST to base URL is common for creation
     @Operation(summary = "Créer un nouvel utilisateur",
             description = "Enregistre un nouvel utilisateur dans le système avec les détails fournis")
     @ApiResponses(value = {
@@ -67,15 +67,14 @@ public class UtilisateurController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la création")
     })
 public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
-        @RequestPart("utilisateurs") UtilisateurRequestDto utilisateurDto,
-        @RequestPart(value = "photoProfil", required = false) MultipartFile photoProfil) {
-
+         @RequestBody UtilisateurRequestDto utilisateurDto) {
     Utilisateur utilisateur = utilisateurMapper.toEntity(utilisateurDto);
-    Utilisateur savedUtilisateur = utilisateurService.createUtilisateur(utilisateur, photoProfil);
-    return ResponseEntity.ok(utilisateurMapper.toDto(savedUtilisateur));
+    Utilisateur savedUtilisateur = utilisateurService.createUtilisateur(utilisateur);
+    return ResponseEntity.status(HttpStatus.CREATED).body(utilisateurMapper.toDto(savedUtilisateur));
+
 }
 
-    @PutMapping("/{userId}/photo")
+    @PutMapping(value = "/{userId}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UtilisateurResponseDto> updatePhotoProfil(
             @PathVariable Long userId,
             @RequestParam("photoProfil") MultipartFile photoProfil) {
