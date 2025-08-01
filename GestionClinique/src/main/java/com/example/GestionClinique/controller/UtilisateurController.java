@@ -79,7 +79,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 }
 
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @GetMapping(path = "/{idUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /{id}
     @Operation(summary = "Obtenir un utilisateur par son ID",
             description = "Récupère les informations détaillées d'un utilisateur spécifique par son identifiant unique")
