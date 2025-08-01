@@ -42,7 +42,7 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
     List<RendezVous> findConfirmedRendezVousFromTodayByMedecin(
             @Param("medecinId") Long medecinId,
             @Param("statut") StatutRDV statut,
-            @Param("currentDateTime") LocalDate currentDate
+            @Param("currentDate") LocalDate currentDate
     );
 
     @Query("SELECT r FROM RendezVous r WHERE r.medecin.id = :medecinId AND r.statut = :statut " +

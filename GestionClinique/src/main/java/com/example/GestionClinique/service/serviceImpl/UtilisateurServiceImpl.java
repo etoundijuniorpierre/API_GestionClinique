@@ -278,7 +278,6 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return utilisateurRepository.findByStatusConnect(StatusConnect.DECONNECTE);
     }
 
-
     @Override
     public List<RendezVous> findAllRendezVousCONFIRMEInBeginByToday(Long medecinId) {
         return rendezVousRepository.findConfirmedRendezVousFromTodayByMedecin(
