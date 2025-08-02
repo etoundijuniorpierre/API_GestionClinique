@@ -4,12 +4,14 @@ import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
+import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -46,4 +48,8 @@ public interface UtilisateurService {
 
     List<Utilisateur> getMedecinsByServiceMedical(ServiceMedical serviceMedical);
     List<Utilisateur> getAvailableMedecinsByServiceAndTime(ServiceMedical serviceMedical, LocalDate date, LocalTime heure);
+
+
+    // endpoint depannage
+    Utilisateur updateUserConnectStatus(Long utilisateurId, StatusConnect statusConnect);
 }

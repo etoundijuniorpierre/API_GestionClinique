@@ -1,4 +1,4 @@
-package com.example.GestionClinique.service;
+package com.example.GestionClinique.service.serviceImpl;
 
 
 import com.example.GestionClinique.service.authService.SecurityUtil;

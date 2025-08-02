@@ -49,8 +49,11 @@ public class StatController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
     public ResponseEntity<?> getDailyStats(
-            @RequestParam(required = false) @Parameter(description = "Date au format YYYY-MM-DD (ex: 2025-07-19). Si omis, la date actuelle est utilisée.") String date) {
-            StatDuJourResponseDto stats = statMapper.toStatDuJourDto(statService.getOrCreateStatDuJour(LocalDate.parse(date)));
+            @RequestParam(required = false) @Parameter(description = "Date au format YYYY-MM-DD (ex: 2025-07-19). Si omis, la date actuelle est utilisée.") LocalDate date) {
+            if (date==null) {
+                date = LocalDate.now();
+            }
+            StatDuJourResponseDto stats = statMapper.toStatDuJourDto(statService.getOrCreateStatDuJour(date));
             return ResponseEntity.ok(stats);
     }
 

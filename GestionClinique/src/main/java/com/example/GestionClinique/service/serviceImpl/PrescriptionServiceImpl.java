@@ -1,7 +1,6 @@
 package com.example.GestionClinique.service.serviceImpl;
 
 
-import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.*;
 import com.example.GestionClinique.repository.*;
 import com.example.GestionClinique.service.HistoriqueActionService;

@@ -82,9 +82,11 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
             @Param("date") LocalDate date);
 
 
-    @Query("SELECT COUNT(r) FROM RendezVous r WHERE r.jour = :date AND r.statut = :statut")
+    // Correction pour countByJourAndStatut
+    @Query("SELECT COUNT(r) FROM RendezVous r WHERE DATE(r.jour) = :date AND r.statut = :statut")
     Long countByJourAndStatut(@Param("date") LocalDate date, @Param("statut") StatutRDV statut);
 
+    // Ces méthodes sont déjà OK
     @Query("SELECT COUNT(r) FROM RendezVous r WHERE YEAR(r.jour) = :year AND MONTH(r.jour) = :month AND r.statut = :statut")
     Long countByMoisAndStatut(@Param("year") int year, @Param("month") int month, @Param("statut") StatutRDV statut);
 

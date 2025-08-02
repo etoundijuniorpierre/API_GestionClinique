@@ -72,7 +72,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // Permettre l'accès public à l'enregistrement et au login
                         .requestMatchers("Api/V1/clinique/login").permitAll()
-                        .requestMatchers("Api/V1/clinique/logout").permitAll()
                         .requestMatchers("Api/V1/clinique/historiqueActions").permitAll()
                         .requestMatchers("Api/V1/clinique/messages/**").permitAll()
                         // Permettre l'accès aux endpoints Swagger UI

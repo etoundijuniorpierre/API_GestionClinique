@@ -12,7 +12,6 @@ import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.RoleRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.HistoriqueActionService;
-import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.service.UtilisateurService;
 import com.example.GestionClinique.service.authService.SecurityUtil;
 import com.example.GestionClinique.service.photoService.FileStorageService;
@@ -27,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -334,5 +334,20 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             LocalTime heure) {
         return utilisateurRepository.findMedecinsByServiceMedicalWithoutRendezVousAt(
                 serviceMedical, date, heure);
+    }
+
+    @Override
+    @Transactional
+    public Utilisateur updateUserConnectStatus(Long utilisateurId, StatusConnect statusConnect) {
+        Utilisateur utilisateur = findUtilisateurById(utilisateurId);
+        if (utilisateur!=null) {
+            utilisateur.setStatusConnect(statusConnect);
+            if (utilisateur.getStatusConnect().equals(StatusConnect.CONNECTE)) {
+                utilisateur.setLastLoginDate(LocalDateTime.now());
+            }if (utilisateur.getStatusConnect().equals(StatusConnect.DECONNECTE)){
+                utilisateur.setLastLogoutDate(LocalDateTime.now());
+            }
+        }
+        return utilisateurRepository.save(utilisateur);
     }
 }

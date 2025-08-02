@@ -76,12 +76,6 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed: UserDetails is null.");
             }
 
-            utilisateurRepository.findByEmail(userDetails.getUsername()).ifPresent(utilisateur -> {
-                utilisateur.setLastLoginDate(LocalDateTime.now());
-                utilisateur.setStatusConnect(StatusConnect.CONNECTE); // Set status to CONNECTE
-                utilisateurRepository.save(utilisateur);
-            });
-
             String jwt = jwtUtil.generateToken(userDetails);
 
             // Construire l'URL complète de la photo
@@ -93,7 +87,7 @@ public class AuthController {
                     userDetails.getId(),
                     jwt,
                     userDetails.getUsername(),
-                    photoUrl, // Ajout de l'URL de la photo
+                    photoUrl,
                     userDetails.getAuthorities()
             ));
 
@@ -109,16 +103,16 @@ public class AuthController {
 
 
 
-    @PostMapping(path = API_NAME + "/logout")
-    @Operation(summary = "Déconnecter un utilisateur",
-            description = "Invalide le token JWT et enregistre l'heure de déconnexion de l'utilisateur.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Déconnexion réussie"),
-            @ApiResponse(responseCode = "400", description = "Requête invalide"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
-    })
-    public ResponseEntity<String> logout(HttpServletRequest request) {
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok("Déconnexion réussie.");
-    }
+//    @PostMapping(path = API_NAME + "/logout")
+//    @Operation(summary = "Déconnecter un utilisateur",
+//            description = "Invalide le token JWT et enregistre l'heure de déconnexion de l'utilisateur.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Déconnexion réussie"),
+//            @ApiResponse(responseCode = "400", description = "Requête invalide"),
+//            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+//    })
+//    public ResponseEntity<String> logout(HttpServletRequest request) {
+//        SecurityContextHolder.clearContext();
+//        return ResponseEntity.ok("Déconnexion réussie.");
+//    }
 }

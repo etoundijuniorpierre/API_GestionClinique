@@ -7,7 +7,6 @@ import com.example.GestionClinique.model.entity.stats.StatsSurLannee;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.repository.*;
 import com.example.GestionClinique.service.HistoriqueActionService;
-import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.service.StatService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,7 @@ public class StatServiceImpl implements StatService {
     public StatDuJour getOrCreateStatDuJour(LocalDate date) {
         String jourStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
         if (jourStr.isEmpty() || jourStr.equals("0") || jourStr == null) {
-            jourStr = String.valueOf(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+            jourStr = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
         }
         Optional<StatDuJour> stat = statDuJourRepository.findByJour(jourStr);
         return stat.orElseGet(() -> calculateStatDuJour(date));

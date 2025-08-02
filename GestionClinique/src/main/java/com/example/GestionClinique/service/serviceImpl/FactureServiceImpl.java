@@ -2,7 +2,6 @@ package com.example.GestionClinique.service.serviceImpl;
 
 
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
-import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.Consultation;
 import com.example.GestionClinique.model.entity.Facture;
 import com.example.GestionClinique.model.entity.Patient; // Need to import Patient entity

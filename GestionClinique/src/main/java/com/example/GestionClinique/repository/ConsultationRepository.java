@@ -14,12 +14,16 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
     Optional<Consultation> findByRendezVousId(Long rendezVousId);
 
 
-    @Query("SELECT COUNT(c) FROM Consultation c WHERE c.creationDate = :date")
+    // Correction pour countByDateConsultation
+    @Query("SELECT COUNT(c) FROM Consultation c WHERE DATE(c.creationDate) = :date")
     Long countByDateConsultation(@Param("date") LocalDate date);
 
+    // Ces méthodes sont déjà OK
     @Query("SELECT COUNT(c) FROM Consultation c WHERE YEAR(c.creationDate) = :year AND MONTH(c.creationDate) = :month")
     Long countByMonthConsultation(@Param("year") int year, @Param("month") int month);
 
     @Query("SELECT COUNT(c) FROM Consultation c WHERE YEAR(c.creationDate) = :year")
     Long countByYearConsultation(@Param("year") int year);
 }
+
+

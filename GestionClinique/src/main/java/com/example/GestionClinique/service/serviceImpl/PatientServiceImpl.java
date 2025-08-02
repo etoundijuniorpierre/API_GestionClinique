@@ -1,6 +1,5 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.DossierMedical;
 import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.RendezVous;

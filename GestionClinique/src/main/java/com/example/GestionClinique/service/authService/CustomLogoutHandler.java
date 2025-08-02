@@ -2,8 +2,12 @@ package com.example.GestionClinique.service.authService;
 
 import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import com.example.GestionClinique.repository.UtilisateurRepository;
+import com.example.GestionClinique.service.UtilisateurService;
+import com.example.GestionClinique.service.serviceImpl.LoggingAspect;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -15,9 +19,15 @@ import java.time.LocalDateTime;
 public class CustomLogoutHandler implements LogoutHandler {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final LoggingAspect loggingAspect;
+    @Lazy private final UtilisateurService utilisateurService;
 
-    public CustomLogoutHandler(UtilisateurRepository utilisateurRepository) {
+    public CustomLogoutHandler(UtilisateurRepository utilisateurRepository,
+                               LoggingAspect loggingAspect,
+                               @Lazy UtilisateurService utilisateurService) {
         this.utilisateurRepository = utilisateurRepository;
+        this.loggingAspect = loggingAspect;
+        this.utilisateurService = utilisateurService;
     }
 
     @Override
@@ -31,12 +41,7 @@ public class CustomLogoutHandler implements LogoutHandler {
         MonUserDetailsCustom userDetails = (MonUserDetailsCustom) authentication.getPrincipal();
         String username = userDetails.getUsername();
 
-        utilisateurRepository.findByEmail(username).ifPresent(utilisateur -> {
-            utilisateur.setLastLogoutDate(LocalDateTime.now());
-            utilisateur.setStatusConnect(StatusConnect.DECONNECTE); // Set status to DECONNECTE
-            utilisateurRepository.save(utilisateur); // Save the updated user
-            System.out.println("User " + username + " logged out at " + LocalDateTime.now() + ". Status set to DECONNECTE.");
-        });
+        utilisateurService.updateUserConnectStatus(userDetails.getId(), StatusConnect.CONNECTE);
 
 
         SecurityContextHolder.clearContext();

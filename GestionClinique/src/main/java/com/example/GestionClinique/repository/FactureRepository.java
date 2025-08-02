@@ -18,14 +18,15 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
     Optional<Facture> findByRendezVousId(Long id);
 
 
-    @Query("SELECT COALESCE(SUM(f.montant), 0.0) FROM Facture f WHERE f.dateEmission = :date")
+    // Utilise la fonction DATE() ou TRUNC() selon ta base de données pour extraire la partie date
+    @Query("SELECT COALESCE(SUM(f.montant), 0.0) FROM Facture f WHERE DATE(f.dateEmission) = :date")
     Double sumMontantTotalByDateFacture(@Param("date") LocalDate date);
 
+    // Ces méthodes sont déjà OK car elles extraient YEAR et MONTH
     @Query("SELECT COALESCE(SUM(f.montant), 0.0) FROM Facture f WHERE YEAR(f.dateEmission) = :year AND MONTH(f.dateEmission) = :month")
     Double sumMontantTotalByMonthFacture(@Param("year") int year, @Param("month") int month);
 
     @Query("SELECT COALESCE(SUM(f.montant), 0.0) FROM Facture f WHERE YEAR(f.dateEmission) = :year")
     Double sumMontantTotalByYearFacture(@Param("year") int year);
-
     Optional<Object> findByConsultationId(Long consultationId);
 }

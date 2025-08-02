@@ -28,9 +28,11 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     Optional<Patient> findByEmail(String email);
 
 
-    @Query("SELECT COUNT(p) FROM Patient p WHERE p.creationDate = :date")
+    // Correction pour countByDateEnregistrement
+    @Query("SELECT COUNT(p) FROM Patient p WHERE DATE(p.creationDate) = :date")
     Long countByDateEnregistrement(@Param("date") LocalDate date);
 
+    // Ces méthodes sont déjà OK
     @Query("SELECT COUNT(p) FROM Patient p WHERE YEAR(p.creationDate) = :year AND MONTH(p.creationDate) = :month")
     Long countByMonthEnregistrement(@Param("year") int year, @Param("month") int month);
 

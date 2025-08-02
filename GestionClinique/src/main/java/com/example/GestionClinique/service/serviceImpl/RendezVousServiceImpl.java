@@ -1,6 +1,5 @@
 package com.example.GestionClinique.service.serviceImpl;
 
-import com.example.GestionClinique.service.LoggingAspect;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;
@@ -17,7 +16,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Console;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ConcurrentModificationException;
