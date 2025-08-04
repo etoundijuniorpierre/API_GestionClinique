@@ -1,5 +1,6 @@
 package com.example.GestionClinique.service.authService;
 
+import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.UtilisateurService;
@@ -18,31 +19,24 @@ import java.time.LocalDateTime;
 @Service
 public class CustomLogoutHandler implements LogoutHandler {
 
-    private final UtilisateurRepository utilisateurRepository;
     private final LoggingAspect loggingAspect;
     @Lazy private final UtilisateurService utilisateurService;
 
-    public CustomLogoutHandler(UtilisateurRepository utilisateurRepository,
+    public CustomLogoutHandler(
                                LoggingAspect loggingAspect,
                                @Lazy UtilisateurService utilisateurService) {
-        this.utilisateurRepository = utilisateurRepository;
         this.loggingAspect = loggingAspect;
         this.utilisateurService = utilisateurService;
     }
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        // Log out logic should only proceed if an authenticated user is found in the context
-        if (authentication == null || !(authentication.getPrincipal() instanceof MonUserDetailsCustom)) {
-            System.out.println("Logout attempt from unauthenticated or invalid session. No user details to update.");
-            return;
+
+        if (authentication != null && authentication.getPrincipal() instanceof MonUserDetailsCustom) {
+            Long actuUser = loggingAspect.currentUserId();
+            utilisateurService.updateUserConnectStatus(actuUser, StatusConnect.DECONNECTE);
+            System.out.println("successfully logged out.");
         }
-
-        MonUserDetailsCustom userDetails = (MonUserDetailsCustom) authentication.getPrincipal();
-        String username = userDetails.getUsername();
-
-        utilisateurService.updateUserConnectStatus(userDetails.getId(), StatusConnect.CONNECTE);
-
 
         SecurityContextHolder.clearContext();
     }

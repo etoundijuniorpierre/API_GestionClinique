@@ -86,7 +86,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
-                .logoutUrl("Api/V1/clinique/logout").permitAll()
+                .logoutUrl("/Api/V1/clinique/logout").permitAll()
                 .addLogoutHandler(customLogoutHandler)
                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()) // Clears context on successful logout
         );
