@@ -20,10 +20,16 @@ public interface UtilisateurMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "creationDate", ignore = true)
     @Mapping(target = "modificationDate", ignore = true)
+    @Mapping(target = "lastLoginDate", ignore = true)
+    @Mapping(target = "lastLogoutDate", ignore = true)
+    @Mapping(target = "statusConnect", ignore = true)
     Utilisateur toEntity(UtilisateurRequestDto dto);
 
-    @Mapping(target = "role", source = "role")
-    @Mapping(target = "serviceMedicalName", source = "serviceMedical")
+
+
+    @Mapping(target = "lastLoginDate", source = "lastLoginDate")
+    @Mapping(target = "lastLogoutDate", source = "lastLogoutDate")
+    @Mapping(target = "statusConnect", source = "statusConnect")
     UtilisateurResponseDto toDto(Utilisateur utilisateur);
 
 

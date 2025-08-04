@@ -51,7 +51,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 utilisateur.getAuthorities()
         );
 
-            utilisateurService.updateUserConnectStatus(utilisateur.getId(), StatusConnect.CONNECTE);
+        utilisateurService.updateUserConnectStatus(utilisateur.getId(), StatusConnect.CONNECTE);
 
         historiqueActionService.enregistrerAction(
                 "connexion avec l'Email : " + email, utilisateur.getId());

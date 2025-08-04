@@ -11,6 +11,7 @@ import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
+import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.service.UtilisateurService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -205,6 +206,28 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
         utilisateurMapper.updateEntityFromDto(utilisateurRequestDto, existingUtilisateur); // Update entity from DTO
         Utilisateur updatedUtilisateur = utilisateurService.updateUtilisateur(id, existingUtilisateur); // Pass updated entity to service
         return ResponseEntity.ok(utilisateurMapper.toDto(updatedUtilisateur)); // Map and return
+    }
+
+
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PatchMapping(path = "/{idUtilisateur}/{statutConnect}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Mettre à jour du StatutConnect d'un utilisateur",
+            description = "Modifier le status d'un Utilisateur")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "StatutConnect utilisateur mis à jour avec succès",
+                    content = @Content(schema = @Schema(implementation = UtilisateurResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "ID utilisateur invalide ou paramètre de statut incorrect"),
+            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé avec l'ID fourni"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la mise à jour du StatutConnect")
+    })
+    public ResponseEntity<UtilisateurResponseDto> updateUserConnectStatus(
+            @Parameter(description = "ID de l'utilisateur à mettre à jour", required = true, example = "123")
+            @PathVariable("idUtilisateur") Long id,
+            @Parameter(description = "Nouveau statut d'activation ", required = true)
+            @PathVariable("statutConnect")StatusConnect statusConnect) {
+        Utilisateur updatedUtilisateur = utilisateurService.updateUserConnectStatus(id, statusConnect);
+        return ResponseEntity.ok(utilisateurMapper.toDto(updatedUtilisateur));
     }
 
 
