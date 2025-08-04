@@ -46,7 +46,11 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository,
                                   RoleRepository roleRepository,
-                                  PasswordEncoder passwordEncoder, RendezVousRepository rendezVousRepository, FileStorageService fileStorageService, FileStorageServiceImpl fileStorageService1, HistoriqueActionService historiqueActionService, SecurityUtil securityUtil, LoggingAspect loggingAspect) {
+                                  PasswordEncoder passwordEncoder,
+                                  RendezVousRepository rendezVousRepository,
+                                  FileStorageServiceImpl fileStorageService1,
+                                  HistoriqueActionService historiqueActionService,
+                                  LoggingAspect loggingAspect) {
         this.utilisateurRepository = utilisateurRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
