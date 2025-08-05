@@ -23,4 +23,5 @@ public class RendezVousResponseDto extends BaseResponseDto {
     private String medecinNomComplet;
     private Long salleId;
     private String nomSalle;
+    private Long factureId;
 }

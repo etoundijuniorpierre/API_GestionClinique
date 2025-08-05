@@ -5,8 +5,11 @@ import com.example.GestionClinique.dto.ResponseDto.RendezVousResponseDto;
 import com.example.GestionClinique.model.entity.Patient;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Utilisateur;
+import com.example.GestionClinique.repository.FactureRepository;
 import com.example.GestionClinique.repository.PatientRepository;
+import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
+import com.example.GestionClinique.service.RendezVousService;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,6 +23,8 @@ public abstract class RendezVousMapper {
     private PatientRepository patientRepository;
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+    @Autowired
+    private RendezVousService rendezVousRepository;
 
 
     @Mapping(target = "id", ignore = true)
@@ -44,6 +49,7 @@ public abstract class RendezVousMapper {
             "entity.getMedecin().getPrenom() + \" \" + entity.getMedecin().getNom() : null)")
     @Mapping(source = "salle.numeroSalle", target = "nomSalle",
             nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+    @Mapping(target = "factureId", expression = "java(entity.getFacture() != null ? entity.getFacture().getId() : null) ")
     public abstract RendezVousResponseDto toDto(RendezVous entity);
 
     public abstract List<RendezVousResponseDto> toDtoList(List<RendezVous> entities);
@@ -84,5 +90,12 @@ public abstract class RendezVousMapper {
                 .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + medecinId));
     }
 
+//    @Named("mapFactureId")
+//    public RendezVous mapFactureId(Long rendezVousId) {
+//        if (rendezVousId == null) {
+//            return null;
+//        }
+//        return rendezVousRepository.findRendezVousById(rendezVousId);
+//    }
 
 }
