@@ -210,7 +210,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @PatchMapping(path = "/{idUtilisateur}/{statutConnect}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Mettre à jour du StatutConnect d'un utilisateur",
             description = "Modifier le status d'un Utilisateur")
