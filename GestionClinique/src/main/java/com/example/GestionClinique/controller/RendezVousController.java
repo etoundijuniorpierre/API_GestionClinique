@@ -255,7 +255,7 @@ public class RendezVousController {
 
 
 @PreAuthorize("hasAnyRole('SECRETAIRE')")
-    @PutMapping(path = "/{idRendezVous}/cancel", produces = MediaType.APPLICATION_JSON_VALUE) // Changed to PATCH or PUT /id/status for clarity
+    @PutMapping(path = "/{idRendezVous}/cancel", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Annuler un rendez-vous",
             description = "Change le statut d'un rendez-vous existant à 'annulé'")
     @ApiResponses(value = {
@@ -274,5 +274,13 @@ public class RendezVousController {
 
     }
 
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+    @PostMapping("/cancel-old")
+    @Operation(summary = "Annuler un rendez-vous et supprimer facture liée",
+            description = "annuler un vieux rendezVous et supprimer la facture liée")
+    public ResponseEntity<String> cancelOldRendezVous() {
+        rendezVousService.cancelRendezVousByJour(LocalDate.now());
+        return ResponseEntity.ok("Tous les rendez-vous antérieurs à la date d'aujourd'hui ont été annulés.");
+    }
 
 }

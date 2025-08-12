@@ -9,13 +9,13 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class  ConsultationResponseDto extends BaseResponseDto {
-    private String motifs;
-    private String tensionArterielle;
-    private Float temperature;
     private Float poids;
     private Float taille;
-    private String compteRendu;
+    private String tensionArterielle;
+    private Float temperature;
+    private String motifs;
     private String diagnostic;
+    private String compteRendu;
 //    private LocalDateTime dateHeureDebut;
 //    private Long dureeMinutes;
 //    private Long rendezVousId;

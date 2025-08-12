@@ -53,6 +53,7 @@ public class ConsultationServiceImpl implements ConsultationService {
                     prescription.setMedecin(medecin);
                     prescription.setPatient(consultation.getDossierMedical().getPatient());
                     prescription.setDossierMedical(consultation.getDossierMedical());
+                    consultation.getDossierMedical().setDernierTraitement(prescription.getMedicaments());
                     savedPrescriptions.add(prescriptionRepository.save(prescription));
                 }
                 consultation.setPrescriptions(savedPrescriptions);
@@ -119,8 +120,8 @@ public class ConsultationServiceImpl implements ConsultationService {
                 prescription.setConsultation(consultationDetails);
                 prescription.setMedecin(medecin);
                 prescription.setPatient(rendezVous.getPatient());
-                prescription.setDossierMedical(rendezVous.getPatient().getDossierMedical()); // Link to dossier from RendezVous
-
+                prescription.setDossierMedical(rendezVous.getPatient().getDossierMedical());
+                rendezVous.getPatient().getDossierMedical().setDernierTraitement(prescription.getMedicaments());
             }
         }
 

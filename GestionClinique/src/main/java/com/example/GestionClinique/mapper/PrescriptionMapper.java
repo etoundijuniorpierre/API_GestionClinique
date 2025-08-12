@@ -27,7 +27,7 @@ public interface PrescriptionMapper {
     @Mapping(target = "medecinNomComplet", expression = "java(entity.getMedecin() != null ? entity.getMedecin().getNom() + \" \" + entity.getMedecin().getPrenom() : null)")
     @Mapping(source = "patient.id", target = "patientId")
     @Mapping(target = "patientNomComplet", expression = "java(entity.getPatient() != null ? entity.getPatient().getNom() + \" \" + entity.getPatient().getPrenom() : null)")
-    @Mapping(target = "consultationDescription", expression = "java(entity.getConsultation() != null ? entity.getConsultation().getMotifs() : null)")
+    @Mapping(target = "motifConsultation", expression = "java(entity.getConsultation() != null ? entity.getConsultation().getMotifs() : null)")
     @Mapping(source = "consultation.id", target = "consultationId")
     PrescriptionResponseDto toDto(Prescription entity);
 

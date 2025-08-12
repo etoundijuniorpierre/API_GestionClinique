@@ -303,35 +303,5 @@ public class FactureController {
     }
 
 
-@PreAuthorize("hasAnyRole('SECRETAIRE', 'COMPTABLE')") // Or other roles who need to print
-    @GetMapping(path = "/download-pdf/{factureId}", produces = MediaType.APPLICATION_PDF_VALUE)
-    @Operation(summary = "Télécharger la facture au format PDF",
-            description = "Génère et télécharge la facture spécifiée au format PDF.")
-    @ApiResponses(value = {
-            @ApiResponse(description = "Facture PDF générée et téléchargée avec succès",
-                    content = @Content(mediaType = "application/pdf")),
-            @ApiResponse(description = "Facture non trouvée avec l'ID spécifié"),
-            @ApiResponse(description = "Erreur interne du serveur lors de la génération du PDF")
-    })
-    public ResponseEntity<byte[]> downloadFacturePdf(
-            @Parameter(description = "ID de la facture à télécharger en PDF", required = true, example = "1")
-            @PathVariable("factureId") Long factureId) {
-        try {
-            byte[] pdfBytes = factureService.generateFacturePdf(factureId);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            String filename = "facture_" + factureId + ".pdf";
-            headers.setContentDispositionFormData("attachment", filename); // Forces download
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-
-            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build(); // 404 Not Found
-        } catch (RuntimeException e) {
-            // Log the error for debugging
-            System.err.println("Error generating PDF: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 500 Internal Server Error
-        }
-    }
 }

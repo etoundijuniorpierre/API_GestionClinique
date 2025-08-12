@@ -24,8 +24,8 @@ public class DossierMedical extends BaseEntity { // Assuming BaseEntity has 'id'
     @Column(name = "allergies", columnDefinition = "TEXT")
     private String allergies;
 
-    @Column(name = "traitements_en_cours", columnDefinition = "TEXT")
-    private String traitementsEnCours;
+    @Column(name = "dernier_traitements", columnDefinition = "TEXT")
+    private String DernierTraitement;
 
     @Column(name = "observations", columnDefinition = "TEXT")
     private String observations;

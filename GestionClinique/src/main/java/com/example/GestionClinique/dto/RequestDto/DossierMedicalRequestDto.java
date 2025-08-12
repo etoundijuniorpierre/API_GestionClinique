@@ -11,7 +11,7 @@ public class DossierMedicalRequestDto {
     private String groupeSanguin;
     private String antecedentsMedicaux;
     private String allergies;
-    private String traitementsEnCours;
+    private String DernierTraitement;
     private String observations;
     private Long patientId;
 }

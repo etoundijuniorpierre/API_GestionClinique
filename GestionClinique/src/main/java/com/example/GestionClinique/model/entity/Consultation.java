@@ -21,21 +21,21 @@ import java.util.List;
 @Table(name = "consultation")
 public class Consultation extends BaseEntity {
 
-
-    @Column(name = "motifs", nullable = false)
-    private String motifs;
-
-    @Column(name = "tension_arterielle", nullable = false)
-    private String tensionArterielle;
-
-    @Column(name = "temperature", nullable = false)
-    private Float temperature;
-
     @Column(name = "poids", nullable = false)
     private Float poids;
 
     @Column(name = "taille", nullable = false)
     private Float taille;
+
+    @Column(name = "temperature", nullable = false)
+    private Float temperature;
+
+    @Column(name = "tension_arterielle", nullable = false)
+    private String tensionArterielle;
+
+
+    @Column(name = "motifs", nullable = false)
+    private String motifs;
 
     @Column(name = "compte_rendu", nullable = false, columnDefinition = "TEXT")
     private String compteRendu;

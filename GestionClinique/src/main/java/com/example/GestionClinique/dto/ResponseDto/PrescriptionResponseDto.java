@@ -20,7 +20,7 @@ public class PrescriptionResponseDto extends BaseResponseDto {
     private String instructions;
     private String dureePrescription;
     private Long quantite;
-    private String consultationDescription;
+    private String motifConsultation;
     private Long consultationId;
 //    private Long dossierMedicalId;
 //    private String dossierMedicalReference;

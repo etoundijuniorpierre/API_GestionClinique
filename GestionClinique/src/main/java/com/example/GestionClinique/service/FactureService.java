@@ -14,7 +14,6 @@ public interface FactureService {
     void generateInvoiceForRendesVous(Long rendezVousId);
 
     Facture payerFacture(Long factureId, ModePaiement modePaiement);
-    byte[] generateFacturePdf(Long factureId);
 
     void generateInvoiceForConsultation(Long consultationId);
 

@@ -13,16 +13,6 @@ import com.example.GestionClinique.repository.RendezVousRepository;
 import com.example.GestionClinique.repository.FactureRepository;
 import com.example.GestionClinique.service.FactureService;
 import com.example.GestionClinique.service.HistoriqueActionService;
-import com.itextpdf.io.source.ByteArrayOutputStream;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Text;
-
-
-
-import com.itextpdf.layout.property.TextAlignment;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -240,65 +230,6 @@ public class FactureServiceImpl implements FactureService {
 
 
 
-    @Override
-    public byte[] generateFacturePdf(Long factureId) {
-        Facture facture = factureRepository.findById(factureId)
-                .orElseThrow(() -> new IllegalArgumentException("Facture not found with ID: " + factureId));
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PdfWriter writer = new PdfWriter(baos);
-        PdfDocument pdf = new PdfDocument(writer);
-        Document document = new Document(pdf);
-
-        try {
-            // --- FIXES HERE: Wrap strings in Paragraph or Text ---
-            document.add(new Paragraph("FACTURE MÉDICALE")
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setBold()
-                    .setFontSize(20));
-            document.add(new Paragraph("--------------------------------------")
-                    .setTextAlignment(TextAlignment.CENTER));
-
-            document.add(new Paragraph("Facture ID: ").add(new Text(facture.getId().toString())));
-            document.add(new Paragraph("Date d'émission: ").add(new Text(facture.getDateEmission().toString())));
-            document.add(new Paragraph("Statut: ").add(new Text(facture.getStatutPaiement().toString())));
-            document.add(new Paragraph("Mode de paiement: ").add(new Text(facture.getModePaiement().toString())));
-            document.add(new Paragraph("Montant: ").add(new Text(String.format("%.2f", facture.getMontant()) + " XAF"))); // Assuming XAF as currency
-
-            if (facture.getPatient() != null) {
-                document.add(new Paragraph("Patient: ").add(new Text(facture.getPatient().getNom() + " " + facture.getPatient().getPrenom())));
-            } else {
-                document.add(new Paragraph("Patient: ").add(new Text("Non spécifié (Urgence)")));
-            }
-
-            if (facture.getRendezVous() != null) {
-                document.add(new Paragraph("rendezVous ID: ").add(new Text(facture.getRendezVous().getId().toString())));
-                if (facture.getRendezVous().getMedecin() != null) {
-                    document.add(new Paragraph("Médecin: ").add(new Text(facture.getRendezVous().getMedecin().getNom() + " " + facture.getRendezVous().getMedecin().getPrenom())));
-                }
-                if (facture.getRendezVous().getConsultation().getMotifs() != null) {
-                    document.add(new Paragraph("Motif rendezVous: ").add(new Text(facture.getRendezVous().getConsultation().getMotifs())));
-                }
-            }
-
-            document.add(new Paragraph("\nMerci de votre confiance!").setTextAlignment(TextAlignment.CENTER));
-
-        } catch (Exception e) { // Catch more specific exceptions if possible (e.g., IOException, DocumentException)
-            System.err.println("Error generating PDF for Facture ID " + factureId + ": " + e.getMessage());
-            throw new RuntimeException("Failed to generate invoice PDF.", e);
-        } finally {
-            // Ensure document is closed even if an error occurs
-            if (document != null) {
-                document.close();
-            }
-        }
-
-        historiqueActionService.enregistrerAction(
-                String.format("gènèration PDF de la facture ID: %d", factureId),
-                loggingAspect.currentUserId()
-        );
-
-        return baos.toByteArray();
-    }
 }
 

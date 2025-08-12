@@ -1,21 +1,20 @@
 package com.example.GestionClinique.service;
 
 
+import com.example.GestionClinique.dto.messagerieDto.MessageRequestDto;
+import com.example.GestionClinique.dto.messagerieDto.MessageResponseDto;
+import com.example.GestionClinique.model.entity.Groupe;
 import com.example.GestionClinique.model.entity.Message;
-import jakarta.validation.constraints.NotNull;
+import com.example.GestionClinique.model.entity.Utilisateur;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface MessageService {
-    Message updateMessage(Long id, Message messageDetails); // Takes entity, returns entity
-    Message findMessageById(Long id); // Returns entity
-    List<Message> findAllMessages(); // Returns list of entities
-    void deleteMessageById(Long id);
-
-    List<Message> findMessagesBySenderId(Long senderId); // Takes Long, returns list of entities
-    List<Message> findMessagesByReceiverId(Long receiverId); // Takes Long, returns list of entities
-    Message markMessageAsRead(Long messageId); // Returns entity
-
-    Message saveMessage(Message messageToSave, @NotNull(message = "L'ID de l'expéditeur est requis.") Long expediteurId, @NotNull(message = "L'ID du destinataire est requis.") Long destinataireId);
+    Message save(Message message);
+    Optional<Message> findById(Long id);
+    List<Message> findAll();
+    void deleteById(Long id);
+    Message updateMessage(Long id, String contenu, Boolean lu, Utilisateur destinataire, Groupe groupe);
 }

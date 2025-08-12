@@ -8,14 +8,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class DossierMedicalResponseDto extends BaseResponseDto {
-    private String patientNomComplet;
-    private String patientTelephone;
-    private LocalDate patientDateNaissance;
-    private String patientGenre;
+    private PatientResponseDto patient;
     private String groupeSanguin;
     private String antecedentsMedicaux;
     private String allergies;
-    private String traitementsEnCours;
+    private String DernierTraitement;
     private String observations;
     private List<ConsultationResponseDto> consultations;
 }

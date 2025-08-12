@@ -1,13 +1,12 @@
 package com.example.GestionClinique.service.serviceImpl;
 
+import com.example.GestionClinique.model.entity.Facture;
 import com.example.GestionClinique.model.entity.RendezVous;
 import com.example.GestionClinique.model.entity.Salle;
 import com.example.GestionClinique.model.entity.Utilisateur;
+import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
-import com.example.GestionClinique.repository.PatientRepository;
-import com.example.GestionClinique.repository.RendezVousRepository;
-import com.example.GestionClinique.repository.SalleRepository;
-import com.example.GestionClinique.repository.UtilisateurRepository;
+import com.example.GestionClinique.repository.*;
 import com.example.GestionClinique.service.FactureService;
 import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.RendezVousService;
@@ -16,8 +15,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Optional;
@@ -27,12 +28,12 @@ import java.util.Optional;
 public class RendezVousServiceImpl implements RendezVousService {
 
     private final RendezVousRepository rendezVousRepository;
-    private final PatientRepository patientRepository;
     private final UtilisateurRepository utilisateurRepository; // For doctors
     private final SalleRepository salleRepository;
     private final FactureService factureService;
     private final HistoriqueActionService historiqueActionService;
     private final LoggingAspect loggingAspect;
+    private final FactureRepository factureRepository;
 
 
     @Override
@@ -240,5 +241,24 @@ public class RendezVousServiceImpl implements RendezVousService {
         return rendezVousRepository.findByJour(jour);
     }
 
+    @Override
+    @Transactional
+    public void cancelRendezVousByJour(LocalDate jour) {
+        List<RendezVous> rendezVousList = rendezVousRepository.findByJourBefore(jour);
+        if (rendezVousList.isEmpty()) {
+            return;
+        }
+        for (RendezVous rendezVous : rendezVousList) {
+            if (rendezVous.getStatut() == StatutRDV.EN_ATTENTE && rendezVous.getJour().isBefore(LocalDate.now())) {
+                cancelRendezVous(rendezVous.getId());
+                Optional<Facture> factureOptional = factureRepository.findByRendezVousId(rendezVous.getId());
+                factureOptional.ifPresent(facture -> {
+                    if (facture.getStatutPaiement() == StatutPaiement.IMPAYEE) {
+                        factureService.deleteFacture(facture.getId());
+                    }
+                });
+            }
+        }
+    }
 
 }

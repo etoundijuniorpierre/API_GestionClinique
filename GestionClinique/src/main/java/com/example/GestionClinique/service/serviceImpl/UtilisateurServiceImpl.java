@@ -177,7 +177,6 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         existingUtilisateur.setGenre(utilisateurDetails.getGenre());
         existingUtilisateur.setServiceMedical(utilisateurDetails.getServiceMedical());
         existingUtilisateur.setActif(utilisateurDetails.getActif());
-        existingUtilisateur.setRole(utilisateurDetails.getRole());
 
         if (utilisateurDetails.getRole() != null && utilisateurDetails.getRole().getId() != null) {
             Role newRole = roleRepository.findById(utilisateurDetails.getRole().getId())

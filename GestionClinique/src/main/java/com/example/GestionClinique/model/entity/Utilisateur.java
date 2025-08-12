@@ -28,7 +28,8 @@ public class Utilisateur extends InfoPersonnel {
 
     private Boolean actif;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER,
+            cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 

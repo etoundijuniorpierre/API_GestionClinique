@@ -17,11 +17,7 @@ public interface DossierMedicalMapper {
     @Mapping(target = "prescriptions", ignore = true)
     DossierMedical toEntity(DossierMedicalRequestDto dto);
 
-
-    @Mapping(target = "patientNomComplet", expression = "java(entity.getPatient() != null ? entity.getPatient().getNom() + \" \" + entity.getPatient().getPrenom() : null)")
-    @Mapping(target = "patientTelephone", source = "patient.telephone")
-    @Mapping(target = "patientDateNaissance", source = "patient.dateNaissance")
-    @Mapping(target = "patientGenre", source = "patient.genre")
+    @Mapping(source = "patient", target = "patient")
     DossierMedicalResponseDto toDto(DossierMedical entity);
 
 

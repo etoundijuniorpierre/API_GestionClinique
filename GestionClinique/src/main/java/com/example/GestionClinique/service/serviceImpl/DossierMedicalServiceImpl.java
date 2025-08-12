@@ -65,7 +65,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         existingDossier.setGroupeSanguin(dossierMedicalDetails.getGroupeSanguin());
         existingDossier.setAntecedentsMedicaux(dossierMedicalDetails.getAntecedentsMedicaux());
         existingDossier.setAllergies(dossierMedicalDetails.getAllergies());
-        existingDossier.setTraitementsEnCours(dossierMedicalDetails.getTraitementsEnCours());
+        existingDossier.setDernierTraitement(dossierMedicalDetails.getDernierTraitement());
         existingDossier.setObservations(dossierMedicalDetails.getObservations());
 
         historiqueActionService.enregistrerAction(

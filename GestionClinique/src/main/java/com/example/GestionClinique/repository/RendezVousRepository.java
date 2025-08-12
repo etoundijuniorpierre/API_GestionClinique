@@ -92,4 +92,6 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
 
     @Query("SELECT COUNT(r) FROM RendezVous r WHERE YEAR(r.jour) = :year AND r.statut = :statut")
     Long countByAnneeAndStatut(@Param("year") int year, @Param("statut") StatutRDV statut);
+
+    List<RendezVous> findByJourBefore(LocalDate jourBefore);
 }
