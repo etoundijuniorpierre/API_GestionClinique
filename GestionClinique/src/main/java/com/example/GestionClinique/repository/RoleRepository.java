@@ -7,11 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
-    Collection<Role> findByRoleType(RoleType roleType);
+    List<Role> findByRoleType(RoleType roleType);
 
     @Query("SELECT r FROM Role r WHERE r.roleType = :roleType")
     Optional<Role> findFirstByRoleType(@Param("roleType") RoleType roleType);

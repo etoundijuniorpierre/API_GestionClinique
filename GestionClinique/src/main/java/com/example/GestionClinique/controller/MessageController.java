@@ -13,6 +13,11 @@ import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.repository.GroupeRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.serviceImpl.MessageServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +53,12 @@ public class MessageController {
     }
 
     // Envoi nouveau message (individuel ou groupe)
+    @Operation(summary = "Envoyer un message",
+            description = "Endpoint WebSocket pour envoyer un message (individuel ou groupe)")
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(MessageRequestDto dto) {
+    public void sendMessage(
+            @Parameter(description = "DTO de création de message", required = true)
+            MessageRequestDto dto) {
 
         Message message = messageMapper.toEntity(dto);
 
@@ -86,16 +95,27 @@ public class MessageController {
     }
 
 
+    @Operation(summary = "Récupérer un message par ID",
+            description = "Endpoint REST pour récupérer un message spécifique")
+    @ApiResponse(responseCode = "200", description = "Message trouvé",
+            content = @Content(schema = @Schema(implementation = MessageResponseDto.class)))
+    @ApiResponse(responseCode = "404", description = "Message non trouvé")
     @GetMapping("/chat.{id}")
-    public ResponseEntity<MessageResponseDto> getMessageById(@PathVariable Long id) {
+    public ResponseEntity<MessageResponseDto> getMessageById(
+            @Parameter(description = "ID du message", required = true, example = "1")
+            @PathVariable Long id) {
         return messageService.findById(id)
                 .map(message -> ResponseEntity.ok(messageMapper.toDto(message)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     // Mise à jour message
+    @Operation(summary = "Mettre à jour un message",
+            description = "Endpoint WebSocket pour modifier un message existant")
     @MessageMapping("/chat.updateMessage")
-    public void updateMessage(MessageUpdateRequestDto dto) {
+    public void updateMessage(
+            @Parameter(description = "DTO de mise à jour de message", required = true)
+            MessageUpdateRequestDto dto) {
 
         Message existing = messageService.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Message introuvable"));
@@ -123,8 +143,12 @@ public class MessageController {
     }
 
     // Suppression message
+    @Operation(summary = "Supprimer un message",
+            description = "Endpoint WebSocket pour supprimer un message")
     @MessageMapping("/chat.deleteMessage")
-    public void deleteMessage(Long messageId) {
+    public void deleteMessage(
+            @Parameter(description = "ID du message à supprimer", required = true, example = "1")
+            Long messageId) {
 
         Message existing = messageService.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message introuvable"));

@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Service
@@ -33,6 +35,7 @@ public class PatientServiceImpl implements PatientService {
         } else {
             throw new IllegalArgumentException("Dossier médical manquant pour la création du patient.");
         }
+        patient.setAge((long) Period.between(patient.getDateNaissance(), LocalDate.now()).getYears());
         Patient savedPatient = patientRepository.save(patient);
 
         historiqueActionService.enregistrerAction(

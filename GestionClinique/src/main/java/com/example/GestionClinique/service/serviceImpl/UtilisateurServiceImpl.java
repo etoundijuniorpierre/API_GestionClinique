@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Period;
 import java.util.*;
 
 import static com.example.GestionClinique.model.entity.enumElem.RoleType.*;
@@ -100,6 +101,8 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         if(role.getRoleType()==MEDECIN) {
             utilisateur.setServiceMedical(utilisateur.getServiceMedical());
         }
+
+        utilisateur.setAge((long) Period.between(utilisateur.getDateNaissance(), LocalDate.now()).getYears());
 
         utilisateur.setRole(role);
         Utilisateur savedUser = utilisateurRepository.save(utilisateur);

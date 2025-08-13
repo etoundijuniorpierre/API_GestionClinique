@@ -11,8 +11,9 @@ import java.time.LocalDate;
 public class InfoPersonnelResponseDto extends BaseResponseDto {
         private String nom;
         private String prenom;
-        private String email;
         private LocalDate dateNaissance;
+        private Long age;
+        private String email;
         private String telephone;
         private String adresse;
         private String genre;
