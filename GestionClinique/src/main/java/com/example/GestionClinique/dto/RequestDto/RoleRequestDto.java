@@ -6,5 +6,5 @@ import lombok.Data;
 
 @Data
 public class RoleRequestDto {
-    private RoleType roleType;
+    private Long id;
 }

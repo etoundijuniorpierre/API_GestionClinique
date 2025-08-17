@@ -15,10 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Optional;
@@ -241,15 +239,21 @@ public class RendezVousServiceImpl implements RendezVousService {
         return rendezVousRepository.findByJour(jour);
     }
 
+
+    // Dans votre service RendezVousServiceImpl
+
     @Override
     @Transactional
-    public void cancelRendezVousByJour(LocalDate jour) {
-        List<RendezVous> rendezVousList = rendezVousRepository.findByJourBefore(jour);
+    public void cancelRendezVousByJour() {
+        LocalDate today = LocalDate.now();
+        List<RendezVous> rendezVousList = rendezVousRepository.findByJourBefore(today);
+
         if (rendezVousList.isEmpty()) {
             return;
         }
+
         for (RendezVous rendezVous : rendezVousList) {
-            if (rendezVous.getStatut() == StatutRDV.EN_ATTENTE && rendezVous.getJour().isBefore(LocalDate.now())) {
+            if (rendezVous.getStatut() == StatutRDV.EN_ATTENTE) {
                 cancelRendezVous(rendezVous.getId());
                 Optional<Facture> factureOptional = factureRepository.findByRendezVousId(rendezVous.getId());
                 factureOptional.ifPresent(facture -> {
@@ -259,6 +263,19 @@ public class RendezVousServiceImpl implements RendezVousService {
                 });
             }
         }
+    }
+    @Override
+    public List<RendezVous> findUtilisateurConfirmedRendezVousByMonth(Long idUtilisateur, int year, int month) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+        return rendezVousRepository.findConfirmedByUtilisateurAndMonth(idUtilisateur, StatutRDV.CONFIRME, startDate, endDate);
+    }
+
+    @Override
+    public List<RendezVous> findRendezVousByMonth(int year, int month) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+        return rendezVousRepository.findByJourBetween(startDate, endDate);
     }
 
 }

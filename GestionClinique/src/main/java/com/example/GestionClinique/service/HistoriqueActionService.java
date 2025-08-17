@@ -15,10 +15,10 @@ public interface HistoriqueActionService {
     HistoriqueAction enregistrerAction(String actionDescription); // For actions not tied to a specific user or user context unknown
 
     // Methods for retrieving actions (return entities)
-    List<HistoriqueAction> findAllHistoriqueActions();
+    List<HistoriqueAction> findAllHistoriqueActionsDesc();
     HistoriqueAction findHistoriqueActionById(Long id);
     List<HistoriqueAction> findHistoriqueActionsByUtilisateurId(Long utilisateurId); // Changed to Long
     List<HistoriqueAction> findHistoriqueActionsByUtilisateurName(String utilisateurName);
     List<HistoriqueAction> findHistoriqueActionsByDateRange(LocalDate startDate, LocalDate endDate);
-
+    List<HistoriqueAction> rechercherHistorique(String nom, String prenom, String email, String motCle);
 }

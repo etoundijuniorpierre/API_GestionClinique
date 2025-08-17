@@ -5,11 +5,13 @@ import com.example.GestionClinique.model.entity.enumElem.RoleType;
 import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -49,4 +51,30 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
             @Param("serviceMedical") ServiceMedical serviceMedical,
             @Param("date") LocalDate date,
             @Param("heure") LocalTime heure);
+
+    @Modifying
+    @Query("UPDATE Utilisateur u SET u.statusConnect = :status, u.lastLoginDate = :loginDate, u.lastLogoutDate = :logoutDate WHERE u.id = :id")
+    void updateStatusAndDates(@Param("id") Long id, @Param("status") StatusConnect status, @Param("loginDate") LocalDateTime loginDate, @Param("logoutDate") LocalDateTime logoutDate);
+
+    @Modifying
+    @Query("UPDATE Utilisateur u SET u.photoProfil = :photoPath WHERE u.id = :id")
+    void updatePhotoProfil(@Param("id") Long id, @Param("photoPath") String photoPath);
+
+    @Modifying
+    @Query("UPDATE Utilisateur u SET u.actif = :isActive WHERE u.id = :id")
+    void updateActifStatus(@Param("id") Long id, @Param("isActive") boolean isActive);
+
+    @Modifying
+    @Query("UPDATE Utilisateur u SET u.statusConnect = :status, u.lastLoginDate = :loginDate WHERE u.id = :id")
+    void updateLogin(@Param("id") Long id,
+                     @Param("status") StatusConnect status,
+                     @Param("loginDate") LocalDateTime loginDate);
+
+    @Modifying
+    @Query("UPDATE Utilisateur u SET u.statusConnect = :status, u.lastLogoutDate = :logoutDate WHERE u.id = :id")
+    void updateLogout(@Param("id") Long id,
+                      @Param("status") StatusConnect status,
+                      @Param("logoutDate") LocalDateTime logoutDate);
+
+
 }

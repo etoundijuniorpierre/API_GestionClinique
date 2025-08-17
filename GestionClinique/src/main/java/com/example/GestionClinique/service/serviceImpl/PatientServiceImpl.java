@@ -51,20 +51,34 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Patient updatePatient(Long id, Patient patientDetails) {
         Patient existingPatient = patientRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found with ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Patient non trouvé avec ID: " + id));
 
         if (patientDetails.getEmail() != null && !patientDetails.getEmail().equals(existingPatient.getEmail())) {
             if (patientRepository.findByEmail(patientDetails.getEmail()).isPresent()) {
-                throw new IllegalArgumentException("Email " + patientDetails.getEmail() + " is already taken by another patient.");
+                throw new IllegalArgumentException("Email " + patientDetails.getEmail() + " est déjà utilisé par un autre patient.");
             }
+            existingPatient.setEmail(patientDetails.getEmail());
         }
-        existingPatient.setNom(patientDetails.getNom());
-        existingPatient.setPrenom(patientDetails.getPrenom());
-        existingPatient.setEmail(patientDetails.getEmail());
-        existingPatient.setAdresse(patientDetails.getAdresse());
-        existingPatient.setTelephone(patientDetails.getTelephone());
-        existingPatient.setDateNaissance(patientDetails.getDateNaissance());
-        existingPatient.setGenre(patientDetails.getGenre());
+
+        if (patientDetails.getNom() != null) {
+            existingPatient.setNom(patientDetails.getNom());
+        }
+        if (patientDetails.getPrenom() != null) {
+            existingPatient.setPrenom(patientDetails.getPrenom());
+        }
+        // Ajoutez des conditions pour tous les champs restants
+        if (patientDetails.getAdresse() != null) {
+            existingPatient.setAdresse(patientDetails.getAdresse());
+        }
+        if (patientDetails.getTelephone() != null) {
+            existingPatient.setTelephone(patientDetails.getTelephone());
+        }
+        if (patientDetails.getDateNaissance() != null) {
+            existingPatient.setDateNaissance(patientDetails.getDateNaissance());
+        }
+        if (patientDetails.getGenre() != null) {
+            existingPatient.setGenre(patientDetails.getGenre());
+        }
 
         historiqueActionService.enregistrerAction(
                 String.format("Mise à jour patient ID: %d", id),

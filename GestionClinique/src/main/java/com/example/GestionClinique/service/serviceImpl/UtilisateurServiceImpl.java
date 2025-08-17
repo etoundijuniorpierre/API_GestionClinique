@@ -13,8 +13,6 @@ import com.example.GestionClinique.repository.RoleRepository;
 import com.example.GestionClinique.repository.UtilisateurRepository;
 import com.example.GestionClinique.service.HistoriqueActionService;
 import com.example.GestionClinique.service.UtilisateurService;
-import com.example.GestionClinique.service.authService.SecurityUtil;
-import com.example.GestionClinique.service.photoService.FileStorageService;
 import com.example.GestionClinique.service.photoService.FileStorageServiceImpl;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
@@ -91,8 +89,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             utilisateur.setActif(true);
         }
 
-        Role role = roleRepository.findFirstByRoleType(utilisateur.getRole().getRoleType())
-                .orElseThrow(() -> new IllegalArgumentException("Role not found in database"));
+
+        Role role = roleRepository.findById(utilisateur.getRole().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Rôle non trouvé avec ID: " + utilisateur.getRole().getId()));
 
         if(role.getRoleType()==SECRETAIRE || role.getRoleType()==ADMIN){
             utilisateur.setServiceMedical(null);
@@ -128,14 +127,17 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 fileStorageService.delete(utilisateur.getPhotoProfil());
             }
             String newPhotoPath = fileStorageService.save(photoProfil, userId);
-            utilisateur.setPhotoProfil(newPhotoPath);
+
+            // Appel de la nouvelle méthode de mise à jour partielle
+            utilisateurRepository.updatePhotoProfil(userId, newPhotoPath);
 
             historiqueActionService.enregistrerAction(
                     String.format("Mise à jour de la photo de profil de l'utilisateur ID: %d", userId),
                     loggingAspect.currentUserId()
             );
         }
-        return utilisateurRepository.save(utilisateur);
+        // Recharger l'utilisateur pour renvoyer l'objet complet mis à jour
+        return utilisateurRepository.findById(userId).orElse(null);
     }
 
 
@@ -166,28 +168,46 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
+    @Transactional
     public Utilisateur updateUtilisateur(Long id, Utilisateur utilisateurDetails) {
         Utilisateur existingUtilisateur = utilisateurRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec ID: " + id));
 
-        existingUtilisateur.setNom(utilisateurDetails.getNom());
-        existingUtilisateur.setPrenom(utilisateurDetails.getPrenom());
-        existingUtilisateur.setEmail(utilisateurDetails.getEmail());
-        existingUtilisateur.setPassword(passwordEncoder.encode(utilisateurDetails.getPassword()));
-        existingUtilisateur.setAdresse(utilisateurDetails.getAdresse());
-        existingUtilisateur.setTelephone(utilisateurDetails.getTelephone());
-        existingUtilisateur.setDateNaissance(utilisateurDetails.getDateNaissance());
-        existingUtilisateur.setGenre(utilisateurDetails.getGenre());
-        existingUtilisateur.setServiceMedical(utilisateurDetails.getServiceMedical());
-        existingUtilisateur.setActif(utilisateurDetails.getActif());
+        if (utilisateurDetails.getNom() != null) {
+            existingUtilisateur.setNom(utilisateurDetails.getNom());
+        }
+        if (utilisateurDetails.getPrenom() != null) {
+            existingUtilisateur.setPrenom(utilisateurDetails.getPrenom());
+        }
+
+        if (utilisateurDetails.getEmail() != null) {
+            existingUtilisateur.setEmail(utilisateurDetails.getEmail());
+        }
+
+        if (utilisateurDetails.getAdresse() != null) {
+            existingUtilisateur.setAdresse(utilisateurDetails.getAdresse());
+        }
+        // ... et ainsi de suite pour tous les autres champs
+        if (utilisateurDetails.getTelephone() != null) {
+            existingUtilisateur.setTelephone(utilisateurDetails.getTelephone());
+        }
+        if (utilisateurDetails.getDateNaissance() != null) {
+            existingUtilisateur.setDateNaissance(utilisateurDetails.getDateNaissance());
+        }
+        if (utilisateurDetails.getGenre() != null) {
+            existingUtilisateur.setGenre(utilisateurDetails.getGenre());
+        }
+        if (utilisateurDetails.getServiceMedical() != null) {
+            existingUtilisateur.setServiceMedical(utilisateurDetails.getServiceMedical());
+        }
+        if (utilisateurDetails.getActif() != null) {
+            existingUtilisateur.setActif(utilisateurDetails.getActif());
+        }
 
         if (utilisateurDetails.getRole() != null && utilisateurDetails.getRole().getId() != null) {
             Role newRole = roleRepository.findById(utilisateurDetails.getRole().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Role not found with ID: " + utilisateurDetails.getRole().getId()));
+                    .orElseThrow(() -> new IllegalArgumentException("Rôle non trouvé avec ID: " + utilisateurDetails.getRole().getId()));
             existingUtilisateur.setRole(newRole);
-        } else if (utilisateurDetails.getRole() == null) {
-
-            throw new IllegalArgumentException("Role cannot be null for a user.");
         }
 
         historiqueActionService.enregistrerAction(
@@ -229,19 +249,21 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return utilisateurRepository.findByRole_RoleType(roleType);
     }
 
+    // ...
     @Override
+    @Transactional
     public Utilisateur updateUtilisateurStatus(Long id, boolean isActive) {
         Utilisateur existingUtilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur not found with ID: " + id));
-        existingUtilisateur.setActif(isActive);
+
+        utilisateurRepository.updateActifStatus(id, isActive);
 
         historiqueActionService.enregistrerAction(
                 String.format("Changement de statut de l'utilisateur ID: %d à %s",
                         id, isActive ? "ACTIF" : "INACTIF"),
                 loggingAspect.currentUserId()
         );
-
-        return utilisateurRepository.save(existingUtilisateur);
+        return utilisateurRepository.findById(id).orElse(null);
     }
 
 
@@ -257,8 +279,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     @Override
     public List<RendezVous> findConfirmedRendezVousForMedecinAndDate(Long medecinId, LocalDate date) {
-        LocalDate PresentDate = LocalDate.now();
-        return rendezVousRepository.findConfirmedRendezVousForMedecinAndDate(medecinId, PresentDate);
+        return rendezVousRepository.findConfirmedRendezVousForMedecinAndDate(medecinId, date);
     }
 
     @Transactional
@@ -342,18 +363,15 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 serviceMedical, date, heure);
     }
 
-    @Override
+
     @Transactional
     public Utilisateur updateUserConnectStatus(Long utilisateurId, StatusConnect statusConnect) {
-        Utilisateur utilisateur = findUtilisateurById(utilisateurId);
-        if (utilisateur!=null) {
-            utilisateur.setStatusConnect(statusConnect);
-            if (utilisateur.getStatusConnect().equals(StatusConnect.CONNECTE)) {
-                utilisateur.setLastLoginDate(LocalDateTime.now());
-            }if (utilisateur.getStatusConnect().equals(StatusConnect.DECONNECTE)){
-                utilisateur.setLastLogoutDate(LocalDateTime.now());
-            }
+        if (statusConnect.equals(StatusConnect.DECONNECTE)) {
+            utilisateurRepository.updateLogout(utilisateurId, statusConnect, LocalDateTime.now());
+        } else if (statusConnect.equals(StatusConnect.CONNECTE)) {
+            utilisateurRepository.updateLogin(utilisateurId, statusConnect, LocalDateTime.now());
         }
-        return utilisateurRepository.save(utilisateur);
+        return utilisateurRepository.findById(utilisateurId).orElseThrow();
     }
+
 }

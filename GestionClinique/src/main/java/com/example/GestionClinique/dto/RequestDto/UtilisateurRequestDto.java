@@ -22,5 +22,5 @@ public class UtilisateurRequestDto extends InfoPersonnelRequestDto {
     private Boolean actif;
 
     @NotNull
-    private String role;
+    private RoleRequestDto role;
 }

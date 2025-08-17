@@ -59,8 +59,8 @@ HistoriqueActionServiceImpl implements HistoriqueActionService {
     }
 
     @Override// Use Spring's Transactional
-    public List<HistoriqueAction> findAllHistoriqueActions() {
-        return historiqueActionRepository.findAll();
+    public List<HistoriqueAction> findAllHistoriqueActionsDesc() {
+        return historiqueActionRepository.findAllByOrderByIdDesc();
     }
 
     @Override// Use Spring's Transactional
@@ -86,4 +86,15 @@ HistoriqueActionServiceImpl implements HistoriqueActionService {
     public List<HistoriqueAction> findHistoriqueActionsByDateRange(LocalDate startDate, LocalDate endDate) {
         return historiqueActionRepository.findByDateBetween(startDate, endDate);
     }
+
+    @Override
+    public List<HistoriqueAction> rechercherHistorique(String nom, String prenom, String email, String motCle) {
+        return historiqueActionRepository.searchHistoriqueActions(
+                (nom != null && !nom.isEmpty()) ? nom : null,
+                (prenom != null && !prenom.isEmpty()) ? prenom : null,
+                (email != null && !email.isEmpty()) ? email : null,
+                (motCle != null && !motCle.isEmpty()) ? motCle : null
+        );
+    }
+
 }

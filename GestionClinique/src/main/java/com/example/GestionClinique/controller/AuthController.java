@@ -1,6 +1,9 @@
 package com.example.GestionClinique.controller;
 
+import com.example.GestionClinique.model.entity.Utilisateur;
 import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
+import com.example.GestionClinique.service.HistoriqueActionService;
+import com.example.GestionClinique.service.UtilisateurService;
 import com.example.GestionClinique.service.authService.MonUserDetailsCustom;
 import com.example.GestionClinique.service.authService.UserDetailsServiceImpl;
 import com.example.GestionClinique.configuration.security.jwtConfig.JwtUtil;
@@ -23,14 +26,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import static com.example.GestionClinique.configuration.utils.Constants.API_NAME;
+import static com.example.GestionClinique.model.entity.enumElem.StatusConnect.DECONNECTE;
 
 
 @Tag(name = "AUTHENTIFICATION", description = "API pour se login dans notre système")
@@ -42,13 +44,18 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final UtilisateurRepository utilisateurRepository; // Inject UtilisateurRepository
+    private final UtilisateurService utilisateurService;
+    private final HistoriqueActionService historiqueActionService;
+
 
     public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
-                          UserDetailsServiceImpl userDetailsServiceImpl, UtilisateurRepository utilisateurRepository) {
+                          UserDetailsServiceImpl userDetailsServiceImpl, UtilisateurRepository utilisateurRepository, UtilisateurService utilisateurService, HistoriqueActionService historiqueActionService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.utilisateurRepository = utilisateurRepository;
+        this.utilisateurService = utilisateurService;
+        this.historiqueActionService = historiqueActionService;
     }
 
     @PostMapping(path = API_NAME + "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -78,10 +85,14 @@ public class AuthController {
 
             String jwt = jwtUtil.generateToken(userDetails);
 
-            // Construire l'URL complète de la photo
             String photoUrl = userDetails.getPhotoProfilPath() != null ?
                     "/api/utilisateurs/" + userDetails.getId() + "/photo" :
                     null;
+
+            historiqueActionService.enregistrerAction(
+                    "Connexion avec l'email : " + loginRequest.getEmail(),
+                    userDetails.getId()
+            );
 
             return ResponseEntity.ok(new LoginResponse(
                     userDetails.getId(),
@@ -101,18 +112,12 @@ public class AuthController {
         }
     }
 
-
-
-//    @PostMapping(path = API_NAME + "/logout")
-//    @Operation(summary = "Déconnecter un utilisateur",
-//            description = "Invalide le token JWT et enregistre l'heure de déconnexion de l'utilisateur.")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Déconnexion réussie"),
-//            @ApiResponse(responseCode = "400", description = "Requête invalide"),
-//            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
-//    })
-//    public ResponseEntity<String> logout(HttpServletRequest request) {
-//        SecurityContextHolder.clearContext();
-//        return ResponseEntity.ok("Déconnexion réussie.");
+//    @PostMapping("/logout")
+//    public ResponseEntity<Map<String, String>> logout(@RequestHeader(value = "Authorization", required = false) String token) {
+//        if (token == null || !token.startsWith("Bearer ")) {
+//            return ResponseEntity.badRequest().body(Map.of("error", "Token d'autorisation manquant ou invalide."));
+//        }
+//
+//        return ResponseEntity.ok(Map.of("message", "Déconnexion réussie."));
 //    }
-}
+    }

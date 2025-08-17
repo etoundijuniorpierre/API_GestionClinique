@@ -21,7 +21,7 @@ public class JwtUtil {
 
 
     private String secret ="PeO2546SF3Sfs5fs3bds3MH2SFsdfDS5s";
-    private long expiration = 660000000;
+    private long expiration = 9000000;
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
@@ -78,4 +78,6 @@ public class JwtUtil {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token, userDetails));
     }
+
+
 }

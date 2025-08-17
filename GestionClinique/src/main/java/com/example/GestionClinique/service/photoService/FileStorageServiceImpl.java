@@ -86,6 +86,10 @@ public class FileStorageServiceImpl implements FileStorageService {
             Path destinationFile = rootLocation.resolve(newFilename).normalize().toAbsolutePath();
 
             Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+
+            existingUtilisateur.setPhotoProfil(newFilename);
+            utilisateurService.updateUtilisateur(existingUtilisateur.getId(), existingUtilisateur);
+
             return newFilename;
 
         } catch (IOException e) {

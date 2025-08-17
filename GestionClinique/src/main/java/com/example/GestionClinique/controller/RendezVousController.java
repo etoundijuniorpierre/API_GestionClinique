@@ -71,7 +71,7 @@ public class RendezVousController {
 
 
 
-@PreAuthorize("hasAnyRole('SECRETAIRE')")
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'ADMIN')")
     @GetMapping(path = "/{idRendezVous}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path
     @Operation(summary = "Obtenir un rendez-vous par son ID",
             description = "Récupère les informations détaillées d'un rendez-vous spécifique")
@@ -136,7 +136,7 @@ public class RendezVousController {
 
 
 
-@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT', 'ADMIN')") // Adjust roles as needed
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'ADMIN')") // Adjust roles as needed
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path for all rendezvous
     @Operation(summary = "Lister tous les rendez-vous",
             description = "Récupère la liste complète de tous les rendez-vous programmés")
@@ -156,7 +156,7 @@ public class RendezVousController {
 
 
 
-@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN')")
     @GetMapping(path = "/statut/{statut}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher des rendez-vous par statut",
             description = "Filtre les rendez-vous selon leur statut (confirmé, annulé, etc.)")
@@ -203,7 +203,7 @@ public class RendezVousController {
 
 
     // The 'isRendezVousAvailable' endpoint signature needs to change to pass IDs, not full objects
-@PreAuthorize("hasAnyRole('SECRETAIRE')")
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN')")
     @GetMapping(path = "/available", produces = MediaType.APPLICATION_JSON_VALUE) // Changed path for a query endpoint
     @Operation(summary = "Vérifier la disponibilité d'un créneau",
             description = "Vérifie si un créneau horaire est disponible pour un médecin et une salle spécifiques.")
@@ -231,7 +231,7 @@ public class RendezVousController {
 
 
 
-@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN', 'PATIENT')") // Patient can view their own
+@PreAuthorize("hasAnyRole('SECRETAIRE', 'MEDECIN')") // Patient can view their own
     @GetMapping(path = "/jour/{jour}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Rechercher des rendez-vous par jour",
             description = "Récupère une liste de tous les rendez-vous programmés pour une date spécifique.")
@@ -279,8 +279,55 @@ public class RendezVousController {
     @Operation(summary = "Annuler un rendez-vous et supprimer facture liée",
             description = "annuler un vieux rendezVous et supprimer la facture liée")
     public ResponseEntity<String> cancelOldRendezVous() {
-        rendezVousService.cancelRendezVousByJour(LocalDate.now());
+        rendezVousService.cancelRendezVousByJour();
         return ResponseEntity.ok("Tous les rendez-vous antérieurs à la date d'aujourd'hui ont été annulés.");
     }
 
+
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+    @GetMapping("/utilisateurs/{idUtilisateur}/confirmed/month/{year}/{month}")
+    @Operation(summary = "Obtenir les rendez-vous confirmés d'un utilisateur pour un mois donné",
+            description = "Récupère tous les rendez-vous confirmés pour un utilisateur spécifique dans un mois et une année donnés.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Liste des rendez-vous confirmés",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = RendezVousResponseDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé"),
+                    @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+            })
+    public ResponseEntity<List<RendezVousResponseDto>> getConfirmedRendezVousByMonth(
+            @PathVariable @Parameter(description = "ID de l'utilisateur") Long idUtilisateur,
+            @PathVariable @Parameter(description = "Année des rendez-vous") int year,
+            @PathVariable @Parameter(description = "Mois des rendez-vous (1-12)") int month) {
+
+        List<RendezVous> rendezVousEntities = rendezVousService.findUtilisateurConfirmedRendezVousByMonth(idUtilisateur, year, month);
+
+        List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
+
+        return ResponseEntity.ok(rendezVousDtos);
+    }
+
+
+
+    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+    @GetMapping("/month/{year}/{month}")
+    @Operation(summary = "Obtenir les rendez-vous pour un mois donné",
+            description = "Récupère tous les rendez-vous dans un mois et une année donnés.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Liste des rendez-vous ",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = RendezVousResponseDto.class))),
+                    @ApiResponse(responseCode = "404", description = "rendezVous non trouvé"),
+                    @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+            })
+    public ResponseEntity<List<RendezVousResponseDto>> getRendezVousByMonth(
+            @PathVariable @Parameter(description = "Année des rendez-vous") int year,
+            @PathVariable @Parameter(description = "Mois des rendez-vous (1-12)") int month) {
+
+        List<RendezVous> rendezVousEntities = rendezVousService.findRendezVousByMonth(year, month);
+
+        List<RendezVousResponseDto> rendezVousDtos = rendezVousMapper.toDtoList(rendezVousEntities);
+
+        return ResponseEntity.ok(rendezVousDtos);
+    }
 }

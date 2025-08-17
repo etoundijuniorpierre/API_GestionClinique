@@ -2,6 +2,7 @@ package com.example.GestionClinique.service.serviceImpl;
 
 
 import com.example.GestionClinique.model.entity.*;
+import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
 import com.example.GestionClinique.repository.*;
@@ -86,50 +87,48 @@ public class ConsultationServiceImpl implements ConsultationService {
         if (rendezVous.getConsultation() != null) {
             throw new RuntimeException("RendezVous with ID " + rendezVousId + " is already linked to a consultation.");
         }
-
-        if (rendezVous.getFacture().getStatutPaiement() != PAYEE) {
-            throw new RuntimeException("RendezVous with ID " + rendezVousId + " is already linked to a consultation.");
+        // Correction de la vérification de la facture
+        if (rendezVous.getFacture() == null || rendezVous.getFacture().getStatutPaiement() != StatutPaiement.PAYEE) {
+            throw new RuntimeException("Cannot start consultation: invoice not found or not paid for rendez-vous with ID " + rendezVousId);
         }
 
         rendezVous.setStatut(StatutRDV.ENCOURS);
-        rendezVousRepository.save(rendezVous);
 
         Utilisateur medecin = utilisateurRepository.findById(medecinId)
                 .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + medecinId));
         consultationDetails.setMedecin(medecin);
-        Salle salle = rendezVous.getSalle();
 
-        if (salle != null) {
-            salle.setStatutSalle(StatutSalle.OCCUPEE);
-            salleRepository.save(salle);
-        } else {
+        Salle salle = rendezVous.getSalle();
+        if (salle == null) {
             throw new IllegalStateException("RendezVous does not have an associated room to mark as occupied.");
         }
+        salle.setStatutSalle(StatutSalle.OCCUPEE);
+        salleRepository.save(salle);
 
-        consultationDetails.setRendezVous(rendezVous);
-
-        if (rendezVous.getPatient() != null && rendezVous.getPatient().getDossierMedical() != null) {
-            consultationDetails.setDossierMedical(rendezVous.getPatient().getDossierMedical());
-        } else {
+        if (rendezVous.getPatient() == null || rendezVous.getPatient().getDossierMedical() == null) {
             throw new RuntimeException("RendezVous patient does not have an associated medical record.");
         }
+        DossierMedical dossierMedical = rendezVous.getPatient().getDossierMedical();
+        consultationDetails.setDossierMedical(dossierMedical);
 
 
-        if (consultationDetails.getPrescriptions() != null && !consultationDetails.getPrescriptions().isEmpty()) {
-            for (Prescription prescription : consultationDetails.getPrescriptions()) {
+        List<Prescription> prescriptionsToSave = consultationDetails.getPrescriptions();
+        if (prescriptionsToSave != null && !prescriptionsToSave.isEmpty()) {
+            for (Prescription prescription : prescriptionsToSave) {
                 prescription.setConsultation(consultationDetails);
                 prescription.setMedecin(medecin);
                 prescription.setPatient(rendezVous.getPatient());
-                prescription.setDossierMedical(rendezVous.getPatient().getDossierMedical());
-                rendezVous.getPatient().getDossierMedical().setDernierTraitement(prescription.getMedicaments());
+                prescription.setDossierMedical(dossierMedical);
             }
+
+            Prescription lastPrescription = prescriptionsToSave.get(prescriptionsToSave.size() - 1);
+            dossierMedical.setDernierTraitement(lastPrescription.getMedicaments());
         }
 
         Consultation newConsultation = consultationRepository.save(consultationDetails);
 
         rendezVous.setConsultation(newConsultation);
         rendezVousRepository.save(rendezVous);
-
         salle.setStatutSalle(StatutSalle.DISPONIBLE);
         rendezVous.setStatut(StatutRDV.TERMINE);
         salleRepository.save(salle);
@@ -257,7 +256,6 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Transactional
     public List<Prescription> findPrescriptionsByConsultationId(Long consultationId) {
         Consultation consultation = findById(consultationId);
-        // Ensure lazy collection is initialized or fetched eagerly
         return consultation.getPrescriptions();
     }
 }

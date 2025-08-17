@@ -1,9 +1,6 @@
 package com.example.GestionClinique.controller;
 
-import com.example.GestionClinique.dto.ResponseDto.stats.StatDuJourResponseDto;
-import com.example.GestionClinique.dto.ResponseDto.stats.StatMoisDernierResponseDto;
-import com.example.GestionClinique.dto.ResponseDto.stats.StatMoisEncoursResponseDto;
-import com.example.GestionClinique.dto.ResponseDto.stats.StatsSurLanneeResponseDto;
+import com.example.GestionClinique.dto.ResponseDto.stats.*;
 import com.example.GestionClinique.mapper.StatMapper;
 import com.example.GestionClinique.service.StatService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,11 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
@@ -50,44 +43,46 @@ public class StatController {
     })
     public ResponseEntity<?> getDailyStats(
             @RequestParam(required = false) @Parameter(description = "Date au format YYYY-MM-DD (ex: 2025-07-19). Si omis, la date actuelle est utilisée.") LocalDate date) {
-            if (date==null) {
-                date = LocalDate.now();
-            }
-            StatDuJourResponseDto stats = statMapper.toStatDuJourDto(statService.getOrCreateStatDuJour(date));
-            return ResponseEntity.ok(stats);
+        if (date == null) {
+            date = LocalDate.now();
+        }
+        StatDuJourResponseDto stats = statMapper.toStatDuJourDto(statService.getOrCreateStatDuJour(date));
+        return ResponseEntity.ok(stats);
     }
 
-
-    @GetMapping("/last-month")
-    @Operation(summary = "Obtenir les statistiques du mois dernier",
-            description = "Récupère les statistiques agrégées pour le mois précédent.")
+    @GetMapping("/monthly")
+    @Operation(summary = "Obtenir les statistiques mensuelles",
+            description = "Récupère les statistiques agrégées pour un mois donné.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Statistiques du mois dernier trouvées",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = StatMoisDernierResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "Statistiques du mois trouvées",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = StatParMoisResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Numéro de mois invalide",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
-    public ResponseEntity<?> getLastMonthStats() {
-            StatMoisDernierResponseDto stats = statMapper.toStatMoisDernierDto(statService.getOrCreateStatMoisDernier());
-            return ResponseEntity.ok(stats);
+    public ResponseEntity<?> getMonthlyStats(
+            @RequestParam @Parameter(description = "Numéro du mois (1-12) ou mot-clé ('last', 'current').", example = "7") String month) {
+        int monthNumber;
+        switch (month.toLowerCase()) {
+            case "last":
+                monthNumber = LocalDate.now().minusMonths(1).getMonthValue();
+                break;
+            case "current":
+                monthNumber = LocalDate.now().getMonthValue();
+                break;
+            default:
+                try {
+                    monthNumber = Integer.parseInt(month);
+                } catch (NumberFormatException e) {
+                    return ResponseEntity.badRequest().body("Le paramètre 'month' doit être un numéro (1-12) ou 'last'/'current'.");
+                }
+        }
+        StatParMoisResponseDto stats = statMapper.toStatParMoisDto(statService.getOrCreateStatParMois(monthNumber));
+        return ResponseEntity.ok(stats);
     }
 
 
-    @GetMapping("/current-month")
-    @Operation(summary = "Obtenir les statistiques du mois en cours",
-            description = "Récupère les statistiques agrégées pour le mois actuel.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Statistiques du mois en cours trouvées",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = StatMoisEncoursResponseDto.class))),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
-    })
-    public ResponseEntity<?> getCurrentMonthStats() {
-            StatMoisEncoursResponseDto stats = statMapper.toStatMoisEncoursDto(statService.getOrCreateStatMoisEncours());
-            return ResponseEntity.ok(stats);
-    }
-
-
-
-    @GetMapping("/yearly/{year}")
+    @GetMapping("/yearly")
     @Operation(summary = "Obtenir les statistiques annuelles",
             description = "Récupère les statistiques agrégées pour une année spécifique.")
     @ApiResponses(value = {
@@ -98,8 +93,8 @@ public class StatController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
     public ResponseEntity<?> getYearlyStats(
-            @PathVariable @Parameter(description = "Année (ex: 2025)") int year) {
-            StatsSurLanneeResponseDto stats = statMapper.toStatsSurLanneeDto(statService.getOrCreateStatsSurLannee(year));
-            return ResponseEntity.ok(stats);
+            @RequestParam @Parameter(description = "Année (ex: 2025)", example = "2025") int year) {
+        StatsSurLanneeResponseDto stats = statMapper.toStatsSurLanneeDto(statService.getOrCreateStatsSurLannee(year));
+        return ResponseEntity.ok(stats);
     }
 }

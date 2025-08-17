@@ -78,7 +78,7 @@ public class HistoriqueActionController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur lors de la récupération")
     })
     public ResponseEntity<List<HistoriqueActionResponseDto>> findAllHistoriqueActions() {
-        List<HistoriqueAction> actions = historiqueActionService.findAllHistoriqueActions();
+        List<HistoriqueAction> actions = historiqueActionService.findAllHistoriqueActionsDesc();
         if (actions.isEmpty()) {
             return ResponseEntity.noContent().build(); // 204 No Content
         }
@@ -169,4 +169,24 @@ public class HistoriqueActionController {
             }
             return ResponseEntity.ok(historiqueActionMapper.toDtoList(actions));
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping(path = "/recherche", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Rechercher dans l'historique des actions",
+            description = "Filtre les actions par nom, prénom, email ou mot clé dans la description.")
+    public ResponseEntity<List<HistoriqueActionResponseDto>> rechercherHistorique(
+            @RequestParam(required = false) String nom,
+            @RequestParam(required = false) String prenom,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String motCle) {
+
+        List<HistoriqueAction> resultats = historiqueActionService.rechercherHistorique(nom, prenom, email, motCle);
+
+        if(resultats.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(historiqueActionMapper.toDtoList(resultats));
+    }
+
 }

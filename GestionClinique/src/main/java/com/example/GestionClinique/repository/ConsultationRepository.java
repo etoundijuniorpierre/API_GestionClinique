@@ -24,6 +24,12 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
 
     @Query("SELECT COUNT(c) FROM Consultation c WHERE YEAR(c.creationDate) = :year")
     Long countByYearConsultation(@Param("year") int year);
+
+    @Query("SELECT COUNT(c) FROM Consultation c WHERE MONTH(c.creationDate) = :month")
+    long countByMonth(@Param("month") int month);
+
+
+
 }
 
 

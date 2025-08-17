@@ -14,6 +14,7 @@ import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatusConnect;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.service.UtilisateurService;
+import com.example.GestionClinique.service.photoService.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -26,6 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -50,12 +53,14 @@ public class UtilisateurController {
     private final UtilisateurMapper utilisateurMapper;
     private final PasswordEncoder passwordEncoder;
     private final RendezVousMapper rendezVousMapper;
+    private final FileStorageService fileStorageService;
 
-    public UtilisateurController(UtilisateurService utilisateurService, UtilisateurMapper utilisateurMapper, PasswordEncoder passwordEncoder, RendezVousMapper rendezVousMapper) {
+    public UtilisateurController(UtilisateurService utilisateurService, UtilisateurMapper utilisateurMapper, PasswordEncoder passwordEncoder, RendezVousMapper rendezVousMapper, FileStorageService fileStorageService) {
         this.utilisateurService = utilisateurService;
         this.utilisateurMapper = utilisateurMapper;
         this.passwordEncoder = passwordEncoder;
         this.rendezVousMapper = rendezVousMapper;
+        this.fileStorageService = fileStorageService;
     }
 
 
@@ -100,7 +105,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 
 
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @GetMapping(path = "/nom/{nomUtilisateur}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: /nom/{nom}
     @Operation(summary = "Rechercher des utilisateurs par nom",
             description = "Récupère tous les utilisateurs correspondant au nom spécifié (recherche partielle)")
@@ -144,7 +149,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @GetMapping(path = "/role/{roleType}", produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path
     @Operation(summary = "Rechercher des utilisateurs par rôle",
             description = "Récupère tous les utilisateurs ayant le rôle spécifié dans le système")
@@ -167,7 +172,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Simplified path: GET to base URL returns all
     @Operation(summary = "Lister tous les utilisateurs",
             description = "Récupère la liste complète de tous les utilisateurs enregistrés dans le système")
@@ -232,7 +237,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 
 
 
-@PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @PatchMapping(path = "/{idUtilisateur}/status/{isActive}", produces = MediaType.APPLICATION_JSON_VALUE) // Changed to PATCH for partial update, distinct path
     @Operation(summary = "Mettre à jour le statut d'un utilisateur",
             description = "Active ou désactive un compte utilisateur dans le système")
@@ -294,6 +299,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
         if (rendezVousDtos.isEmpty()) { return ResponseEntity.noContent().build(); }
         return ResponseEntity.ok(rendezVousDtos);
     }
+
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping("/rendezvous/medecin/status")
@@ -370,7 +376,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
         }
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @GetMapping("/connected")
     @Operation(summary = "Lister les utilisateurs actuellement connectés",
             description = "Récupère la liste de tous les utilisateurs dont le statut de connexion est 'CONNECTE'.")
@@ -385,7 +391,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
     }
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @GetMapping("/disconnected")
     @Operation(summary = "Lister les utilisateurs actuellement déconnectés",
             description = "Récupère la liste de tous les utilisateurs dont le statut de connexion est 'DECONNECTE'.")
@@ -421,7 +427,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
     }
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @GetMapping("/connected/last-activity")
     @Operation(summary = "Lister les utilisateurs connectés triés par dernière activité",
             description = "Récupère la liste des utilisateurs actuellement connectés, triés par leur date de dernière connexion (les plus récents en premier).")
@@ -436,7 +442,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
     }
 
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETAIRE', 'MEDECIN')")
     @GetMapping("/disconnected/last-activity")
     @Operation(summary = "Lister les utilisateurs déconnectés triés par dernière déconnexion",
             description = "Récupère la liste des utilisateurs actuellement déconnectés, triés par leur date de dernière déconnexion (les plus récents en premier).")
@@ -488,6 +494,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
     }
 
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @PutMapping(value = "/{userId}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Mettre à jour la photo de profil",
             description = "Permet de mettre à jour la photo de profil d'un utilisateur")
@@ -508,6 +515,8 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
         return ResponseEntity.ok(utilisateurMapper.toDto(updatedUtilisateur));
     }
 
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping("/{userId}/photo")
     @Operation(summary = "Récupérer la photo de profil",
             description = "Récupère la photo de profil d'un utilisateur")
@@ -517,16 +526,30 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
             @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé ou photo inexistante"),
             @ApiResponse(responseCode = "500", description = "Erreur lors de la récupération de l'image")
     })
-    public ResponseEntity<Resource> getPhotoProfil(
-            @Parameter(description = "ID de l'utilisateur", required = true)
-            @PathVariable Long userId) {
-        Resource photo = utilisateurService.getPhotoProfil(userId);
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(photo);
+    public ResponseEntity<Resource> getPhotoByUserId(@PathVariable Long userId) {
+        try {
+            Utilisateur utilisateur = utilisateurService.findUtilisateurById(userId);
+            if (utilisateur == null || utilisateur.getPhotoProfil() == null) {
+                return ResponseEntity.notFound().build();
+            }
+            Resource file = fileStorageService.load(utilisateur.getPhotoProfil());
+
+            String contentType = Files.probeContentType(file.getFile().toPath());
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                    .body(file);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping("/by-service/{serviceMedical}")
     @Operation(summary = "Récupérer les médecins par service médical",
             description = "Retourne la liste des médecins appartenant à un service médical spécifique")
@@ -544,6 +567,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
     }
 
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEDECIN', 'SECRETAIRE')")
     @GetMapping("/available/{serviceMedical}")
     @Operation(summary = "Rechercher des médecins disponibles",
             description = "Retourne la liste des médecins disponibles pour un service, date et heure donnés")
@@ -569,4 +593,7 @@ public ResponseEntity<UtilisateurResponseDto> createUtilisateur(
 
         return ResponseEntity.ok(utilisateurMapper.toDtoList(medecins));
     }
+
+
+
 }

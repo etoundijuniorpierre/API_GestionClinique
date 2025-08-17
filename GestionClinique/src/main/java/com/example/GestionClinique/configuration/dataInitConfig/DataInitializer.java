@@ -59,7 +59,7 @@ public class DataInitializer {
     private void initializeAdminUser(UtilisateurRepository utilisateurRepository,
                                      RoleRepository roleRepository,
                                      PasswordEncoder passwordEncoder) {
-        if (utilisateurRepository.findAll().isEmpty()) {
+        if (utilisateurRepository.findByEmail("admin@gmail.com").isEmpty()) {
             Role adminRole = roleRepository.findFirstByRoleType(ADMIN)
                     .orElseThrow(() -> new IllegalStateException("ADMIN role not found"));
 
@@ -72,9 +72,9 @@ public class DataInitializer {
             admin.setEmail("admin@gmail.com");
             admin.setDateNaissance(birthDate);
             admin.setAge(age);
-            admin.setTelephone("+237006100");
+            admin.setTelephone("+237677850000");
             admin.setAdresse("Yaounde Mimboman Sapeur");
-            admin.setGenre("M");
+            admin.setGenre("Homme");
             admin.setPassword(passwordEncoder.encode("administrateur"));
             admin.setActif(true);
             admin.setRole(adminRole);

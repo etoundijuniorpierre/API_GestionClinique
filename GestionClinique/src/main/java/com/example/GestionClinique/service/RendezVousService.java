@@ -32,5 +32,9 @@ public interface RendezVousService {
 
     List<RendezVous> findRendezVousByJour(LocalDate jour);
 
-    void cancelRendezVousByJour(LocalDate jour);
+    void cancelRendezVousByJour();
+
+    List<RendezVous> findUtilisateurConfirmedRendezVousByMonth(Long idUtilisateur, int year, int month);
+
+    List<RendezVous> findRendezVousByMonth(int year, int month);
 }
