@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -31,6 +32,8 @@ public class StatController {
         this.statMapper = statMapper;
     }
 
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/daily")
     @Operation(summary = "Obtenir les statistiques journalières",
             description = "Récupère les statistiques pour une journée spécifique. Si la date n'est pas fournie, les statistiques du jour actuel sont retournées.")
@@ -50,6 +53,8 @@ public class StatController {
         return ResponseEntity.ok(stats);
     }
 
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/monthly")
     @Operation(summary = "Obtenir les statistiques mensuelles",
             description = "Récupère les statistiques agrégées pour un mois donné.")
@@ -81,7 +86,7 @@ public class StatController {
         return ResponseEntity.ok(stats);
     }
 
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/yearly")
     @Operation(summary = "Obtenir les statistiques annuelles",
             description = "Récupère les statistiques agrégées pour une année spécifique.")
