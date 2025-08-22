@@ -1,4 +1,4 @@
-package com.example.GestionClinique.dto.messagerieDto;
+package com.example.GestionClinique.dto.ResponseDto.messageResponseDto;
 
 import com.example.GestionClinique.dto.ResponseDto.BaseResponseDto;
 import com.example.GestionClinique.dto.ResponseDto.UtilisateurResponseDto;
@@ -7,14 +7,8 @@ import lombok.*;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class MessageResponseDto extends BaseResponseDto {
-
     private String contenu;
-
     private boolean lu;
-
     private UtilisateurResponseDto expediteur;
-
-    private UtilisateurResponseDto destinataire;
-
-    private GroupeResponseDto groupe;
+    private Long conversationId;
 }

@@ -2,6 +2,7 @@ package com.example.GestionClinique.service.serviceImpl;
 
 
 import com.example.GestionClinique.model.entity.*;
+import com.example.GestionClinique.model.entity.enumElem.ServiceMedical;
 import com.example.GestionClinique.model.entity.enumElem.StatutPaiement;
 import com.example.GestionClinique.model.entity.enumElem.StatutRDV;
 import com.example.GestionClinique.model.entity.enumElem.StatutSalle;
@@ -42,26 +43,17 @@ public class ConsultationServiceImpl implements ConsultationService {
 
         Utilisateur medecin = utilisateurRepository.findById(medecinId)
                 .orElseThrow(() -> new IllegalArgumentException("Medecin not found with ID: " + medecinId));
+
         consultation.setMedecin(medecin);
         consultation.setDossierMedical(null);
-        consultation.getDossierMedical().setPatient(null);
 
-        List<Prescription> savedPrescriptions = new ArrayList<>();
-        if (consultation.getPrescriptions() != null && !consultation.getPrescriptions().isEmpty()) {
-            if (consultation.getDossierMedical() != null && consultation.getDossierMedical().getPatient() != null) {
-                for (Prescription prescription : consultation.getPrescriptions()) {
-                    prescription.setConsultation(consultation);
-                    prescription.setMedecin(medecin);
-                    prescription.setPatient(consultation.getDossierMedical().getPatient());
-                    prescription.setDossierMedical(consultation.getDossierMedical());
-                    consultation.getDossierMedical().setDernierTraitement(prescription.getMedicaments());
-                    savedPrescriptions.add(prescriptionRepository.save(prescription));
-                }
-                consultation.setPrescriptions(savedPrescriptions);
-            } else {
-
-                System.out.println("Warning: Prescriptions provided for emergency consultation without a linked DossierMedical/Patient. Prescriptions will not be saved.");
-                consultation.setPrescriptions(new ArrayList<>());
+        List<Prescription> prescriptionsToSave = consultation.getPrescriptions();
+        if (prescriptionsToSave != null && !prescriptionsToSave.isEmpty()) {
+            for (Prescription prescription : prescriptionsToSave) {
+                prescription.setConsultation(consultation);
+                prescription.setMedecin(medecin);
+                prescription.setPatient(null);
+                prescription.setDossierMedical(null);
             }
         }
 
@@ -121,7 +113,7 @@ public class ConsultationServiceImpl implements ConsultationService {
                 prescription.setDossierMedical(dossierMedical);
             }
 
-            Prescription lastPrescription = prescriptionsToSave.get(prescriptionsToSave.size() - 1);
+            Prescription lastPrescription = prescriptionsToSave.getLast();
             dossierMedical.setDernierTraitement(lastPrescription.getMedicaments());
         }
 

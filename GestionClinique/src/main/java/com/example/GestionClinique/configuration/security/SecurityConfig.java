@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/Api/V1/clinique/historiqueActions").permitAll()
                         .requestMatchers("/Api/V1/clinique/historiqueActions/**").permitAll()
                         .requestMatchers("/Api/V1/clinique/rendezvous/cancel-old").permitAll()
-                        .requestMatchers("/Api/V1/clinique/messages/**").permitAll()
+                        .requestMatchers("/Api/V1/clinique/ws/**").permitAll()
                         // Permettre l'accès aux endpoints Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Permettre l'accès en POST à l'inscription seulement pour un rôle

@@ -1,7 +1,7 @@
 package com.example.GestionClinique.mapper;
 
-import com.example.GestionClinique.dto.messagerieDto.GroupeRequestDto;
-import com.example.GestionClinique.dto.messagerieDto.GroupeResponseDto;
+import com.example.GestionClinique.dto.RequestDto.messageRequestDto.GroupeRequestDto;
+import com.example.GestionClinique.dto.ResponseDto.messageResponseDto.GroupeResponseDto;
 import com.example.GestionClinique.model.entity.Groupe;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

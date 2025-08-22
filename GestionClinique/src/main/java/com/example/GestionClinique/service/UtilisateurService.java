@@ -52,4 +52,6 @@ public interface UtilisateurService {
 
     // endpoint depannage
     Utilisateur updateUserConnectStatus(Long utilisateurId, StatusConnect statusConnect);
+
+    List<Utilisateur> findAllByIds(List<Long> participantIds);
 }

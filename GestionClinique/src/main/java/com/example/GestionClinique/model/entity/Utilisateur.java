@@ -35,13 +35,13 @@ public class Utilisateur extends InfoPersonnel {
     @Column(name = "photo_profil")
     private String photoProfil;
 
+
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == null) {
             return Collections.emptyList();
         }
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.getRoleType().name()));
     }
-
 
     @Column(name = "last_login_date")
     private LocalDateTime lastLoginDate;
@@ -66,12 +66,7 @@ public class Utilisateur extends InfoPersonnel {
     @OneToMany(mappedBy = "medecin", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Prescription> prescriptions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "expediteur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Message> messagesEnvoyes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "destinataire", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Message> messagesRecus = new ArrayList<>();
-
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<HistoriqueAction> historiqueActions = new ArrayList<>();
+
 }

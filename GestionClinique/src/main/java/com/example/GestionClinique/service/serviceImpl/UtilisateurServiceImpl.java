@@ -374,4 +374,12 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return utilisateurRepository.findById(utilisateurId).orElseThrow();
     }
 
+    @Override
+    public List<Utilisateur> findAllByIds(List<Long> participantIds) {
+        if (participantIds == null || participantIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return utilisateurRepository.findAllById(participantIds);
+    }
+
 }

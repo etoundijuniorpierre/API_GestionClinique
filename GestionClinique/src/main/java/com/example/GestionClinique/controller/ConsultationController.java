@@ -62,15 +62,12 @@ public class ConsultationController {
     }
 
 
-    // Helper to get authenticated user ID
+
     private Long getAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof MonUserDetailsCustom) {
-            // Assuming your Utilisateur is directly stored as the principal
             return ((MonUserDetailsCustom) authentication.getPrincipal()).getId();
         }
-        // IMPORTANT: Implement robust error handling or a custom UserDetails service
-        // that provides the user ID. This is a crucial security and functional point.
         throw new IllegalStateException("Authenticated user (Medecin) ID not found in security context or not an Utilisateur instance.");
     }
 

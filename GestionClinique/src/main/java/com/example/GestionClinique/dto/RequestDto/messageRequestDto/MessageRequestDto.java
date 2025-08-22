@@ -1,4 +1,4 @@
-package com.example.GestionClinique.dto.messagerieDto;
+package com.example.GestionClinique.dto.RequestDto.messageRequestDto;
 
 
 import jakarta.validation.constraints.NotBlank;
@@ -15,8 +15,8 @@ public class MessageRequestDto {
     @NotNull(message = "ID de l'expéditeur requis")
     private Long expediteurId;
 
-    private Long destinataireId; // nullable si message de groupe
+    private Long groupeId;
 
-    private Long groupeId; // nullable si message individuel
+    private Long conversationId;
 }
 

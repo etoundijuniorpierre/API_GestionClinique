@@ -25,7 +25,7 @@ public class Groupe extends BaseEntity {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_createur", insertable = false, updatable = false)
+    @JoinColumn(name = "id_createur", nullable = false)
     private Utilisateur createur;
 
     @ManyToMany
@@ -35,5 +35,6 @@ public class Groupe extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "utilisateur_id")
     )
     private List<Utilisateur> membres = new ArrayList<>();
+
 }
 

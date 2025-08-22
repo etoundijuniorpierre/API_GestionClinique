@@ -1,4 +1,4 @@
-package com.example.GestionClinique.dto.messagerieDto;
+package com.example.GestionClinique.dto.ResponseDto.messageResponseDto;
 
 
 import com.example.GestionClinique.dto.ResponseDto.BaseResponseDto;
