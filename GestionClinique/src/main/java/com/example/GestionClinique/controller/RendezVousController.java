@@ -274,7 +274,7 @@ public class RendezVousController {
 
     }
 
-    @PreAuthorize("hasAnyRole('SECRETAIRE', 'ADMIN', 'MEDECIN')")
+
     @PostMapping("/cancel-old")
     @Operation(summary = "Annuler un rendez-vous et supprimer facture liée",
             description = "annuler un vieux rendezVous et supprimer la facture liée")

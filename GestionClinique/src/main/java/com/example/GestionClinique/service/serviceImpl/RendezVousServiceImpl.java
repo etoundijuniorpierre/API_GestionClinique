@@ -239,9 +239,6 @@ public class RendezVousServiceImpl implements RendezVousService {
         return rendezVousRepository.findByJour(jour);
     }
 
-
-    // Dans votre service RendezVousServiceImpl
-
     @Override
     @Transactional
     public void cancelRendezVousByJour() {
@@ -254,7 +251,10 @@ public class RendezVousServiceImpl implements RendezVousService {
 
         for (RendezVous rendezVous : rendezVousList) {
             if (rendezVous.getStatut() == StatutRDV.EN_ATTENTE) {
-                cancelRendezVous(rendezVous.getId());
+                // New logic to handle cancellation for past appointments
+                rendezVous.setStatut(StatutRDV.ANNULE); // Set the status to 'canceled'
+                rendezVousRepository.save(rendezVous); // Save the updated appointment
+
                 Optional<Facture> factureOptional = factureRepository.findByRendezVousId(rendezVous.getId());
                 factureOptional.ifPresent(facture -> {
                     if (facture.getStatutPaiement() == StatutPaiement.IMPAYEE) {
@@ -264,6 +264,7 @@ public class RendezVousServiceImpl implements RendezVousService {
             }
         }
     }
+
     @Override
     public List<RendezVous> findUtilisateurConfirmedRendezVousByMonth(Long idUtilisateur, int year, int month) {
         LocalDate startDate = LocalDate.of(year, month, 1);

@@ -41,11 +41,11 @@ public class Prescription extends BaseEntity {
     private Utilisateur medecin; // This is a Utilisateur acting as a doctor
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(name = "patient_id")
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dossier_medical_id", nullable = false) // Changed to snake_case
+    @JoinColumn(name = "dossier_medical_id") // Changed to snake_case
     private DossierMedical dossierMedical;
 }
 
